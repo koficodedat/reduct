@@ -15,7 +15,7 @@ export type Option<T> = Some<T> | None;
  * Some class representing a present value
  */
 export class Some<T> {
-  readonly _tag: 'Some' = 'Some';
+  readonly _tag = 'Some' as const;
 
   constructor(private readonly value: T) {}
 
@@ -80,7 +80,7 @@ export class Some<T> {
  * None class representing an absent value
  */
 export class None {
-  readonly _tag: 'None' = 'None';
+  readonly _tag = 'None' as const;
 
   /**
    * Throws an error because there is no value to return

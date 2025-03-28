@@ -33,10 +33,10 @@ const defaultOptions: PropertyOptions = {
 /**
  * Verifies a property with given arbitrary generators
  *
- * @param name - Description of the property
- * @param arbitraries - Arbitrary generators for test inputs
- * @param predicate - Function that should hold true for all generated inputs
- * @param options - Test configuration options
+ * @param _name - Description of the property
+ * @param _arbitraries - Arbitrary generators for test inputs
+ * @param _predicate - Function that should hold true for all generated inputs
+ * @param _options - Test configuration options
  *
  * @example
  * ```typescript
@@ -50,13 +50,13 @@ const defaultOptions: PropertyOptions = {
  * );
  * ```
  */
-export function verifyProperty<Ts extends any[]>(
-  name: string,
-  arbitraries: fc.Arbitrary<any>[],
-  predicate: (...args: any[]) => boolean | void,
-  options: PropertyOptions = {},
+export function verifyProperty<_Ts extends any[]>(
+  _name: string,
+  _arbitraries: fc.Arbitrary<any>[],
+  _predicate: (...args: any[]) => boolean | void,
+  _options: PropertyOptions = {},
 ): void {
-  const opts = { ...defaultOptions, ...options };
+  const opts = { ...defaultOptions, ..._options };
 
   const fcOptions: fc.Parameters<any> = {
     numRuns: opts.numRuns,
@@ -70,24 +70,24 @@ export function verifyProperty<Ts extends any[]>(
     fcOptions.path = opts.path;
   }
 
-  fc.assert(fc.property(...arbitraries, predicate), fcOptions);
+  fc.assert(fc.property(..._arbitraries as unknown as [fc.Arbitrary<any>, ...fc.Arbitrary<any>[]], _predicate), fcOptions);
 }
 
 /**
  * Verifies an asynchronous property with given arbitrary generators
  *
- * @param name - Description of the property
- * @param arbitraries - Arbitrary generators for test inputs
- * @param predicate - Async function that should hold true for all generated inputs
- * @param options - Test configuration options
+ * @param _name - Description of the property
+ * @param _arbitraries - Arbitrary generators for test inputs
+ * @param _predicate - Async function that should hold true for all generated inputs
+ * @param _options - Test configuration options
  */
-export async function verifyAsyncProperty<Ts extends any[]>(
-  name: string,
-  arbitraries: fc.Arbitrary<any>[],
-  predicate: (...args: any[]) => Promise<boolean | void>,
-  options: PropertyOptions = {},
+export async function verifyAsyncProperty<_Ts extends any[]>(
+  _name: string,
+  _arbitraries: fc.Arbitrary<any>[],
+  _predicate: (...args: any[]) => Promise<boolean | void>,
+  _options: PropertyOptions = {},
 ): Promise<void> {
-  const opts = { ...defaultOptions, ...options };
+  const opts = { ...defaultOptions, ..._options };
 
   const fcOptions: fc.Parameters<any> = {
     numRuns: opts.numRuns,
@@ -101,7 +101,7 @@ export async function verifyAsyncProperty<Ts extends any[]>(
     fcOptions.path = opts.path;
   }
 
-  await fc.assert(fc.asyncProperty(...arbitraries, predicate), fcOptions);
+  await fc.assert(fc.asyncProperty(..._arbitraries as unknown as [fc.Arbitrary<any>, ...fc.Arbitrary<any>[]], _predicate), fcOptions);
 }
 
 /**
@@ -176,7 +176,7 @@ export const properties = {
    * Verifies that a function obeys an identity law (fn(identity) === identity)
    */
   identity: <T>(fn: (input: T) => T, identityValue: T, inputArb: fc.Arbitrary<T>) => {
-    return verifyProperty('function should preserve identity', [inputArb], input => {
+    return verifyProperty('function should preserve identity', [inputArb], _input => {
       const result = fn(identityValue);
       return JSON.stringify(result) === JSON.stringify(identityValue);
     });
@@ -240,7 +240,7 @@ export const properties = {
   searchCorrectness: <T>(
     searchFn: (arr: readonly T[], target: T) => number,
     inputArb: fc.Arbitrary<T[]>,
-    elementArb: fc.Arbitrary<T>,
+    _elementArb: fc.Arbitrary<T>,
   ) => {
     return verifyProperty('search should find existing elements', [inputArb], input => {
       if (input.length === 0) return true;
@@ -275,7 +275,7 @@ export const properties = {
       [inputArb, elementArb],
       (input, target) => {
         // Only test if target is not in the input
-        if (input.some(item => JSON.stringify(item) === JSON.stringify(target))) {
+        if (input.some((item: any) => JSON.stringify(item) === JSON.stringify(target))) {
           return true;
         }
 

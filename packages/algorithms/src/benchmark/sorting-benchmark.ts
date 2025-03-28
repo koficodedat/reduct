@@ -125,7 +125,7 @@ export function runSortingBenchmarkSuite(size: number = 10000): {
  * const scalabilityResults = measureSortingScalability(quickSort);
  * ```
  */
-export function measureSortingScalability<T>(
+export function measureSortingScalability(
   algorithm: (items: readonly number[]) => number[],
   maxSize: number = 100000,
   steps: number = 5,

@@ -137,11 +137,11 @@ export class LazySequence<T> {
    * @returns A new lazy sequence with transformed elements
    */
   map<U>(fn: (item: T, index: number) => U): LazySequence<U> {
-    const self = this;
+    const source = this.source;
 
     function* generator(): Generator<U> {
       let index = 0;
-      for (const item of self.source) {
+      for (const item of source) {
         yield fn(item, index++);
       }
     }
@@ -156,11 +156,11 @@ export class LazySequence<T> {
    * @returns A new lazy sequence with filtered elements
    */
   filter(predicate: (item: T, index: number) => boolean): LazySequence<T> {
-    const self = this;
+    const source = this.source;
 
     function* generator(): Generator<T> {
       let index = 0;
-      for (const item of self.source) {
+      for (const item of source) {
         if (predicate(item, index++)) {
           yield item;
         }
@@ -177,13 +177,13 @@ export class LazySequence<T> {
    * @returns A new limited lazy sequence
    */
   take(count: number): LazySequence<T> {
-    const self = this;
+    const source = this.source;
 
     function* generator(): Generator<T> {
       if (count <= 0) return;
 
       let i = 0;
-      for (const item of self.source) {
+      for (const item of source) {
         yield item;
         i++;
         if (i >= count) break;
@@ -200,11 +200,11 @@ export class LazySequence<T> {
    * @returns A new lazy sequence starting after the skipped elements
    */
   skip(count: number): LazySequence<T> {
-    const self = this;
+    const source = this.source;
 
     function* generator(): Generator<T> {
       let i = 0;
-      for (const item of self.source) {
+      for (const item of source) {
         if (i >= count) {
           yield item;
         }
@@ -222,11 +222,11 @@ export class LazySequence<T> {
    * @returns A new flattened lazy sequence
    */
   flatMap<U>(fn: (item: T, index: number) => Iterable<U>): LazySequence<U> {
-    const self = this;
+    const source = this.source;
 
     function* generator(): Generator<U> {
       let index = 0;
-      for (const item of self.source) {
+      for (const item of source) {
         const nestedItems = fn(item, index++);
         for (const nestedItem of nestedItems) {
           yield nestedItem;
@@ -245,10 +245,10 @@ export class LazySequence<T> {
    * @returns A new zipped lazy sequence
    */
   zipWith<U, R>(other: Iterable<U>, fn: (a: T, b: U) => R): LazySequence<R> {
-    const self = this;
+    const source = this.source;
 
     function* generator(): Generator<R> {
-      const iteratorA = self.source[Symbol.iterator]();
+      const iteratorA = source[Symbol.iterator]();
       const iteratorB = other[Symbol.iterator]();
 
       while (true) {

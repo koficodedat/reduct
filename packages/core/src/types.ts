@@ -63,7 +63,7 @@ export function isUndefined(value: unknown): value is undefined {
 /**
  * Type predicate for function values
  */
-export function isFunction(value: unknown): value is Function {
+export function isFunction(value: unknown): value is (args: any[]) => any {
   return typeof value === 'function';
 }
 
@@ -214,11 +214,26 @@ export function isLiteral<T extends string | number | boolean | null | undefined
 export function isEnum<T extends Record<string, string | number>>(
   enumObj: T,
 ): (value: unknown) => value is T[keyof T] {
-  const enumValues = new Set(
-    Object.values(enumObj).filter(value => typeof value === 'string' || typeof value === 'number'),
+  // For numeric enums, TypeScript creates reverse mappings
+  // We need to filter out the string keys that aren't actual enum values
+  const enumValues = new Set();
+  
+  // Get all values that are either strings or numbers
+  const allValues = Object.values(enumObj).filter(
+    value => typeof value === 'string' || typeof value === 'number'
   );
-
+  
+  // Add them to our set of valid enum values
+  allValues.forEach(value => enumValues.add(value));
+  
   return (value: unknown): value is T[keyof T] => {
+    // Check if the value is in our set of valid enum values
+    // AND ensure it's not just a key name (string) that's also in the values
+    if (typeof value === 'string' && typeof enumObj[value] !== 'undefined') {
+      // It's likely a key name, not a string enum value
+      return false;
+    }
+    
     return enumValues.has(value as string | number);
   };
 }

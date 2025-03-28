@@ -14,7 +14,7 @@
  */
 
 import { List } from '@reduct/data-structures';
-import { CompareFunction, defaultCompare } from './quickSort';
+import { CompareFunction, defaultCompare } from './quick-sort';
 
 /**
  * Sorts an array using the merge sort algorithm.

@@ -21,9 +21,12 @@
     "@typescript-eslint/parser": "^6.0.0",
     "@vitest/coverage-v8": "^1.0.0",
     "eslint": "^8.0.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.5",
     "fast-check": "^3.13.2",
+    "prettier": "^3.5.3",
     "typescript": "^5.0.0",
-    "vitest": "^1.0.0"
+    "vitest": "^3.0.9"
   },
   "engines": {
     "node": ">=18.0.0"

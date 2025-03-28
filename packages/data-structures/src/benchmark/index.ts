@@ -323,7 +323,7 @@ export function runMapBenchmarks(size: number = 10000): string {
   // Random keys for lookup tests
   const randomKeys = Array.from(
     { length: 100 },
-    (_, i) => `key${Math.floor(Math.random() * size)}`,
+    () => `key${Math.floor(Math.random() * size)}`,
   );
 
   // Construction benchmark

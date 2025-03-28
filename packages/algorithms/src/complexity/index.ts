@@ -101,7 +101,7 @@ export async function analyzeTimeComplexity<T, R>(
 
   const sizeStep = (opts.maxSize - opts.minSize) / (opts.steps - 1);
   const sizes = Array.from({ length: opts.steps }, (_, i) =>
-    Math.floor(opts.minSize + i * sizeStep),
+    Math.floor(opts?.minSize ?? 0 + i * sizeStep),
   );
 
   const data: Array<{ size: number; time: number }> = [];
@@ -151,22 +151,22 @@ function fitComplexityModel(
   expectedClass: ComplexityClass,
 ): { bestFit: ComplexityClass; bestFitQuality: number } {
   const complexityFunctions: Record<ComplexityClass, (n: number) => number> = {
-    [ComplexityClass.CONSTANT]: n => 1,
-    [ComplexityClass.LOGARITHMIC]: n => Math.log(n),
-    [ComplexityClass.LINEAR]: n => n,
-    [ComplexityClass.LINEARITHMIC]: n => n * Math.log(n),
-    [ComplexityClass.QUADRATIC]: n => n * n,
-    [ComplexityClass.CUBIC]: n => n * n * n,
-    [ComplexityClass.EXPONENTIAL]: n => Math.pow(2, n),
-    [ComplexityClass.FACTORIAL]: n => {
+    [ComplexityClass.CONSTANT]: _n => 1,
+    [ComplexityClass.LOGARITHMIC]: _n => Math.log(_n),
+    [ComplexityClass.LINEAR]: _n => _n,
+    [ComplexityClass.LINEARITHMIC]: _n => _n * Math.log(_n),
+    [ComplexityClass.QUADRATIC]: _n => _n * _n,
+    [ComplexityClass.CUBIC]: _n => _n * _n * _n,
+    [ComplexityClass.EXPONENTIAL]: _n => Math.pow(2, _n),
+    [ComplexityClass.FACTORIAL]: _n => {
       // Approximate factorial with Stirling's formula for large n
       // to avoid overflow
-      if (n > 20) {
-        return Math.sqrt(2 * Math.PI * n) * Math.pow(n / Math.E, n);
+      if (_n > 20) {
+        return Math.sqrt(2 * Math.PI * _n) * Math.pow(_n / Math.E, _n);
       }
 
       let result = 1;
-      for (let i = 2; i <= n; i++) {
+      for (let i = 2; i <= _n; i++) {
         result *= i;
       }
       return result;
@@ -226,7 +226,6 @@ function calculateRSquared(
   const sumY = yValues.reduce((a, b) => a + b, 0);
   const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
   const sumXX = xValues.reduce((sum, x) => sum + x * x, 0);
-  const sumYY = yValues.reduce((sum, y) => sum + y * y, 0);
 
   const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
   const intercept = (sumY - slope * sumX) / n;

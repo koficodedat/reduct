@@ -15,7 +15,7 @@ export type Result<T, E> = Ok<T> | Err<E>;
  * Ok class representing a successful result
  */
 export class Ok<T> {
-  readonly _tag: 'Ok' = 'Ok';
+  readonly _tag = 'Ok' as const;
 
   constructor(private readonly value: T) {}
 
@@ -80,7 +80,7 @@ export class Ok<T> {
  * Err class representing an error result
  */
 export class Err<E> {
-  readonly _tag: 'Err' = 'Err';
+  readonly _tag = 'Err' as const;
 
   constructor(private readonly error: E) {}
 

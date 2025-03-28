@@ -108,7 +108,7 @@ describe('Linear Search', () => {
     });
 
     it('should handle empty arrays', () => {
-      expect(findIndex([], x => true)).toBe(-1);
+      expect(findIndex([], () => true)).toBe(-1);
     });
   });
 
@@ -122,7 +122,7 @@ describe('Linear Search', () => {
     });
 
     it('should handle empty Lists', () => {
-      expect(findIndexList(List.empty(), x => true).isNone()).toBe(true);
+      expect(findIndexList(List.empty(), () => true).isNone()).toBe(true);
     });
   });
 });

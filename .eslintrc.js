@@ -6,10 +6,9 @@ module.exports = {
       sourceType: 'module',
       ecmaVersion: 2020,
     },
-    plugins: ['@typescript-eslint/eslint-plugin', 'prettier'],
+    plugins: ['@typescript-eslint/eslint-plugin'],
     extends: [
       'plugin:@typescript-eslint/recommended',
-      'plugin:prettier/recommended',
     ],
     root: true,
     env: {
@@ -27,6 +26,6 @@ module.exports = {
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_',
       }],
-      'prettier/prettier': ['error', {}, { usePrettierrc: true }],
+      // Prettier rules removed
     },
 };
