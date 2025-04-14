@@ -29,7 +29,7 @@ export class Ok<T> {
   /**
    * Returns the contained value or a default if the result is Err
    */
-  getOrElse(_default: T): T {
+  getOrElse<U = T>(_default: U): T {
     return this.value;
   }
 
@@ -73,6 +73,13 @@ export class Ok<T> {
    */
   forEach(f: (value: T) => void): void {
     f(this.value);
+  }
+
+  /**
+   * Returns the error (always throws for Ok)
+   */
+  getErr(): never {
+    throw new Error('Cannot get error from Ok');
   }
 }
 

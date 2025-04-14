@@ -16,3 +16,6 @@ export * from './memoize';
 export * from './utility';
 export * from './types';
 export * from './lazy';
+
+// Export testing utilities
+export * as testing from './testing/property';

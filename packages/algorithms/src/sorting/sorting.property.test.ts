@@ -1,5 +1,6 @@
 import { describe, it } from 'vitest';
-import { verifyProperty, arbitrary, properties } from '@reduct/core/testing/property';
+import { testing } from '@reduct/core';
+const { verifyProperty, arbitrary, properties } = testing;
 import { quickSort, functionalQuickSort } from './quick-sort';
 import { mergeSort, bottomUpMergeSort } from './merge-sort';
 import { heapSort, functionalHeapSort } from './heap-sort';
@@ -14,7 +15,7 @@ describe('Sorting Algorithm Property Tests', () => {
     });
 
     it('should preserve array length', () => {
-      verifyProperty('preserves array length', [arrayArbitrary], array => {
+      verifyProperty('preserves array length', [arrayArbitrary], (array: number[]) => {
         const sorted = quickSort(array);
         return sorted.length === array.length;
       });
@@ -28,7 +29,7 @@ describe('Sorting Algorithm Property Tests', () => {
       verifyProperty(
         'imperative and functional variants are equivalent',
         [arrayArbitrary],
-        array => {
+        (array: number[]) => {
           const sorted1 = quickSort(array);
           const sorted2 = functionalQuickSort(array);
           return JSON.stringify(sorted1) === JSON.stringify(sorted2);
@@ -43,7 +44,7 @@ describe('Sorting Algorithm Property Tests', () => {
     });
 
     it('should preserve array length', () => {
-      verifyProperty('preserves array length', [arrayArbitrary], array => {
+      verifyProperty('preserves array length', [arrayArbitrary], (array: number[]) => {
         const sorted = mergeSort(array);
         return sorted.length === array.length;
       });
@@ -54,7 +55,7 @@ describe('Sorting Algorithm Property Tests', () => {
     });
 
     it('should be equivalent to bottom-up variant', () => {
-      verifyProperty('recursive and bottom-up variants are equivalent', [arrayArbitrary], array => {
+      verifyProperty('recursive and bottom-up variants are equivalent', [arrayArbitrary], (array: number[]) => {
         const sorted1 = mergeSort(array);
         const sorted2 = bottomUpMergeSort(array);
         return JSON.stringify(sorted1) === JSON.stringify(sorted2);
@@ -68,7 +69,7 @@ describe('Sorting Algorithm Property Tests', () => {
     });
 
     it('should preserve array length', () => {
-      verifyProperty('preserves array length', [arrayArbitrary], array => {
+      verifyProperty('preserves array length', [arrayArbitrary], (array: number[]) => {
         const sorted = heapSort(array);
         return sorted.length === array.length;
       });
@@ -82,7 +83,7 @@ describe('Sorting Algorithm Property Tests', () => {
       verifyProperty(
         'imperative and functional variants are equivalent',
         [arrayArbitrary],
-        array => {
+        (array: number[]) => {
           const sorted1 = heapSort(array);
           const sorted2 = functionalHeapSort(array);
           return JSON.stringify(sorted1) === JSON.stringify(sorted2);
@@ -93,7 +94,7 @@ describe('Sorting Algorithm Property Tests', () => {
 
   describe('All Sorting Algorithms', () => {
     it('should produce the same results', () => {
-      verifyProperty('all sorting algorithms produce same results', [arrayArbitrary], array => {
+      verifyProperty('all sorting algorithms produce same results', [arrayArbitrary], (array: number[]) => {
         const sortMethods = [
           quickSort,
           mergeSort,

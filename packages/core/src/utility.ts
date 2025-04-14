@@ -29,7 +29,7 @@ export function identity<T>(value: T): T {
  * alwaysTrue(1, 2, 3); // true
  * ```
  */
-export function constant<T>(value: T): () => T {
+export function constant<T>(value: T): (...args: any[]) => T {
   return () => value;
 }
 

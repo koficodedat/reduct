@@ -40,8 +40,8 @@ describe('Option', () => {
 
     it('should filter correctly', () => {
       const s = some(42);
-      expect(s.filter(x => x > 20).get()).toBe(42);
-      expect(s.filter(x => x < 20).isNone()).toBe(true);
+      expect(s.filter((x: number) => x > 20).get()).toBe(42);
+      expect(s.filter((x: number) => x < 20).isNone()).toBe(true);
     });
   });
 
