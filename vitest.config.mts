@@ -28,7 +28,8 @@ export default defineConfig({
       '@reduct/core': resolve(__dirname, 'packages/core/src'),
       '@reduct/core/testing/property': resolve(__dirname, 'packages/core/src/testing/property.ts'),
       '@reduct/data-structures': resolve(__dirname, 'packages/data-structures/src'),
-      '@reduct/algorithms': resolve(__dirname, 'packages/algorithms/src')
+      '@reduct/algorithms': resolve(__dirname, 'packages/algorithms/src'),
+      '@reduct/benchmark': resolve(__dirname, 'packages/benchmark/src')
     }
   }
 });

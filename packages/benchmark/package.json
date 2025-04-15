@@ -1,0 +1,59 @@
+{
+  "name": "@reduct/benchmark",
+  "version": "0.1.0",
+  "description": "Benchmarking infrastructure for Reduct",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./runners": {
+      "types": "./dist/runners/index.d.ts",
+      "import": "./dist/runners/index.mjs",
+      "require": "./dist/runners/index.js"
+    },
+    "./visualization": {
+      "types": "./dist/visualization/index.d.ts",
+      "import": "./dist/visualization/index.mjs",
+      "require": "./dist/visualization/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "runners": ["./dist/runners/index.d.ts"],
+      "visualization": ["./dist/visualization/index.d.ts"]
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/runners/index.ts src/visualization/index.ts --format cjs,esm --dts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@reduct/core": "^0.1.0",
+    "@reduct/data-structures": "^0.1.0",
+    "@reduct/algorithms": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "eslint": "^8.0.0",
+    "rimraf": "^5.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
+}

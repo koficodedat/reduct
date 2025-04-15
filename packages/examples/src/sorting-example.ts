@@ -10,9 +10,9 @@ import {
   quickSort,
   mergeSort,
   heapSort,
-  functionalQuickSort,
-  runSortingBenchmark,
+  functionalQuickSort
 } from '@reduct/algorithms';
+import { runSortingBenchmarks, formatBenchmarkSuite } from '@reduct/benchmark';
 
 // Example 1: Basic sorting with arrays
 console.log('Example 1: Basic Array Sorting');
@@ -80,5 +80,5 @@ console.log('');
 // Example 5: Benchmarking different algorithms
 console.log('Example 5: Benchmarking');
 console.log('Running benchmarks (this may take a moment)...');
-const benchmarkResults = runSortingBenchmark(1000);
-console.log(benchmarkResults);
+const benchmarkResults = runSortingBenchmarks(1000);
+console.log(formatBenchmarkSuite(benchmarkResults));

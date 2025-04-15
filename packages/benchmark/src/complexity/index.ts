@@ -7,6 +7,12 @@
  * @packageDocumentation
  */
 
+// Export instrumented sorting algorithms
+export * from './instrumented-sort';
+
+// Export operation analysis tools
+export * from './operation-analysis';
+
 /**
  * Common complexity classes for algorithm analysis
  */

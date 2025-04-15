@@ -5,7 +5,13 @@
  * to verify the runtime behavior of algorithms.
  */
 
-import { complexity } from '@reduct/algorithms';
+import {
+  OperationCounter,
+  instrumentedQuickSort,
+  instrumentedMergeSort,
+  analyzeOperationComplexity,
+  formatComplexityReport
+} from '@reduct/benchmark';
 
 // We're not using these directly, so we can comment them out
 // import { quickSort, mergeSort } from '@reduct/algorithms';
@@ -46,10 +52,10 @@ console.log(mergeSortCounter.getCounts());
 console.log('\nExample 2: Comparing QuickSort with Different Input Types');
 
 // Analyze QuickSort with random input
-const randomInputAnalysis = complexity.analyzeOperationComplexity(
+const randomInputAnalysis = analyzeOperationComplexity(
   'QuickSort (Random Input)',
-  (counter: complexity.OperationCounter<number>) => complexity.instrumentedQuickSort(counter),
-  (size: number) => new complexity.OperationCounter(generateRandomArray(size)),
+  (counter: OperationCounter<number>) => instrumentedQuickSort(counter),
+  (size: number) => new OperationCounter(generateRandomArray(size)),
   {
     minSize: 100,
     maxSize: 1000,
@@ -58,10 +64,10 @@ const randomInputAnalysis = complexity.analyzeOperationComplexity(
 );
 
 // Analyze QuickSort with nearly sorted input
-const nearlySortedAnalysis = complexity.analyzeOperationComplexity(
+const nearlySortedAnalysis = analyzeOperationComplexity(
   'QuickSort (Nearly Sorted Input)',
-  (counter: complexity.OperationCounter<number>) => complexity.instrumentedQuickSort(counter),
-  (size: number) => new complexity.OperationCounter(generateNearlySortedArray(size)),
+  (counter: OperationCounter<number>) => instrumentedQuickSort(counter),
+  (size: number) => new OperationCounter(generateNearlySortedArray(size)),
   {
     minSize: 100,
     maxSize: 1000,
@@ -69,17 +75,17 @@ const nearlySortedAnalysis = complexity.analyzeOperationComplexity(
   },
 );
 
-console.log(complexity.formatComplexityReport(randomInputAnalysis));
-console.log(complexity.formatComplexityReport(nearlySortedAnalysis));
+console.log(formatComplexityReport(randomInputAnalysis));
+console.log(formatComplexityReport(nearlySortedAnalysis));
 
 // Example 3: Comparing QuickSort and MergeSort
 console.log('\nExample 3: Comparing Sorting Algorithms');
 
 // Analyze both sorting algorithms with the same input
-const quickSortAnalysis = complexity.analyzeOperationComplexity(
+const quickSortAnalysis = analyzeOperationComplexity(
   'QuickSort',
-  (counter: complexity.OperationCounter<number>) => complexity.instrumentedQuickSort(counter),
-  (size: number) => new complexity.OperationCounter(generateRandomArray(size)),
+  (counter: OperationCounter<number>) => instrumentedQuickSort(counter),
+  (size: number) => new OperationCounter(generateRandomArray(size)),
   {
     minSize: 100,
     maxSize: 1000,
@@ -87,10 +93,10 @@ const quickSortAnalysis = complexity.analyzeOperationComplexity(
   },
 );
 
-const mergeSortAnalysis = complexity.analyzeOperationComplexity(
+const mergeSortAnalysis = analyzeOperationComplexity(
   'MergeSort',
-  (counter: complexity.OperationCounter<number>) => complexity.instrumentedMergeSort(counter),
-  (size: number) => new complexity.OperationCounter(generateRandomArray(size)),
+  (counter: OperationCounter<number>) => instrumentedMergeSort(counter),
+  (size: number) => new OperationCounter(generateRandomArray(size)),
   {
     minSize: 100,
     maxSize: 1000,
@@ -98,5 +104,5 @@ const mergeSortAnalysis = complexity.analyzeOperationComplexity(
   },
 );
 
-console.log(complexity.formatComplexityReport(quickSortAnalysis));
-console.log(complexity.formatComplexityReport(mergeSortAnalysis));
+console.log(formatComplexityReport(quickSortAnalysis));
+console.log(formatComplexityReport(mergeSortAnalysis));

@@ -1,44 +1,19 @@
 /**
  * Benchmark utilities
  *
- * Provides tools for measuring and comparing algorithm performance.
- *
  * @packageDocumentation
  */
 
-/**
- * Result of a benchmark run
- */
-export interface BenchmarkResult {
-  /** Name of the benchmark */
-  name: string;
-  /** Execution time in milliseconds */
-  timeMs: number;
-  /** Number of operations per second */
-  opsPerSecond: number;
-  /** Input size used for testing */
-  inputSize: number;
-}
-
-/**
- * Options for running a benchmark
- */
-export interface BenchmarkOptions {
-  /** Number of times to repeat the test */
-  iterations?: number;
-  /** Whether to warm up the function before measuring */
-  warmup?: boolean;
-  /** Number of warm-up runs */
-  warmupIterations?: number;
-}
+import { BenchmarkOptions, BenchmarkResult } from './types';
 
 /**
  * Default benchmark options
  */
-const defaultOptions: BenchmarkOptions = {
+export const defaultOptions: BenchmarkOptions = {
   iterations: 100,
   warmup: true,
   warmupIterations: 5,
+  measureMemory: false,
 };
 
 /**
@@ -46,6 +21,7 @@ const defaultOptions: BenchmarkOptions = {
  *
  * @param fn - The function to benchmark
  * @param name - A name for the benchmark
+ * @param operation - The operation being tested
  * @param inputSize - The size of the input (for ops/sec calculation)
  * @param options - Benchmark configuration options
  * @returns Benchmark results
@@ -55,6 +31,7 @@ const defaultOptions: BenchmarkOptions = {
  * const result = benchmark(
  *   () => quickSort(largeArray),
  *   'QuickSort',
+ *   'sort',
  *   largeArray.length
  * );
  * ```
@@ -62,6 +39,7 @@ const defaultOptions: BenchmarkOptions = {
 export function benchmark<T>(
   fn: () => T,
   name: string,
+  operation: string,
   inputSize: number,
   options: BenchmarkOptions = {},
 ): BenchmarkResult {
@@ -72,6 +50,15 @@ export function benchmark<T>(
     for (let i = 0; i < opts.warmupIterations; i++) {
       fn();
     }
+  }
+
+  let memoryBefore = 0;
+  let memoryAfter = 0;
+
+  // Measure memory usage if requested
+  if (opts.measureMemory && global.gc) {
+    global.gc(); // Force garbage collection
+    memoryBefore = process.memoryUsage().heapUsed;
   }
 
   const start = performance.now();
@@ -85,22 +72,37 @@ export function benchmark<T>(
   const totalTime = end - start;
   const iterations = opts.iterations || 1;
 
+  // Measure memory usage after execution if requested
+  if (opts.measureMemory && global.gc) {
+    global.gc(); // Force garbage collection
+    memoryAfter = process.memoryUsage().heapUsed;
+  }
+
   // Calculate average time per operation
   const timePerOperation = totalTime / iterations;
   const opsPerSecond = 1000 / timePerOperation;
 
-  return {
+  const result: BenchmarkResult = {
     name,
+    operation,
     timeMs: timePerOperation,
     opsPerSecond,
     inputSize,
   };
+
+  // Add memory usage if measured
+  if (opts.measureMemory) {
+    result.memoryBytes = memoryAfter - memoryBefore;
+  }
+
+  return result;
 }
 
 /**
  * Compares the performance of multiple functions
  *
  * @param fns - Object mapping function names to functions
+ * @param operation - The operation being tested
  * @param inputSize - The size of the input
  * @param options - Benchmark configuration options
  * @returns Object with benchmark results for each function
@@ -111,18 +113,19 @@ export function benchmark<T>(
  *   quickSort: () => quickSort(largeArray),
  *   mergeSort: () => mergeSort(largeArray),
  *   heapSort: () => heapSort(largeArray)
- * }, largeArray.length);
+ * }, 'sort', largeArray.length);
  * ```
  */
 export function compareBenchmarks<T>(
   fns: Record<string, () => T>,
+  operation: string,
   inputSize: number,
   options: BenchmarkOptions = {},
 ): Record<string, BenchmarkResult> {
   const results: Record<string, BenchmarkResult> = {};
 
   for (const [name, fn] of Object.entries(fns)) {
-    results[name] = benchmark(fn, name, inputSize, options);
+    results[name] = benchmark(fn, name, operation, inputSize, options);
   }
 
   return results;
@@ -184,6 +187,16 @@ export function generatePartiallySortedArray(size: number, randomFactor: number 
 }
 
 /**
+ * Generates random key-value pairs for map benchmarking
+ *
+ * @param size - The number of entries to generate
+ * @returns An array of key-value pairs
+ */
+export function generateRandomEntries(size: number): Array<[string, number]> {
+  return Array.from({ length: size }, (_, i) => [`key${i}`, Math.floor(Math.random() * 1000)]);
+}
+
+/**
  * Formats benchmark results as a string table
  *
  * @param results - Object with benchmark results
@@ -197,8 +210,17 @@ export function formatBenchmarkResults(results: Record<string, BenchmarkResult>)
   const fastestTime = Math.min(...entries.map(r => r.timeMs));
 
   // Create header
-  let output = 'Algorithm       | Time (ms) | Ops/Sec   | vs. Fastest\n';
-  output += '--------------- | --------- | --------- | -----------\n';
+  let output = 'Implementation  | Time (ms) | Ops/Sec   | vs. Fastest';
+  if (entries.some(r => r.memoryBytes !== undefined)) {
+    output += ' | Memory (KB)';
+  }
+  output += '\n';
+  
+  output += '--------------- | --------- | --------- | -----------';
+  if (entries.some(r => r.memoryBytes !== undefined)) {
+    output += ' | -----------';
+  }
+  output += '\n';
 
   // Add each result
   for (const result of entries.sort((a, b) => a.timeMs - b.timeMs)) {
@@ -210,7 +232,14 @@ export function formatBenchmarkResults(results: Record<string, BenchmarkResult>)
       result.opsPerSecond,
     )
       .toString()
-      .padStart(9)} | ${relativeText}\n`;
+      .padStart(9)} | ${relativeText.padStart(11)}`;
+    
+    if (result.memoryBytes !== undefined) {
+      const memoryKB = (result.memoryBytes / 1024).toFixed(2);
+      output += ` | ${memoryKB.padStart(11)}`;
+    }
+    
+    output += '\n';
   }
 
   return output;
