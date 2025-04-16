@@ -8,7 +8,10 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist",
-    "start": "ts-node src/index.ts"
+    "start": "ts-node src/index.ts",
+    "start:algorithm": "ts-node src/algorithm-examples/index.ts",
+    "start:core": "ts-node src/core-examples/index.ts",
+    "start:data-structure": "ts-node src/data-structure-examples/index.ts"
   },
   "dependencies": {
     "@reduct/core": "^0.1.0",

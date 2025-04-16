@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-// Re-export from runners and visualization
+// Re-export from modules
 export * from './runners';
 export * from './visualization';
 export * from './types';
