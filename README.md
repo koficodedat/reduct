@@ -34,6 +34,18 @@ Reduct is organized into focused packages:
 - `@reduct/core`: Fundamental functional programming utilities
 - `@reduct/data-structures`: Immutable data structures
 - `@reduct/algorithms`: Pure algorithm implementations
+- `@reduct/benchmark`: Performance benchmarking utilities and scripts
+
+## Project Structure
+
+```
+/packages
+  /core
+  /data-structures
+  /algorithms
+  /benchmark
+  /examples
+```
 
 ## Quick Start
 
@@ -56,6 +68,17 @@ const process = pipe(
 );
 
 const result = process(numbers); // [6, 8, 10, 16]
+```
+
+## Benchmarking
+
+Reduct provides a dedicated benchmarking package for performance testing:
+
+```typescript
+import { runListBenchmarks, formatBenchmarkSuite } from '@reduct/benchmark';
+
+const results = runListBenchmarks(10000);
+console.log(formatBenchmarkSuite(results));
 ```
 
 ## Data Structures
@@ -170,6 +193,10 @@ const evenNumbers = numbers
   .take(10)
   .toArray(); // [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
 ```
+
+## Documentation Conventions
+
+- All public/example files use a file-level doc comment with `@packageDocumentation` placed at the bottom of the comment. This ensures consistent API documentation generation across the monorepo.
 
 ## Philosophy
 

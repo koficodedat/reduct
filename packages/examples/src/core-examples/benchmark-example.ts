@@ -3,30 +3,32 @@
  *
  * This example demonstrates how to use the benchmarking utilities
  * to measure and compare performance of data structures and algorithms.
+ *
+ * @packageDocumentation
  */
 
 import {
-  formatAllDataStructureBenchmarks,
-  compareAllWithNativeStructures,
   runListBenchmarks,
+  compareListWithNativeArray,
   formatBenchmarkSuite,
   benchmark,
   compareBenchmarks,
   formatBenchmarkResults
 } from '@reduct/benchmark';
 
-// Example 1: Run benchmarks for all data structures with a small size
-console.log('Example 1: Basic Data Structure Benchmarks');
-console.log(formatAllDataStructureBenchmarks(1000));
+// Example 1: Run and format List benchmarks
+console.log('Example 1: List Benchmarks');
+const listBenchmarks = runListBenchmarks(1000);
+console.log(formatBenchmarkSuite(listBenchmarks));
 
-// Example 2: Compare immutable data structures with native JavaScript equivalents
-console.log('Example 2: Comparing with Native JavaScript');
-console.log(compareAllWithNativeStructures(5000));
+// Example 2: Compare List with native JavaScript arrays
+console.log('Example 2: Comparing List with Native Array');
+console.log(compareListWithNativeArray(1000));
 
 // Example 3: Run detailed benchmark for a specific data structure
 console.log('Example 3: Detailed List Benchmarks');
-const listBenchmarks = runListBenchmarks(10000);
-console.log(formatBenchmarkSuite(listBenchmarks));
+const detailedListBenchmarks = runListBenchmarks(10000);
+console.log(formatBenchmarkSuite(detailedListBenchmarks));
 
 // Example 4: Using the benchmark functionality
 console.log('Example 4: Custom Benchmark Examples');

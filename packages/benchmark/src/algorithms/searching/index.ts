@@ -8,8 +8,8 @@ import {
   linearSearch,
   binarySearch
 } from '@reduct/algorithms';
-import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../types';
-import { benchmark, generateSortedArray } from '../utils';
+import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../../types';
+import { benchmark, generateSortedArray } from '../../utils';
 
 /**
  * Runs benchmarks on all searching algorithms

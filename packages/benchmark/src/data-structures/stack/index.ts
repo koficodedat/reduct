@@ -5,8 +5,8 @@
  */
 
 import { Stack } from '@reduct/data-structures';
-import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../types';
-import { benchmark, generateRandomArray, formatBenchmarkResults } from '../utils';
+import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../../types';
+import { benchmark, generateRandomArray, formatBenchmarkResults } from '../../utils';
 
 /**
  * Runs benchmarks for the persistent Stack data structure

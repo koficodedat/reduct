@@ -12,14 +12,14 @@ import {
   bottomUpMergeSort,
   functionalHeapSort,
 } from '@reduct/algorithms';
-import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../types';
+import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../../types';
 import {
   benchmark,
   generateRandomArray,
   generateSortedArray,
   generateReverseSortedArray,
   generatePartiallySortedArray,
-} from '../utils';
+} from '../../utils';
 
 /**
  * Runs benchmarks on all sorting algorithms using a random array

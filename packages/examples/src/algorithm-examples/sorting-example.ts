@@ -3,7 +3,10 @@
  *
  * This example demonstrates how to use various sorting algorithms
  * provided by the Reduct library.
+ *
+ * @packageDocumentation
  */
+
 
 import { List } from '@reduct/data-structures';
 import {
@@ -82,3 +85,4 @@ console.log('Example 5: Benchmarking');
 console.log('Running benchmarks (this may take a moment)...');
 const benchmarkResults = runSortingBenchmarks(1000);
 console.log(formatBenchmarkSuite(benchmarkResults));
+

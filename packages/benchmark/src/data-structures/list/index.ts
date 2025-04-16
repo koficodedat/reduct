@@ -5,8 +5,8 @@
  */
 
 import { List } from '@reduct/data-structures';
-import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../types';
-import { benchmark, formatBenchmarkResults, generateRandomArray } from '../utils';
+import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../../types';
+import { benchmark, formatBenchmarkResults, generateRandomArray } from '../../utils';
 
 /**
  * Runs benchmarks for the immutable List data structure

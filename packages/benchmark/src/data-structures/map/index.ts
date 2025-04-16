@@ -5,8 +5,8 @@
  */
 
 import { ImmutableMap } from '@reduct/data-structures';
-import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../types';
-import { benchmark, formatBenchmarkResults, generateRandomEntries } from '../utils';
+import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../../types';
+import { benchmark, formatBenchmarkResults, generateRandomEntries } from '../../utils';
 
 /**
  * Runs benchmarks for the immutable Map data structure

@@ -3,21 +3,15 @@
  *
  * This script demonstrates how to use the benchmark package to run
  * performance tests on Reduct data structures and algorithms.
+ *
+ * @packageDocumentation
  */
 
-import {
-  runListBenchmarks,
-  compareListWithNativeArray,
-  runMapBenchmarks,
-  compareMapWithNativeMap,
-  runSortingBenchmarks,
-  runSortingBenchmarkSuite,
-  runSearchingBenchmarks,
-  measureListScalability,
-  measureMapScalability,
-  measureSortingScalability,
-  measureSearchingScalability,
-} from '../runners';
+import { runListBenchmarks, compareListWithNativeArray, measureListScalability } from '../data-structures/list';
+import { runMapBenchmarks, compareMapWithNativeMap, measureMapScalability } from '../data-structures/map';
+import { runStackBenchmarks, compareStackWithNativeArray, measureStackScalability } from '../data-structures/stack';
+import { runSortingBenchmarks, runSortingBenchmarkSuite, measureSortingScalability } from '../algorithms/sorting';
+import { runSearchingBenchmarks, measureSearchingScalability } from '../algorithms/searching';
 
 import {
   formatBenchmarkSuite,
@@ -46,6 +40,15 @@ console.log(formatBenchmarkSuite(mapBenchmarks));
 console.log('Comparing Map with native Map...');
 console.log(compareMapWithNativeMap(1000));
 
+// Run Stack benchmarks
+console.log('Running Stack benchmarks...');
+const stackBenchmarks = runStackBenchmarks(1000);
+console.log(formatBenchmarkSuite(stackBenchmarks));
+
+// Compare Stack with native array
+console.log('Comparing Stack with native array...');
+console.log(compareStackWithNativeArray(1000));
+
 // Run sorting benchmarks
 console.log('Running sorting benchmarks...');
 const sortingBenchmarks = runSortingBenchmarks(1000);
@@ -73,6 +76,11 @@ console.log(formatScalabilityResult(listScalability));
 console.log('Measuring Map scalability...');
 const mapScalability = measureMapScalability('get', 10000, 5);
 console.log(formatScalabilityResult(mapScalability));
+
+// Measure Stack scalability
+console.log('Measuring Stack scalability...');
+const stackScalability = measureStackScalability('push', 10000, 5);
+console.log(formatScalabilityResult(stackScalability));
 
 // Measure sorting algorithm scalability
 console.log('Measuring sorting algorithm scalability...');

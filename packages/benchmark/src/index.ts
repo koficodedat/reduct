@@ -7,8 +7,16 @@
  */
 
 // Re-export from modules
-export * from './runners';
 export * from './visualization';
 export * from './types';
 export * from './utils';
 export * from './complexity';
+
+// Explicit re-exports for examples compatibility
+export { runListBenchmarks, compareListWithNativeArray, measureListScalability } from './data-structures/list';
+export { runMapBenchmarks, compareMapWithNativeMap, measureMapScalability } from './data-structures/map';
+export { runStackBenchmarks, compareStackWithNativeArray, measureStackScalability } from './data-structures/stack';
+export { runSortingBenchmarks, runSortingBenchmarkSuite, measureSortingScalability } from './algorithms/sorting';
+export { runSearchingBenchmarks, measureSearchingScalability } from './algorithms/searching';
+export { formatBenchmarkSuite } from './visualization/formatters';
+export { formatBenchmarkResults, compareBenchmarks, benchmark } from './utils';
