@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Stack } from '../../src/stack';
+import { Stack } from '../../../src/stack/index';
 
 describe('Persistent Stack', () => {
   describe('Construction', () => {

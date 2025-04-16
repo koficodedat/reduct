@@ -5,7 +5,7 @@ import {
   infiniteSequence,
   rangeSequence,
   lazyFunction
-} from './lazy';
+} from '../../src/lazy';
 
 describe('Lazy Evaluation', () => {
   describe('Lazy', () => {

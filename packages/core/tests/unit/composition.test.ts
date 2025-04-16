@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import * from '../../src/composition';
+import { compose, pipe } from '../../src/composition';
 
 describe('compose', () => {
   it('should compose functions from right to left', () => {

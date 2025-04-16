@@ -15,7 +15,7 @@ import {
   isTuple,
   isLiteral,
   isEnum,
-} from './types';
+} from '../../src/types';
 
 describe('Type Predicates', () => {
   describe('Basic Type Guards', () => {

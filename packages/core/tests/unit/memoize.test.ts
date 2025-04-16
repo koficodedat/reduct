@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import * from '../../src/memoize';
+import { memoize, memoizeWith } from '../../src/memoize';
 
 describe('Memoization', () => {
   describe('memoize', () => {

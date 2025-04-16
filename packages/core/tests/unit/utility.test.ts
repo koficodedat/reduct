@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import * from '../../src/utility';
+import { identity, constant, prop, not, anyPass, allPass, uncurry } from '../../src/utility';
 
 describe('Utility Functions', () => {
   describe('identity', () => {

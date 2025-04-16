@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import * from '../../src/option';
+import { some, none, fromNullable } from '../../src/option';
 
 describe('Option', () => {
   describe('Some', () => {

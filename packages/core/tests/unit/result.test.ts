@@ -1,49 +1,49 @@
 import { describe, it, expect } from 'vitest';
-import * from '../../src/result';
+import { ok, err, tryCatch } from '../../src/result';
 
 describe('Result', () => {
   describe('Ok', () => {
     it('should return the contained value with get', () => {
-      const result = ok(42);
-      expect(result.get()).toBe(42);
+      const resultValue = ok(42);
+      expect(resultValue.get()).toBe(42);
     });
 
     it('should transform the value with map', () => {
-      const result = ok(42);
-      const mapped = result.map(x => x * 2);
+      const resultValue = ok(42);
+      const mapped = resultValue.map(x => x * 2);
       expect(mapped.get()).toBe(84);
     });
 
     it('should return the contained value with getOrElse', () => {
-      const result = ok(42);
-      expect(result.getOrElse(0)).toBe(42);
+      const resultValue = ok(42);
+      expect(resultValue.getOrElse(0)).toBe(42);
     });
 
     it('should flatMap correctly', () => {
-      const result = ok(42);
-      const flatMapped = result.flatMap(x => ok(x * 2));
+      const resultValue = ok(42);
+      const flatMapped = resultValue.flatMap(x => ok(x * 2));
       expect(flatMapped.get()).toBe(84);
 
-      const flatMappedToErr = result.flatMap(_ => err('error'));
+      const flatMappedToErr = resultValue.flatMap(_ => err('error'));
       expect(flatMappedToErr.isErr()).toBe(true);
     });
 
     it('should report isOk correctly', () => {
-      const result = ok(42);
-      expect(result.isOk()).toBe(true);
-      expect(result.isErr()).toBe(false);
+      const resultValue = ok(42);
+      expect(resultValue.isOk()).toBe(true);
+      expect(resultValue.isErr()).toBe(false);
     });
 
     it('should execute forEach with the value', () => {
-      const result = ok(42);
+      const resultValue = ok(42);
       let value = 0;
-      result.forEach(x => { value = x; });
+      resultValue.forEach(x => { value = x; });
       expect(value).toBe(42);
     });
 
     it('should not modify when using mapErr', () => {
-      const result = ok(42);
-      const mapped = result.mapErr(e => `${e}!`);
+      const resultValue = ok(42);
+      const mapped = resultValue.mapErr(e => `${e}!`);
       expect(mapped.isOk()).toBe(true);
       expect(mapped.get()).toBe(42);
     });
@@ -51,67 +51,67 @@ describe('Result', () => {
 
   describe('Err', () => {
     it('should throw when calling get', () => {
-      const result = err('error');
-      expect(() => result.get()).toThrow();
+      const resultValue = err('error');
+      expect(() => resultValue.get()).toThrow();
     });
 
     it('should return Err when mapping', () => {
-      const result = err('error');
-      const mapped = result.map(x => x);
+      const resultValue = err('error');
+      const mapped = resultValue.map(x => x);
       expect(mapped.isErr()).toBe(true);
     });
 
     it('should return the default with getOrElse', () => {
-      const result = err('error');
-      expect(result.getOrElse(42)).toBe(42);
+      const resultValue = err('error');
+      expect(resultValue.getOrElse(42)).toBe(42);
     });
 
     it('should return Err when flatMapping', () => {
-      const result = err('error');
-      const flatMapped = result.flatMap(x => ok(x));
+      const resultValue = err('error');
+      const flatMapped = resultValue.flatMap(x => ok(x));
       expect(flatMapped.isErr()).toBe(true);
     });
 
     it('should report isErr correctly', () => {
-      const result = err('error');
-      expect(result.isOk()).toBe(false);
-      expect(result.isErr()).toBe(true);
+      const resultValue = err('error');
+      expect(resultValue.isOk()).toBe(false);
+      expect(resultValue.isErr()).toBe(true);
     });
 
     it('should not execute forEach', () => {
-      const result = err('error');
+      const resultValue = err('error');
       let executed = false;
-      result.forEach(() => { executed = true; });
+      resultValue.forEach(() => { executed = true; });
       expect(executed).toBe(false);
     });
 
     it('should transform the error with mapErr', () => {
-      const result = err('error');
-      const mapped = result.mapErr(e => `${e}!`);
+      const resultValue = err('error');
+      const mapped = resultValue.mapErr(e => `${e}!`);
       expect(mapped.isErr()).toBe(true);
       expect(mapped.getErr()).toBe('error!');
     });
 
     it('should return the error with getErr', () => {
-      const result = err('error');
-      expect(result.getErr()).toBe('error');
+      const resultValue = err('error');
+      expect(resultValue.getErr()).toBe('error');
     });
   });
 
   describe('tryCatch', () => {
     it('should return Ok for successful operations', () => {
-      const result = tryCatch(() => 42, e => String(e));
-      expect(result.isOk()).toBe(true);
-      expect(result.get()).toBe(42);
+      const resultValue = tryCatch(() => 42, e => String(e));
+      expect(resultValue.isOk()).toBe(true);
+      expect(resultValue.get()).toBe(42);
     });
 
     it('should return Err for failed operations', () => {
-      const result = tryCatch(() => {
+      const resultValue = tryCatch(() => {
         throw new Error('something went wrong');
       }, e => e instanceof Error ? e.message : String(e));
 
-      expect(result.isErr()).toBe(true);
-      expect(result.getErr()).toBe('something went wrong');
+      expect(resultValue.isErr()).toBe(true);
+      expect(resultValue.getErr()).toBe('something went wrong');
     });
 
     it('should handle JSON parsing example', () => {

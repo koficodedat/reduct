@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { List } from '../../src/list';
+import { List } from '../../../src/list/index';
 
 describe('Immutable List', () => {
   describe('Construction', () => {
