@@ -15,6 +15,7 @@ export * from './cli';
 export * from './registry';
 export * from './analysis';
 export * from './benchmark-registry/main';
+export * from './ci';
 // Export from comparison but avoid name conflicts
 export {
   ComparisonBuilder,
