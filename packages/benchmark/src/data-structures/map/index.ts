@@ -7,7 +7,6 @@
 import { ImmutableMap } from '@reduct/data-structures';
 import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../../types';
 import { benchmark, generateRandomEntries } from '../../utils';
-import { compareMapWithNativeMapAdapter } from './adapter-comparison';
 
 /**
  * Runs benchmarks for the immutable Map data structure
@@ -144,20 +143,6 @@ export function runMapBenchmarks(
   };
 }
 
-/**
- * Compares the Map implementation with native JavaScript Map and plain objects
- *
- * @param size - Size of the data structures to test
- * @param options - Benchmark options
- * @returns Formatted benchmark results
- */
-export function compareMapWithNativeMap(
-  size: number = 10000,
-  options: BenchmarkOptions = {},
-): string {
-  // Use the adapter-based implementation
-  return compareMapWithNativeMapAdapter(size, options);
-}
 
 /**
  * Measures how Map operations scale with input size

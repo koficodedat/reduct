@@ -7,7 +7,6 @@
 import { List } from '@reduct/data-structures';
 import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../../types';
 import { benchmark, generateRandomArray } from '../../utils';
-import { compareListWithNativeArrayAdapter } from './adapter-comparison';
 
 /**
  * Runs benchmarks for the immutable List data structure
@@ -122,20 +121,6 @@ export function runListBenchmarks(
   };
 }
 
-/**
- * Compares the List implementation with native JavaScript arrays
- *
- * @param size - Size of the data structures to test
- * @param options - Benchmark options
- * @returns Formatted benchmark results
- */
-export function compareListWithNativeArray(
-  size: number = 10000,
-  options: BenchmarkOptions = {},
-): string {
-  // Use the adapter-based implementation
-  return compareListWithNativeArrayAdapter(size, options);
-}
 
 /**
  * Measures how List operations scale with input size
