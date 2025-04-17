@@ -82,6 +82,11 @@ program
   .option('-i, --input <file>', 'Input JSON file with benchmark results')
   .option('-o, --output <file>', 'Output file')
   .option('-c, --chart-type <type>', 'Chart type for HTML output (bar, line, pie)', 'bar')
+  .option('-t, --title <title>', 'Title for the output document')
+  .option('--charts', 'Include charts in the output (for md and html formats)')
+  .option('--no-headers', 'Exclude headers from CSV output')
+  .option('--delimiter <char>', 'Delimiter for CSV output (default: comma)')
+  .option('--format-numbers', 'Format numbers with thousands separator')
   .action(exportCommand);
 
 program.parse();

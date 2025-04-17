@@ -9,7 +9,23 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { BenchmarkResult, BenchmarkSuite, BenchmarkComparison, ScalabilityResult } from '../../types';
-import { exportResultsToCSV, exportSuiteToCSV, exportComparisonToCSV, exportScalabilityToCSV } from '../../visualization/exporters';
+import {
+  exportResultsToCSV,
+  exportSuiteToCSV,
+  exportComparisonToCSV,
+  exportScalabilityToCSV,
+  exportResultsToMarkdown,
+  exportSuiteToMarkdown,
+  exportComparisonToMarkdown,
+  exportScalabilityToMarkdown,
+  exportResultsToHTML,
+  exportSuiteToHTML,
+  exportComparisonToHTML,
+  exportScalabilityToHTML,
+  CSVExportOptions,
+  MarkdownExportOptions,
+  HTMLExportOptions
+} from '../../visualization/exporters';
 
 /**
  * Command handler for the 'export' command
@@ -34,17 +50,26 @@ export function exportCommand(format: string, options: any): void {
 
     switch (format.toLowerCase()) {
       case 'csv':
-        result = exportToCSV(data);
+        result = exportToCSV(data, {
+          includeHeaders: options.headers !== false,
+          delimiter: options.delimiter || ',',
+          formatNumbers: options.formatNumbers || false,
+          includeMetadata: options.metadata !== false,
+        });
         break;
       case 'md':
-        // Markdown export will be implemented later
-        console.error('Markdown export not yet implemented');
-        process.exit(1);
+        result = exportToMarkdown(data, {
+          includeCharts: options.charts || false,
+          formatNumbers: true,
+        });
         break;
       case 'html':
-        // HTML export will be implemented later
-        console.error('HTML export not yet implemented');
-        process.exit(1);
+        result = exportToHTML(data, {
+          includeCharts: options.charts !== false,
+          chartType: options.chartType || 'bar',
+          formatNumbers: true,
+          title: options.title,
+        });
         break;
       default:
         console.error(`Unknown format: ${format}`);
@@ -67,22 +92,75 @@ export function exportCommand(format: string, options: any): void {
  * Exports data to CSV format
  *
  * @param data - Benchmark data
+ * @param options - CSV export options
  * @returns CSV string
  */
-function exportToCSV(data: any): string {
+function exportToCSV(data: any, options?: CSVExportOptions): string {
   // Determine the type of data
   if (Array.isArray(data) && data.length > 0 && 'name' in data[0] && 'operation' in data[0]) {
     // It's an array of BenchmarkResult
-    return exportResultsToCSV(data as BenchmarkResult[]);
+    return exportResultsToCSV(data as BenchmarkResult[], options);
   } else if ('benchmarks' in data && Array.isArray(data.benchmarks)) {
     // It's a BenchmarkSuite
-    return exportSuiteToCSV(data as BenchmarkSuite);
+    return exportSuiteToCSV(data as BenchmarkSuite, options);
   } else if ('results' in data && Array.isArray(data.results) && 'implementation' in data.results[0]) {
     // It's a BenchmarkComparison
-    return exportComparisonToCSV(data as BenchmarkComparison);
+    return exportComparisonToCSV(data as BenchmarkComparison, options);
   } else if ('results' in data && Array.isArray(data.results) && 'inputSize' in data.results[0]) {
     // It's a ScalabilityResult
-    return exportScalabilityToCSV(data as ScalabilityResult);
+    return exportScalabilityToCSV(data as ScalabilityResult, options);
+  } else {
+    throw new Error('Unknown data format');
+  }
+}
+
+/**
+ * Exports data to Markdown format
+ *
+ * @param data - Benchmark data
+ * @param options - Markdown export options
+ * @returns Markdown string
+ */
+function exportToMarkdown(data: any, options?: MarkdownExportOptions): string {
+  // Determine the type of data
+  if (Array.isArray(data) && data.length > 0 && 'name' in data[0] && 'operation' in data[0]) {
+    // It's an array of BenchmarkResult
+    return exportResultsToMarkdown(data as BenchmarkResult[], options);
+  } else if ('benchmarks' in data && Array.isArray(data.benchmarks)) {
+    // It's a BenchmarkSuite
+    return exportSuiteToMarkdown(data as BenchmarkSuite, options);
+  } else if ('results' in data && Array.isArray(data.results) && 'implementation' in data.results[0]) {
+    // It's a BenchmarkComparison
+    return exportComparisonToMarkdown(data as BenchmarkComparison, options);
+  } else if ('results' in data && Array.isArray(data.results) && 'inputSize' in data.results[0]) {
+    // It's a ScalabilityResult
+    return exportScalabilityToMarkdown(data as ScalabilityResult, options);
+  } else {
+    throw new Error('Unknown data format');
+  }
+}
+
+/**
+ * Exports data to HTML format
+ *
+ * @param data - Benchmark data
+ * @param options - HTML export options
+ * @returns HTML string
+ */
+function exportToHTML(data: any, options?: HTMLExportOptions): string {
+  // Determine the type of data
+  if (Array.isArray(data) && data.length > 0 && 'name' in data[0] && 'operation' in data[0]) {
+    // It's an array of BenchmarkResult
+    return exportResultsToHTML(data as BenchmarkResult[], options);
+  } else if ('benchmarks' in data && Array.isArray(data.benchmarks)) {
+    // It's a BenchmarkSuite
+    return exportSuiteToHTML(data as BenchmarkSuite, options);
+  } else if ('results' in data && Array.isArray(data.results) && 'implementation' in data.results[0]) {
+    // It's a BenchmarkComparison
+    return exportComparisonToHTML(data as BenchmarkComparison, options);
+  } else if ('results' in data && Array.isArray(data.results) && 'inputSize' in data.results[0]) {
+    // It's a ScalabilityResult
+    return exportScalabilityToHTML(data as ScalabilityResult, options);
   } else {
     throw new Error('Unknown data format');
   }
