@@ -80,6 +80,44 @@ export function baseTemplate(title: string, content: string, scripts: string = '
       margin: 0;
       padding-left: 20px;
     }
+    /* View toggle styles */
+    .view-toggles {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .view-toggle-btn {
+      padding: 8px 16px;
+      background-color: #f2f2f2;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+    }
+    .view-toggle-btn:hover {
+      background-color: #e6e6e6;
+    }
+    .view-toggle-btn.active {
+      background-color: #0066cc;
+      color: white;
+      border-color: #0066cc;
+    }
+    .view-container {
+      display: none;
+      margin-bottom: 30px;
+    }
+    .view-container.active {
+      display: block;
+    }
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .view-toggles {
+        flex-direction: column;
+        gap: 5px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -93,6 +131,32 @@ export function baseTemplate(title: string, content: string, scripts: string = '
     Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
     Chart.defaults.font.size = 14;
     Chart.defaults.color = '#333';
+
+    // View toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize view toggles
+      const viewToggles = document.querySelectorAll('.view-toggle-btn');
+      if (viewToggles.length > 0) {
+        viewToggles.forEach(toggle => {
+          toggle.addEventListener('click', function() {
+            const viewType = this.getAttribute('data-view');
+            const section = this.closest('.benchmark-section');
+
+            // Update active toggle button
+            section.querySelectorAll('.view-toggle-btn').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            this.classList.add('active');
+
+            // Show selected view, hide others
+            section.querySelectorAll('.view-container').forEach(container => {
+              container.classList.remove('active');
+            });
+            section.querySelector('.view-container[data-view="' + viewType + '"]').classList.add('active');
+          });
+        });
+      }
+    });
 
     ${scripts}
   </script>
@@ -532,6 +596,45 @@ export function createRadarChartScript(
     }
   });
   `;
+}
+
+/**
+ * Creates a toggleable view container for benchmark results
+ *
+ * @param sectionId - ID of the section
+ * @param title - Section title
+ * @param tableContent - HTML content for table view
+ * @param chartContent - HTML content for chart view
+ * @param rawContent - HTML content for raw data view
+ * @returns HTML for the toggleable view container
+ */
+export function createToggleableViews(sectionId: string, title: string, tableContent: string, chartContent: string, rawContent: string): string {
+  let html = `<div id="${sectionId}" class="benchmark-section">`;
+  html += `\n  <h2>${title}</h2>\n`;
+
+  // Add view toggle buttons
+  html += '  <div class="view-toggles">\n';
+  html += '    <button class="view-toggle-btn active" data-view="table">Table View</button>\n';
+  html += '    <button class="view-toggle-btn" data-view="chart">Chart View</button>\n';
+  html += '    <button class="view-toggle-btn" data-view="raw">Raw Data</button>\n';
+  html += '  </div>\n';
+
+  // Add view containers
+  html += '  <div class="view-container active" data-view="table">\n';
+  html += tableContent;
+  html += '\n  </div>\n';
+
+  html += '  <div class="view-container" data-view="chart">\n';
+  html += chartContent;
+  html += '\n  </div>\n';
+
+  html += '  <div class="view-container" data-view="raw">\n';
+  html += '    <pre>' + rawContent + '</pre>\n';
+  html += '  </div>\n';
+
+  html += '</div>\n';
+
+  return html;
 }
 
 /**

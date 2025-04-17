@@ -958,7 +958,7 @@ export function exportSuiteToHTML(suite: BenchmarkSuite, options?: HTMLExportOpt
  */
 export function exportComparisonToHTML(comparison: BenchmarkComparison, options?: HTMLExportOptions): string {
   const opts = { ...defaultHTMLOptions, ...options };
-  const { includeMetadata, formatNumbers, includeTableOfContents, includeCharts, title } = opts;
+  const { includeMetadata, formatNumbers, includeTableOfContents, title } = opts;
 
   // Import the HTML template functions
   const {
@@ -967,7 +967,8 @@ export function exportComparisonToHTML(comparison: BenchmarkComparison, options?
     createLineChartScript,
     createPieChartScript,
     createRadarChartScript,
-    createTableOfContents
+    createTableOfContents,
+    createToggleableViews
   } = require('./html-template');
 
   let content = '';
@@ -979,10 +980,6 @@ export function exportComparisonToHTML(comparison: BenchmarkComparison, options?
       { name: 'Summary', id: 'summary' },
       { name: 'Results', id: 'results' },
     ];
-
-    if (includeCharts) {
-      sections.push({ name: 'Charts', id: 'charts' });
-    }
 
     if (includeMetadata) {
       sections.push({ name: 'Metadata', id: 'metadata' });
@@ -1004,114 +1001,117 @@ export function exportComparisonToHTML(comparison: BenchmarkComparison, options?
   content += `  <p><strong>Fastest Implementation:</strong> ${fastest.implementation} (${formatNumberForHTML(Math.floor(fastest.opsPerSecond), formatNumbers)} ops/sec)</p>\n`;
   content += '</div>\n';
 
-  // Results section
-  content += '<div id="results">\n';
-  content += '  <h2>Results</h2>\n';
-  content += '  <table>\n';
-  content += '    <thead>\n';
-  content += '      <tr>\n';
-  content += '        <th>Implementation</th>\n';
-  content += '        <th>Time (ms)</th>\n';
-  content += '        <th>Ops/Sec</th>\n';
-  content += '        <th>vs. Fastest</th>\n';
+  // Create table content
+  let tableContent = '  <table>\n';
+  tableContent += '    <thead>\n';
+  tableContent += '      <tr>\n';
+  tableContent += '        <th>Implementation</th>\n';
+  tableContent += '        <th>Time (ms)</th>\n';
+  tableContent += '        <th>Ops/Sec</th>\n';
+  tableContent += '        <th>vs. Fastest</th>\n';
 
   if (comparison.results.some(r => r.memoryBytes !== undefined)) {
-    content += '        <th>Memory (KB)</th>\n';
+    tableContent += '        <th>Memory (KB)</th>\n';
   }
 
-  content += '      </tr>\n';
-  content += '    </thead>\n';
-  content += '    <tbody>\n';
+  tableContent += '      </tr>\n';
+  tableContent += '    </thead>\n';
+  tableContent += '    <tbody>\n';
 
   // Table rows
   for (const result of sortedResults) {
     const isFastest = result === sortedResults[0];
     const relativeText = result.relativeFactor === 1 ? 'fastest' : `${result.relativeFactor.toFixed(2)}x slower`;
 
-    content += `      <tr${isFastest ? ' class="fastest"' : ''}>\n`;
-    content += `        <td>${result.implementation}</td>\n`;
-    content += `        <td>${formatNumberForHTML(result.timeMs, formatNumbers)}</td>\n`;
-    content += `        <td>${formatNumberForHTML(Math.floor(result.opsPerSecond), formatNumbers)}</td>\n`;
-    content += `        <td>${relativeText}</td>\n`;
+    tableContent += `      <tr${isFastest ? ' class="fastest"' : ''}>\n`;
+    tableContent += `        <td>${result.implementation}</td>\n`;
+    tableContent += `        <td>${formatNumberForHTML(result.timeMs, formatNumbers)}</td>\n`;
+    tableContent += `        <td>${formatNumberForHTML(Math.floor(result.opsPerSecond), formatNumbers)}</td>\n`;
+    tableContent += `        <td>${relativeText}</td>\n`;
 
     if (comparison.results.some(r => r.memoryBytes !== undefined)) {
       const memoryKB = result.memoryBytes !== undefined ? (result.memoryBytes / 1024).toFixed(2) : 'N/A';
-      content += `        <td>${memoryKB}</td>\n`;
+      tableContent += `        <td>${memoryKB}</td>\n`;
     }
 
-    content += '      </tr>\n';
+    tableContent += '      </tr>\n';
   }
 
-  content += '    </tbody>\n';
-  content += '  </table>\n';
-  content += '</div>\n';
+  tableContent += '    </tbody>\n';
+  tableContent += '  </table>\n';
 
-  // Charts section
-  if (includeCharts) {
-    content += '<div id="charts">\n';
-    content += '  <h2>Charts</h2>\n';
+  // Create chart content
+  let chartContent = '';
+  const chartId = 'comparison_chart';
+  chartContent += '<div class="chart-container">\n';
+  chartContent += `  <canvas id="${chartId}"></canvas>\n`;
+  chartContent += '</div>\n';
 
-    const chartId = 'comparison_chart';
-    content += '  <div class="chart-container">\n';
-    content += `    <canvas id="${chartId}"></canvas>\n`;
-    content += '  </div>\n';
+  // Sort by name for consistent ordering
+  const chartResults = [...comparison.results].sort((a, b) => a.implementation.localeCompare(b.implementation));
 
-    // Sort by name for consistent ordering
-    const chartResults = [...comparison.results].sort((a, b) => a.implementation.localeCompare(b.implementation));
+  // Prepare chart data
+  const labels = chartResults.map(r => r.implementation);
+  const timeData = chartResults.map(r => r.timeMs);
+  const opsData = chartResults.map(r => Math.floor(r.opsPerSecond));
 
-    // Prepare chart data
-    const labels = chartResults.map(r => r.implementation);
-    const timeData = chartResults.map(r => r.timeMs);
-    const opsData = chartResults.map(r => Math.floor(r.opsPerSecond));
+  // Add chart script based on chart type
+  if (opts.chartType === 'line') {
+    scripts += createLineChartScript(
+      chartId,
+      `${comparison.operation} Operation (Size: ${comparison.inputSize})`,
+      labels,
+      timeData,
+      opsData,
+      opts.chartOptions
+    );
+  } else if (opts.chartType === 'pie') {
+    // For pie charts, we'll show the operations per second as a pie chart
+    scripts += createPieChartScript(
+      chartId,
+      `${comparison.operation} Operation (Size: ${comparison.inputSize})`,
+      labels,
+      opsData,
+      opts.chartOptions
+    );
+  } else if (opts.chartType === 'radar') {
+    // For radar charts, we need to restructure the data
+    const metrics = ['Time (ms)', 'Ops/Sec', 'Relative Factor'];
+    const datasets = comparison.results.map(result => ({
+      label: result.implementation,
+      data: [result.timeMs, result.opsPerSecond, result.relativeFactor]
+    }));
 
-    // Add chart script based on chart type
-    if (opts.chartType === 'line') {
-      scripts += createLineChartScript(
-        chartId,
-        `${comparison.operation} Operation (Size: ${comparison.inputSize})`,
-        labels,
-        timeData,
-        opsData,
-        opts.chartOptions
-      );
-    } else if (opts.chartType === 'pie') {
-      // For pie charts, we'll show the operations per second as a pie chart
-      scripts += createPieChartScript(
-        chartId,
-        `${comparison.operation} Operation (Size: ${comparison.inputSize})`,
-        labels,
-        opsData,
-        opts.chartOptions
-      );
-    } else if (opts.chartType === 'radar') {
-      // For radar charts, we need to restructure the data
-      const metrics = ['Time (ms)', 'Ops/Sec', 'Relative Factor'];
-      const datasets = comparison.results.map(result => ({
-        label: result.implementation,
-        data: [result.timeMs, result.opsPerSecond, result.relativeFactor]
-      }));
-
-      scripts += createRadarChartScript(
-        chartId,
-        `${comparison.operation} Operation (Size: ${comparison.inputSize})`,
-        metrics,
-        datasets,
-        opts.chartOptions
-      );
-    } else {
-      // Default to bar chart
-      scripts += createBarChartScript(
-        chartId,
-        `${comparison.operation} Operation (Size: ${comparison.inputSize})`,
-        labels,
-        timeData,
-        opsData,
-        opts.chartOptions
-      );
-    }
-
-    content += '</div>\n';
+    scripts += createRadarChartScript(
+      chartId,
+      `${comparison.operation} Operation (Size: ${comparison.inputSize})`,
+      metrics,
+      datasets,
+      opts.chartOptions
+    );
+  } else {
+    // Default to bar chart
+    scripts += createBarChartScript(
+      chartId,
+      `${comparison.operation} Operation (Size: ${comparison.inputSize})`,
+      labels,
+      timeData,
+      opsData,
+      opts.chartOptions
+    );
   }
+
+  // Create raw data content
+  const rawData = JSON.stringify(comparison, null, 2);
+
+  // Add toggleable views section
+  content += createToggleableViews(
+    'results',
+    'Results',
+    tableContent,
+    chartContent,
+    rawData
+  );
 
   // Metadata section
   if (includeMetadata) {

@@ -9,6 +9,7 @@
 
 import { BenchmarkOptions, BenchmarkComparison } from '../types';
 import { benchmark } from '../utils';
+import { ProgressIndicator, ProgressIndicatorType } from '../visualization/progress';
 import {
   getAdapter,
   findCommonAdapterOperations,
@@ -25,6 +26,10 @@ export interface AdapterComparisonOptions extends BenchmarkOptions {
   operations?: string[];
   /** Minimum compatibility score (0-1) */
   minCompatibilityScore?: number;
+  /** Whether to show progress indicators */
+  showProgress?: boolean;
+  /** Type of progress indicator to use */
+  progressIndicatorType?: ProgressIndicatorType;
 }
 
 /**
@@ -42,6 +47,8 @@ export function compareImplementationsWithAdapters(
     size,
     operations: specifiedOps,
     minCompatibilityScore = 0.5,
+    showProgress = true,
+    progressIndicatorType = ProgressIndicatorType.BAR,
     ...benchmarkOptions
   } = options;
 
@@ -86,8 +93,21 @@ export function compareImplementationsWithAdapters(
     }
   });
 
+  // Create progress indicator for operations
+  const operationsProgress = showProgress ?
+    new ProgressIndicator(operations.length, 'Running benchmarks', {
+      type: progressIndicatorType,
+      showPercentage: true,
+      showElapsedTime: true,
+      showEta: true
+    }) : null;
+
+  if (operationsProgress) {
+    operationsProgress.start();
+  }
+
   // Run benchmarks for each operation
-  return operations.map(operation => {
+  const results = operations.map((operation, opIndex) => {
     const results = adapters.map((adapter, index) => {
       const instance = instances[index];
       const op = adapter.operations[operation];
@@ -155,6 +175,11 @@ export function compareImplementationsWithAdapters(
       relativeFactor: result.timeMs / fastestTime
     }));
 
+    // Update progress indicator
+    if (operationsProgress) {
+      operationsProgress.update(opIndex + 1, `Completed ${operation} operation`);
+    }
+
     return {
       name: `${operation} Operation Comparison`,
       description: `Comparing ${operation} across different implementations`,
@@ -163,4 +188,11 @@ export function compareImplementationsWithAdapters(
       results: comparisonResults
     };
   });
+
+  // Complete progress indicator
+  if (operationsProgress) {
+    operationsProgress.complete('All benchmarks completed');
+  }
+
+  return results;
 }

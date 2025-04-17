@@ -175,13 +175,13 @@ The current benchmark system has:
 - [x] **HTML Format**
   - [x] Interactive charts
   - [x] Tabular data
-  - [ ] Toggle between different views
+  - [x] Toggle between different views
   - [x] Exportable reports
 
 - [x] **Console Format**
   - [x] Improved table formatting
-  - [ ] Color-coded output
-  - [ ] Progress indicators during benchmark runs
+  - [x] Color-coded output
+  - [x] Progress indicators during benchmark runs
 
 ## Implementation Timeline
 
