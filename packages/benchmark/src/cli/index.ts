@@ -1,9 +1,9 @@
 /**
  * CLI for Reduct Benchmarking
- * 
+ *
  * Provides a command-line interface for running benchmarks, comparing
  * implementations, and exporting results.
- * 
+ *
  * @packageDocumentation
  */
 
@@ -12,20 +12,21 @@ import { runCommand } from './commands/run';
 import { compareCommand } from './commands/compare';
 import { scalabilityCommand } from './commands/scalability';
 import { exportCommand } from './commands/export';
+import { registerTemplateExportCommand } from './commands/template-export';
 
 /**
  * Creates the CLI program with all commands and options
- * 
+ *
  * @returns Configured commander program
  */
 export function createCLI(): Command {
   const program = new Command();
-  
+
   program
     .name('reduct-benchmark')
     .description('Reduct benchmarking CLI')
     .version('0.1.0');
-  
+
   // Run command
   program
     .command('run')
@@ -37,7 +38,7 @@ export function createCLI(): Command {
     .option('-o, --output <format>', 'Output format (console, csv, md, html)', 'console')
     .option('-f, --output-file <file>', 'Output file path')
     .action(runCommand);
-  
+
   // Compare command
   program
     .command('compare')
@@ -50,7 +51,7 @@ export function createCLI(): Command {
     .option('--output <format>', 'Output format (console, csv, md, html)', 'console')
     .option('-f, --output-file <file>', 'Output file path')
     .action(compareCommand);
-  
+
   // Scalability command
   program
     .command('scalability')
@@ -63,7 +64,7 @@ export function createCLI(): Command {
     .option('--output <format>', 'Output format (console, csv, md, html)', 'console')
     .option('-f, --output-file <file>', 'Output file path')
     .action(scalabilityCommand);
-  
+
   // Export command
   program
     .command('export')
@@ -71,15 +72,18 @@ export function createCLI(): Command {
     .argument('<format>', 'Output format (csv, md, html, console)')
     .option('-i, --input <file>', 'Input JSON file with benchmark results')
     .option('-o, --output <file>', 'Output file')
-    .option('-c, --chart-type <type>', 'Chart type for HTML output (bar, line, pie)', 'bar')
+    .option('-c, --chart-type <type>', 'Chart type for HTML output (bar, line, pie, radar)', 'bar')
     .action(exportCommand);
-  
+
+  // Register template export command
+  registerTemplateExportCommand(program);
+
   return program;
 }
 
 /**
  * CLI entry point
- * 
+ *
  * @param args - Command line arguments
  */
 export function cli(args: string[] = process.argv.slice(2)): void {

@@ -11,6 +11,7 @@ import { compareListWithNativeArray } from '../../data-structures/list';
 import { compareMapWithNativeMap } from '../../data-structures/map';
 import { compareStackWithNativeArray } from '../../data-structures/stack';
 import * as fs from 'fs';
+import { resolveReportPath } from '../../utils/paths';
 
 /**
  * Command handler for the 'compare' command
@@ -73,8 +74,9 @@ export function compareCommand(types: string[], options: any): void {
  */
 function outputResult(result: string, options: any): void {
   if (options.outputFile) {
-    fs.writeFileSync(options.outputFile, result);
-    console.log(`Results saved to ${options.outputFile}`);
+    const outputPath = resolveReportPath(options.outputFile);
+    fs.writeFileSync(outputPath, result);
+    console.log(`Results saved to ${outputPath}`);
   } else {
     console.log(result);
   }

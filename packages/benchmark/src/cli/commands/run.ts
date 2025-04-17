@@ -15,6 +15,7 @@ import { runSearchingBenchmarks } from '../../algorithms/searching';
 import { formatBenchmarkSuite } from '../../visualization/formatters';
 import { exportSuiteToCSV } from '../../visualization/exporters';
 import * as fs from 'fs';
+import { resolveReportPath } from '../../utils/paths';
 
 /**
  * Command handler for the 'run' command
@@ -63,8 +64,9 @@ export function runCommand(type: string, options: any): void {
     case 'csv':
       const csv = exportSuiteToCSV(result);
       if (options.outputFile) {
-        fs.writeFileSync(options.outputFile, csv);
-        console.log(`Results saved to ${options.outputFile}`);
+        const outputPath = resolveReportPath(options.outputFile);
+        fs.writeFileSync(outputPath, csv);
+        console.log(`Results saved to ${outputPath}`);
       } else {
         console.log(csv);
       }

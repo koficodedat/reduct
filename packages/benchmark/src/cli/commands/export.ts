@@ -8,6 +8,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { resolveReportPath } from '../../utils/paths';
 import { BenchmarkResult, BenchmarkSuite, BenchmarkComparison, ScalabilityResult } from '../../types';
 import {
   exportResultsToCSV,
@@ -83,8 +84,9 @@ export function exportCommand(format: string, options: any): void {
     }
 
     if (options.output) {
-      fs.writeFileSync(options.output, result);
-      console.log(`Results exported to ${options.output}`);
+      const outputPath = resolveReportPath(options.output);
+      fs.writeFileSync(outputPath, result);
+      console.log(`Results exported to ${outputPath}`);
     } else {
       console.log(result);
     }

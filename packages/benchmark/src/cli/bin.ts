@@ -14,6 +14,7 @@ import { compareCommand } from './commands/compare';
 import { adapterCompareCommand } from './commands/adapter-compare';
 import { scalabilityCommand } from './commands/scalability';
 import { exportCommand } from './commands/export';
+import { registerTemplateExportCommand } from './commands/template-export';
 
 const program = new Command();
 
@@ -92,5 +93,8 @@ program
   .option('--legend-position <position>', 'Legend position (top, bottom, left, right)', 'top')
   .option('--no-animation', 'Disable chart animations')
   .action(exportCommand);
+
+// Register template export command
+registerTemplateExportCommand(program);
 
 program.parse();

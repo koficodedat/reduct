@@ -11,6 +11,7 @@ import { getAdapter } from '../../adapters';
 import { formatBenchmarkComparison } from '../../visualization/formatters';
 import { exportComparisonToCSV } from '../../visualization/exporters';
 import * as fs from 'fs';
+import { resolveReportPath } from '../../utils/paths';
 
 /**
  * Command handler for the 'adapter-compare' command
@@ -72,8 +73,9 @@ export function adapterCompareCommand(types: string[], options: any): void {
         if (comparisons.length > 0) {
           const csv = exportComparisonToCSV(comparisons[0]);
           if (options.outputFile) {
-            fs.writeFileSync(options.outputFile, csv);
-            console.log(`Results saved to ${options.outputFile}`);
+            const outputPath = resolveReportPath(options.outputFile);
+            fs.writeFileSync(outputPath, csv);
+            console.log(`Results saved to ${outputPath}`);
           } else {
             console.log(csv);
           }

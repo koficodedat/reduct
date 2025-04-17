@@ -16,6 +16,7 @@ import { formatScalabilityResult } from '../../visualization/formatters';
 import { exportScalabilityToCSV } from '../../visualization/exporters';
 import { quickSort, binarySearch } from '@reduct/algorithms';
 import * as fs from 'fs';
+import { resolveReportPath } from '../../utils/paths';
 
 /**
  * Command handler for the 'scalability' command
@@ -108,8 +109,9 @@ export function scalabilityCommand(type: string, operation: string, options: any
     case 'csv':
       const csv = exportScalabilityToCSV(result);
       if (options.outputFile) {
-        fs.writeFileSync(options.outputFile, csv);
-        console.log(`Results saved to ${options.outputFile}`);
+        const outputPath = resolveReportPath(options.outputFile);
+        fs.writeFileSync(outputPath, csv);
+        console.log(`Results saved to ${outputPath}`);
       } else {
         console.log(csv);
       }
