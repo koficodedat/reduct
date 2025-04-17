@@ -85,10 +85,15 @@ The current benchmark system has:
   - [x] Add pie charts for operation distribution
   - [x] Support customizable chart options
 
-- [ ] **3.3. Create Output Templates**
-  - [ ] Design templates for different output formats
-  - [ ] Implement template rendering system
-  - [ ] Support customizable templates
+- [x] **3.3. Create Output Templates**
+  - [x] Design templates for different output formats
+  - [x] Implement template rendering system
+  - [x] Support customizable templates
+
+- [x] **3.4. Implement Default Report Location**
+  - [x] Create a dedicated reports directory
+  - [x] Update commands to use this directory by default
+  - [x] Add option to override the default location
 
 ### 4. Integration with Existing Code
 
