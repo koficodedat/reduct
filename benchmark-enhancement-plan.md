@@ -101,10 +101,10 @@ The current benchmark system has:
   - [ ] Maintain existing API functions
   - [ ] Create adapters for legacy benchmark functions
 
-- [ ] **4.2. Refactor Existing Comparison Functions**
-  - [ ] Update `compareListWithNativeArray()` to use new system
-  - [ ] Update `compareMapWithNativeMap()` to use new system
-  - [ ] Update `compareStackWithNativeArray()` to use new system
+- [x] **4.2. Refactor Existing Comparison Functions**
+  - [x] Update `compareListWithNativeArray()` to use new system
+  - [x] Update `compareMapWithNativeMap()` to use new system
+  - [x] Update `compareStackWithNativeArray()` to use new system
 
 - [ ] **4.3. Update Documentation**
   - [ ] Create new documentation for CLI usage

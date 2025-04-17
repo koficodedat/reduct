@@ -6,7 +6,8 @@
 
 import { List } from '@reduct/data-structures';
 import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../../types';
-import { benchmark, formatBenchmarkResults, generateRandomArray } from '../../utils';
+import { benchmark, generateRandomArray } from '../../utils';
+import { compareListWithNativeArrayAdapter } from './adapter-comparison';
 
 /**
  * Runs benchmarks for the immutable List data structure
@@ -132,89 +133,8 @@ export function compareListWithNativeArray(
   size: number = 10000,
   options: BenchmarkOptions = {},
 ): string {
-  const array = generateRandomArray(size);
-  const list = List.from(array);
-
-  // Random indices for lookup tests
-  const randomIndices = Array.from({ length: 100 }, () => Math.floor(Math.random() * size));
-
-  const results: Record<string, BenchmarkResult> = {};
-
-  // Construction
-  results['Array.from'] = benchmark(() => Array.from(array), 'Array', 'construction', size, options);
-  results['List.from'] = benchmark(() => List.from(array), 'List', 'construction', size, options);
-
-  // Map operation
-  results['Array.map'] = benchmark(() => array.map(x => x * 2), 'Array', 'map', size, {
-    ...options,
-    iterations: Math.min(options.iterations || 100, 10),
-  });
-
-  results['List.map'] = benchmark(() => list.map(x => x * 2), 'List', 'map', size, {
-    ...options,
-    iterations: Math.min(options.iterations || 100, 10),
-  });
-
-  // Filter operation
-  results['Array.filter'] = benchmark(() => array.filter(x => x % 2 === 0), 'Array', 'filter', size, {
-    ...options,
-    iterations: Math.min(options.iterations || 100, 10),
-  });
-
-  results['List.filter'] = benchmark(() => list.filter(x => x % 2 === 0), 'List', 'filter', size, {
-    ...options,
-    iterations: Math.min(options.iterations || 100, 10),
-  });
-
-  // Reduce operation
-  results['Array.reduce'] = benchmark(
-    () => array.reduce((sum, x) => sum + x, 0),
-    'Array',
-    'reduce',
-    size,
-    {
-      ...options,
-      iterations: Math.min(options.iterations || 100, 10),
-    },
-  );
-
-  results['List.reduce'] = benchmark(
-    () => list.reduce((sum, x) => sum + x, 0),
-    'List',
-    'reduce',
-    size,
-    {
-      ...options,
-      iterations: Math.min(options.iterations || 100, 10),
-    },
-  );
-
-  // Access operation
-  results['Array.access'] = benchmark(
-    () => {
-      for (const index of randomIndices) {
-        array[index];
-      }
-    },
-    'Array',
-    'access(100x)',
-    size,
-    { ...options, iterations: Math.min(options.iterations || 100, 10) },
-  );
-
-  results['List.get'] = benchmark(
-    () => {
-      for (const index of randomIndices) {
-        list.get(index);
-      }
-    },
-    'List',
-    'get(100x)',
-    size,
-    { ...options, iterations: Math.min(options.iterations || 100, 10) },
-  );
-
-  return formatBenchmarkResults(results);
+  // Use the adapter-based implementation
+  return compareListWithNativeArrayAdapter(size, options);
 }
 
 /**

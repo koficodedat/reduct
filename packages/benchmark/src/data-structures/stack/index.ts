@@ -6,7 +6,8 @@
 
 import { Stack } from '@reduct/data-structures';
 import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../../types';
-import { benchmark, generateRandomArray, formatBenchmarkResults } from '../../utils';
+import { benchmark, generateRandomArray } from '../../utils';
+import { compareStackWithNativeArrayAdapter } from './adapter-comparison';
 
 /**
  * Runs benchmarks for the persistent Stack data structure
@@ -228,7 +229,8 @@ export function compareStackWithNativeArray(
     iterations: Math.min(options.iterations || 100, 10),
   });
 
-  return formatBenchmarkResults(results);
+  // Use the adapter-based implementation
+  return compareStackWithNativeArrayAdapter(size, options);
 }
 
 /**
