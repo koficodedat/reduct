@@ -11,6 +11,7 @@ export * from './visualization';
 export * from './types';
 export * from './utils';
 export * from './complexity';
+export * from './cli';
 
 // Explicit re-exports for examples compatibility
 export { runListBenchmarks, compareListWithNativeArray, measureListScalability } from './data-structures/list';
