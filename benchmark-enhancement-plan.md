@@ -61,10 +61,15 @@ The current benchmark system has:
   - [x] Implement benchmarking logic for compatible operations
   - [x] Support comparing data structures of different types
 
-- [ ] **2.3. Create Operation Adapters**
-  - [ ] Define standard operation interfaces (get, set, add, remove, etc.)
-  - [ ] Create adapters for each data structure to map to standard operations
-  - [ ] Implement operation-specific benchmark functions
+- [x] **2.3. Create Operation Adapters**
+  - [x] Define standard operation interfaces (get, set, add, remove, etc.)
+  - [x] Create adapters for each data structure to map to standard operations
+  - [x] Implement operation-specific benchmark functions
+
+- [x] **2.4. Implement CLI Commands**
+  - [x] Add adapter-based comparison command
+  - [x] Support comparing different types of data structures
+  - [x] Support comparing different algorithms
 
 ### 3. Enhanced Visualization
 
@@ -176,9 +181,9 @@ The current benchmark system has:
 ## Implementation Timeline
 
 1. **Phase 1: Core Infrastructure**
-   - [ ] CLI framework
-   - [ ] Registry system
-   - [ ] Basic comparison engine
+   - [x] CLI framework
+   - [x] Registry system
+   - [x] Basic comparison engine
 
 2. **Phase 2: Visualization Enhancements**
    - [ ] Exporters for different formats

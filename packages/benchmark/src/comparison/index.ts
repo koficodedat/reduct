@@ -16,6 +16,9 @@ import {
 } from '../registry';
 import { generateRandomArray } from '../utils';
 
+// Export adapter-based comparison
+export * from './adapter-based';
+
 /**
  * Options for comparing implementations
  */

@@ -11,6 +11,7 @@
 import { Command } from 'commander';
 import { runCommand } from './commands/run';
 import { compareCommand } from './commands/compare';
+import { adapterCompareCommand } from './commands/adapter-compare';
 import { scalabilityCommand } from './commands/scalability';
 import { exportCommand } from './commands/export';
 
@@ -38,13 +39,27 @@ program
   .command('compare')
   .description('Compare multiple data structures or algorithms')
   .argument('<types...>', 'Types to compare (list, array, map, etc.)')
-  .option('-o, --operations <operations...>', 'Operations to compare')
+  .option('-o, --operations <operations>', 'Operations to compare (comma-separated)')
   .option('-s, --size <number>', 'Size of the data structures', '10000')
   .option('-i, --iterations <number>', 'Number of iterations', '100')
   .option('-m, --measure-memory', 'Measure memory usage')
   .option('--output <format>', 'Output format (console, csv, md, html)', 'console')
   .option('-f, --output-file <file>', 'Output file path')
   .action(compareCommand);
+
+// Adapter Compare command
+program
+  .command('adapter-compare')
+  .description('Compare multiple data structures or algorithms using the adapter system')
+  .argument('<types...>', 'Types to compare (list, array, map, quick-sort, etc.)')
+  .option('-o, --operations <operations>', 'Operations to compare (comma-separated)')
+  .option('-s, --size <number>', 'Size of the data structures', '10000')
+  .option('-i, --iterations <number>', 'Number of iterations', '100')
+  .option('-m, --measure-memory', 'Measure memory usage')
+  .option('--output <format>', 'Output format (console, csv, md, html)', 'console')
+  .option('-f, --output-file <file>', 'Output file path')
+  .option('--min-score <number>', 'Minimum compatibility score (0-1)', '0.5')
+  .action(adapterCompareCommand);
 
 // Scalability command
 program
