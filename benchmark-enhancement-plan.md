@@ -9,7 +9,7 @@ The current benchmark system has:
 1. **Core benchmarking utilities**:
    - `benchmark()` function for measuring performance
    - `compareBenchmarks()` for comparing multiple implementations
-   - Various data structure-specific benchmark functions (e.g., `runListBenchmarks()`, `compareListWithNativeArray()`)
+   - Various data structure-specific benchmark functions (e.g., `runListBenchmarks()`)
 
 2. **Visualization tools**:
    - Formatters for console output (`formatBenchmarkSuite()`, `formatBenchmarkComparison()`, etc.)
@@ -20,7 +20,7 @@ The current benchmark system has:
    - No dedicated CLI interface
 
 4. **Comparison capabilities**:
-   - Current comparisons are rigid (e.g., `compareListWithNativeArray()`, `compareMapWithNativeMap()`)
+   - Current comparisons were rigid (now replaced with the adapter-based system)
    - No flexible way to compare different data structures with common operations
 
 ## Enhancement Goals
@@ -102,9 +102,7 @@ The current benchmark system has:
   - [ ] Create adapters for legacy benchmark functions
 
 - [x] **4.2. Refactor Existing Comparison Functions**
-  - [x] Update `compareListWithNativeArray()` to use new system
-  - [x] Update `compareMapWithNativeMap()` to use new system
-  - [x] Update `compareStackWithNativeArray()` to use new system
+  - [x] Replace specific comparison functions with the adapter-based system
 
 - [x] **4.3. Update Documentation**
   - [x] Create new documentation for CLI usage

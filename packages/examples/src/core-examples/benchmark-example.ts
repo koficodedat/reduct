@@ -9,7 +9,6 @@
 
 import {
   runListBenchmarks,
-  compareListWithNativeArray,
   formatBenchmarkSuite,
   benchmark,
   compareBenchmarks,
@@ -21,9 +20,10 @@ console.log('Example 1: List Benchmarks');
 const listBenchmarks = runListBenchmarks(1000);
 console.log(formatBenchmarkSuite(listBenchmarks));
 
-// Example 2: Compare List with native JavaScript arrays
+// Example 2: Compare List with native JavaScript arrays using CLI
 console.log('Example 2: Comparing List with Native Array');
-console.log(compareListWithNativeArray(1000));
+console.log('To compare List with native Array, use the CLI:');
+console.log('npx reduct-benchmark adapter-compare reduct-list native-array -s 1000');
 
 // Example 3: Run detailed benchmark for a specific data structure
 console.log('Example 3: Detailed List Benchmarks');

@@ -47,11 +47,15 @@ The CSV exporter converts benchmark results to comma-separated values format, su
 ### Basic Usage
 
 ```typescript
-import { compareListWithNativeArray, exportToCSV } from '@reduct/benchmark';
+import { compareImplementationsWithAdapters, exportToCSV } from '@reduct/benchmark';
 import * as fs from 'fs';
 
 // Run a comparison benchmark
-const comparison = compareListWithNativeArray(10000);
+const comparisons = compareImplementationsWithAdapters(
+  ['reduct-list', 'native-array'],
+  { size: 10000 }
+);
+const comparison = comparisons[0];
 
 // Export to CSV
 const csv = exportToCSV(comparison);
@@ -110,11 +114,15 @@ The Markdown exporter converts benchmark results to Markdown format, suitable fo
 ### Basic Usage
 
 ```typescript
-import { compareListWithNativeArray, exportToMarkdown } from '@reduct/benchmark';
+import { compareImplementationsWithAdapters, exportToMarkdown } from '@reduct/benchmark';
 import * as fs from 'fs';
 
 // Run a comparison benchmark
-const comparison = compareListWithNativeArray(10000);
+const comparisons = compareImplementationsWithAdapters(
+  ['reduct-list', 'native-array'],
+  { size: 10000 }
+);
+const comparison = comparisons[0];
 
 // Export to Markdown
 const markdown = exportToMarkdown(comparison);
@@ -188,11 +196,15 @@ The HTML exporter converts benchmark results to HTML format with interactive cha
 ### Basic Usage
 
 ```typescript
-import { compareListWithNativeArray, exportToHTML } from '@reduct/benchmark';
+import { compareImplementationsWithAdapters, exportToHTML } from '@reduct/benchmark';
 import * as fs from 'fs';
 
 // Run a comparison benchmark
-const comparison = compareListWithNativeArray(10000);
+const comparisons = compareImplementationsWithAdapters(
+  ['reduct-list', 'native-array'],
+  { size: 10000 }
+);
+const comparison = comparisons[0];
 
 // Export to HTML
 const html = exportToHTML(comparison);
@@ -268,10 +280,14 @@ The console formatter converts benchmark results to a string format suitable for
 ### Basic Usage
 
 ```typescript
-import { compareListWithNativeArray, formatBenchmarkComparison } from '@reduct/benchmark';
+import { compareImplementationsWithAdapters, formatBenchmarkComparison } from '@reduct/benchmark';
 
 // Run a comparison benchmark
-const comparison = compareListWithNativeArray(10000);
+const comparisons = compareImplementationsWithAdapters(
+  ['reduct-list', 'native-array'],
+  { size: 10000 }
+);
+const comparison = comparisons[0];
 
 // Format for console
 const formatted = formatBenchmarkComparison(comparison);

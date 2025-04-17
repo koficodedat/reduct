@@ -92,15 +92,18 @@ The benchmark package can also be used programmatically:
 
 ```typescript
 import {
-  compareListWithNativeArray,
+  compareImplementationsWithAdapters,
   measureListScalability,
   exportToHTML,
   exportToCSV
 } from '@reduct/benchmark';
 
 // Run a comparison benchmark
-const comparisonResults = compareListWithNativeArray(10000);
-console.log(comparisonResults);
+const comparisonResults = compareImplementationsWithAdapters(
+  ['reduct-list', 'native-array'],
+  { size: 10000 }
+);
+console.log(comparisonResults[0]);
 
 // Measure scalability
 const scalabilityResults = measureListScalability('get', {

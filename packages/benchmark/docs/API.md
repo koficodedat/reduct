@@ -223,34 +223,7 @@ const suite = runListBenchmarks(10000);
 console.log(formatBenchmarkSuite(suite));
 ```
 
-#### `compareListWithNativeArray`
 
-Compare the List implementation with native JavaScript arrays.
-
-```typescript
-function compareListWithNativeArray(
-  size?: number,
-  options?: BenchmarkOptions
-): string;
-```
-
-#### Parameters
-
-- `size`: Size of the data structures (default: 10000)
-- `options`: Benchmark options
-
-#### Returns
-
-- `string`: Formatted comparison results
-
-#### Example
-
-```typescript
-import { compareListWithNativeArray } from '@reduct/benchmark';
-
-const comparison = compareListWithNativeArray(10000);
-console.log(comparison);
-```
 
 #### `measureListScalability`
 
@@ -316,34 +289,7 @@ const suite = runMapBenchmarks(10000);
 console.log(formatBenchmarkSuite(suite));
 ```
 
-#### `compareMapWithNativeMap`
 
-Compare the Map implementation with native JavaScript Map and plain objects.
-
-```typescript
-function compareMapWithNativeMap(
-  size?: number,
-  options?: BenchmarkOptions
-): string;
-```
-
-#### Parameters
-
-- `size`: Size of the data structures (default: 10000)
-- `options`: Benchmark options
-
-#### Returns
-
-- `string`: Formatted comparison results
-
-#### Example
-
-```typescript
-import { compareMapWithNativeMap } from '@reduct/benchmark';
-
-const comparison = compareMapWithNativeMap(10000);
-console.log(comparison);
-```
 
 #### `measureMapScalability`
 
@@ -409,34 +355,7 @@ const suite = runStackBenchmarks(10000);
 console.log(formatBenchmarkSuite(suite));
 ```
 
-#### `compareStackWithNativeArray`
 
-Compare the Stack implementation with native JavaScript arrays.
-
-```typescript
-function compareStackWithNativeArray(
-  size?: number,
-  options?: BenchmarkOptions
-): string;
-```
-
-#### Parameters
-
-- `size`: Size of the data structures (default: 10000)
-- `options`: Benchmark options
-
-#### Returns
-
-- `string`: Formatted comparison results
-
-#### Example
-
-```typescript
-import { compareStackWithNativeArray } from '@reduct/benchmark';
-
-const comparison = compareStackWithNativeArray(10000);
-console.log(comparison);
-```
 
 #### `measureStackScalability`
 
@@ -635,6 +554,48 @@ console.log(formatScalabilityResult(scalability));
 ```
 
 ## Operation Adapters
+
+### Comparison
+
+#### `compareImplementationsWithAdapters`
+
+Compare multiple implementations using adapters. This function replaces the specific comparison functions like `compareListWithNativeArray`, `compareMapWithNativeMap`, and `compareStackWithNativeArray`.
+
+```typescript
+function compareImplementationsWithAdapters(
+  ids: string[],
+  options: AdapterComparisonOptions
+): BenchmarkComparison[];
+```
+
+#### Parameters
+
+- `ids`: Array of implementation IDs to compare
+- `options`: Comparison options
+  - `size`: Size of the data structures to test
+  - `operations`: Operations to benchmark (if not specified, all common operations will be tested)
+  - `minCompatibilityScore`: Minimum compatibility score (0-1) for operations to be included
+  - `showProgress`: Whether to show progress indicators
+  - `progressIndicatorType`: Type of progress indicator to use
+
+#### Returns
+
+- `BenchmarkComparison[]`: Array of benchmark comparisons, one for each operation
+
+#### Example
+
+```typescript
+import { compareImplementationsWithAdapters, formatBenchmarkComparison } from '@reduct/benchmark';
+
+const comparisons = compareImplementationsWithAdapters(
+  ['reduct-list', 'native-array'],
+  { size: 10000, operations: ['get', 'map', 'filter'] }
+);
+
+comparisons.forEach(comparison => {
+  console.log(formatBenchmarkComparison(comparison));
+});
+```
 
 ### Registry
 
@@ -963,7 +924,7 @@ registerTemplate({
 <body>
   <h1>{{ data.title }}</h1>
   <p>Generated: {{ helpers.formatDate(new Date()) }}</p>
-  
+
   <h2>Results</h2>
   <table>
     <thead>

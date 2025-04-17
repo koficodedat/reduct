@@ -58,36 +58,12 @@ console.log(formatBenchmarkSuite(suite));
 
 ## Comparing Implementations
 
-### Comparing List with Native Array
+### Using the Adapter System
 
 ```typescript
-import { compareListWithNativeArray } from '@reduct/benchmark';
-
-// Compare List with native Array
-const comparison = compareListWithNativeArray(10000);
-
-// Display the results
-console.log(comparison);
-```
-
-### Comparing Map Implementations
-
-```typescript
-import { compareMapWithNativeMap } from '@reduct/benchmark';
-
-// Compare Map with native Map and plain objects
-const comparison = compareMapWithNativeMap(10000);
-
-// Display the results
-console.log(comparison);
-```
-
-### Using the Adapter System for Comparisons
-
-```typescript
-import { 
-  compareImplementationsWithAdapters, 
-  formatBenchmarkComparison 
+import {
+  compareImplementationsWithAdapters,
+  formatBenchmarkComparison
 } from '@reduct/benchmark';
 
 // Compare multiple implementations using the adapter system
@@ -110,9 +86,9 @@ for (const comparison of comparisons) {
 ### Measuring List Scalability
 
 ```typescript
-import { 
-  measureListScalability, 
-  formatScalabilityResult 
+import {
+  measureListScalability,
+  formatScalabilityResult
 } from '@reduct/benchmark';
 
 // Measure how List.get scales with input size
@@ -129,9 +105,9 @@ console.log(formatScalabilityResult(scalability));
 ### Measuring Sorting Algorithm Scalability
 
 ```typescript
-import { 
-  measureSortingScalability, 
-  formatScalabilityResult 
+import {
+  measureSortingScalability,
+  formatScalabilityResult
 } from '@reduct/benchmark';
 
 // Measure how quicksort scales with input size
@@ -241,8 +217,8 @@ console.log(formatBenchmarkResults(results));
 ### Registering Custom Implementations and Operations
 
 ```typescript
-import { 
-  registerImplementation, 
+import {
+  registerImplementation,
   registerOperation,
   compareImplementationsWithAdapters,
   formatBenchmarkComparison
@@ -292,11 +268,15 @@ for (const comparison of comparisons) {
 ### Exporting to CSV
 
 ```typescript
-import { compareListWithNativeArray, exportToCSV } from '@reduct/benchmark';
+import { compareImplementationsWithAdapters, exportToCSV } from '@reduct/benchmark';
 import * as fs from 'fs';
 
 // Run a comparison benchmark
-const comparison = compareListWithNativeArray(10000);
+const comparisons = compareImplementationsWithAdapters(
+  ['reduct-list', 'native-array'],
+  { size: 10000 }
+);
+const comparison = comparisons[0];
 
 // Export to CSV
 const csv = exportToCSV(comparison, {
@@ -312,11 +292,15 @@ fs.writeFileSync('list-comparison.csv', csv);
 ### Exporting to Markdown
 
 ```typescript
-import { compareListWithNativeArray, exportToMarkdown } from '@reduct/benchmark';
+import { compareImplementationsWithAdapters, exportToMarkdown } from '@reduct/benchmark';
 import * as fs from 'fs';
 
 // Run a comparison benchmark
-const comparison = compareListWithNativeArray(10000);
+const comparisons = compareImplementationsWithAdapters(
+  ['reduct-list', 'native-array'],
+  { size: 10000 }
+);
+const comparison = comparisons[0];
 
 // Export to Markdown
 const markdown = exportToMarkdown(comparison, {
@@ -333,11 +317,15 @@ fs.writeFileSync('list-comparison.md', markdown);
 ### Exporting to HTML
 
 ```typescript
-import { compareListWithNativeArray, exportToHTML } from '@reduct/benchmark';
+import { compareImplementationsWithAdapters, exportToHTML } from '@reduct/benchmark';
 import * as fs from 'fs';
 
 // Run a comparison benchmark
-const comparison = compareListWithNativeArray(10000);
+const comparisons = compareImplementationsWithAdapters(
+  ['reduct-list', 'native-array'],
+  { size: 10000 }
+);
+const comparison = comparisons[0];
 
 // Export to HTML
 const html = exportToHTML(comparison, {
@@ -358,14 +346,18 @@ fs.writeFileSync('list-comparison.html', html);
 ### Rendering a Template
 
 ```typescript
-import { 
-  compareListWithNativeArray, 
-  renderTemplate 
+import {
+  compareImplementationsWithAdapters,
+  renderTemplate
 } from '@reduct/benchmark';
 import * as fs from 'fs';
 
 // Run a comparison benchmark
-const comparison = compareListWithNativeArray(10000);
+const comparisons = compareImplementationsWithAdapters(
+  ['reduct-list', 'native-array'],
+  { size: 10000 }
+);
+const comparison = comparisons[0];
 
 // Render a template
 const html = renderTemplate('html-comparison', {
@@ -387,10 +379,10 @@ fs.writeFileSync('list-comparison.html', html);
 ### Creating a Custom Template
 
 ```typescript
-import { 
-  registerTemplate, 
+import {
+  registerTemplate,
   renderTemplate,
-  compareListWithNativeArray 
+  compareImplementationsWithAdapters
 } from '@reduct/benchmark';
 import * as fs from 'fs';
 
@@ -415,7 +407,7 @@ registerTemplate({
 <body>
   <h1>{{ data.title || 'Benchmark Results' }}</h1>
   <p>Generated: {{ helpers.formatDate(new Date()) }}</p>
-  
+
   <h2>{{ data.operation }} Operation (Input Size: {{ helpers.formatNumber(data.inputSize) }})</h2>
   <table>
     <thead>
@@ -442,7 +434,11 @@ registerTemplate({
 });
 
 // Run a comparison benchmark
-const comparison = compareListWithNativeArray(10000);
+const comparisons = compareImplementationsWithAdapters(
+  ['reduct-list', 'native-array'],
+  { size: 10000 }
+);
+const comparison = comparisons[0];
 
 // Render the custom template
 const html = renderTemplate('my-html-template', {
@@ -505,7 +501,7 @@ const results = {
     'find(random)',
     size
   ),
-  
+
   // List benchmarks
   'List.sorted.find': benchmark(
     () => sortedList.find(x => x === size / 2),
@@ -560,7 +556,7 @@ const asyncOperations = {
 // Run benchmarks
 const runAsyncBenchmarks = async () => {
   const results = {};
-  
+
   for (const [name, fn] of Object.entries(asyncOperations)) {
     results[name] = benchmark(
       async () => {
@@ -572,7 +568,7 @@ const runAsyncBenchmarks = async () => {
       { iterations: 1000 }
     );
   }
-  
+
   // Format and display results
   console.log(formatBenchmarkResults(results));
 };

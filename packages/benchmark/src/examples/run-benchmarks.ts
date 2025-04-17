@@ -7,9 +7,10 @@
  * @packageDocumentation
  */
 
-import { runListBenchmarks, compareListWithNativeArray, measureListScalability } from '../data-structures/list';
-import { runMapBenchmarks, compareMapWithNativeMap, measureMapScalability } from '../data-structures/map';
-import { runStackBenchmarks, compareStackWithNativeArray, measureStackScalability } from '../data-structures/stack';
+import { runListBenchmarks, measureListScalability } from '../data-structures/list';
+import { runMapBenchmarks, measureMapScalability } from '../data-structures/map';
+import { runStackBenchmarks, measureStackScalability } from '../data-structures/stack';
+import { compareImplementationsWithAdapters } from '../comparison/adapter-based';
 import { runSortingBenchmarks, runSortingBenchmarkSuite, measureSortingScalability } from '../algorithms/sorting';
 import { runSearchingBenchmarks, measureSearchingScalability } from '../algorithms/searching';
 
@@ -29,7 +30,11 @@ console.log(formatBenchmarkSuite(listBenchmarks));
 
 // Compare List with native array
 console.log('Comparing List with native array...');
-console.log(compareListWithNativeArray(1000));
+const listComparisons = compareImplementationsWithAdapters(
+  ['reduct-list', 'native-array'],
+  { size: 1000 }
+);
+console.log(listComparisons[0]);
 
 // Run Map benchmarks
 console.log('Running Map benchmarks...');
@@ -38,7 +43,11 @@ console.log(formatBenchmarkSuite(mapBenchmarks));
 
 // Compare Map with native Map
 console.log('Comparing Map with native Map...');
-console.log(compareMapWithNativeMap(1000));
+const mapComparisons = compareImplementationsWithAdapters(
+  ['reduct-map', 'native-map'],
+  { size: 1000 }
+);
+console.log(mapComparisons[0]);
 
 // Run Stack benchmarks
 console.log('Running Stack benchmarks...');
@@ -47,7 +56,11 @@ console.log(formatBenchmarkSuite(stackBenchmarks));
 
 // Compare Stack with native array
 console.log('Comparing Stack with native array...');
-console.log(compareStackWithNativeArray(1000));
+const stackComparisons = compareImplementationsWithAdapters(
+  ['reduct-stack', 'native-array'],
+  { size: 1000 }
+);
+console.log(stackComparisons[0]);
 
 // Run sorting benchmarks
 console.log('Running sorting benchmarks...');
