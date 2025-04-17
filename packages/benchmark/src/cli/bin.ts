@@ -15,6 +15,8 @@ import { adapterCompareCommand } from './commands/adapter-compare';
 import { scalabilityCommand } from './commands/scalability';
 import { exportCommand } from './commands/export';
 import { registerTemplateExportCommand } from './commands/template-export';
+import { createAnalyzeCommand } from './commands/analyze';
+import { createTrendCommand } from './commands/trend';
 import { ComparisonBuilder, runComplexComparison, formatComplexComparisonResult } from '../comparison';
 import { exportToFormat } from '../visualization/exporters';
 import * as fs from 'fs';
@@ -65,6 +67,9 @@ program
   .option('--output <format>', 'Output format (console, csv, md, html)', 'console')
   .option('-f, --output-file <file>', 'Output file path')
   .option('--min-score <number>', 'Minimum compatibility score (0-1)', '0.5')
+  .option('-r, --record', 'Record benchmark results for trend analysis')
+  .option('-d, --history-dir <directory>', 'Directory to store benchmark history', '.benchmark-history')
+  .option('--max-runs <number>', 'Maximum number of runs to keep', '100')
   .action(adapterCompareCommand);
 
 // Scalability command
@@ -101,6 +106,12 @@ program
 
 // Register template export command
 registerTemplateExportCommand(program);
+
+// Register analyze command
+program.addCommand(createAnalyzeCommand());
+
+// Register trend command
+program.addCommand(createTrendCommand());
 
 // Complex Compare command
 program

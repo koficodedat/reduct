@@ -7,11 +7,12 @@
  */
 
 import { compareImplementationsWithAdapters, AdapterComparisonOptions } from '../../comparison/adapter-based';
-import { getAdapter } from '../../adapters';
+// import { getAdapter } from '../../adapters';
 import { formatBenchmarkComparison } from '../../visualization/formatters';
 import { exportComparisonToCSV } from '../../visualization/exporters';
 import * as fs from 'fs';
 import { resolveReportPath } from '../../utils/paths';
+import { recordBenchmarkRun } from '../../analysis/trends';
 
 /**
  * Command handler for the 'adapter-compare' command
@@ -60,6 +61,17 @@ export function adapterCompareCommand(types: string[], options: any): void {
     // Run the comparison
     const comparisons = compareImplementationsWithAdapters(implementationIds, adapterOptions);
 
+    // Record benchmark results for trend analysis if enabled
+    if (options.record) {
+      for (const comparison of comparisons) {
+        const name = recordBenchmarkRun(comparison as any, {
+          historyDir: options.historyDir || '.benchmark-history',
+          maxRuns: parseInt(options.maxRuns || '100', 10)
+        });
+        console.log(`Recorded benchmark results as ${name}`);
+      }
+    }
+
     // Handle output
     switch (options.output) {
       case 'console':
@@ -88,8 +100,9 @@ export function adapterCompareCommand(types: string[], options: any): void {
           console.log(); // Add a blank line between comparisons
         }
     }
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`Error: ${errorMessage}`);
     console.error('Available types:');
     console.error('- Data structures: list, array, map, native-map, object, stack, native-stack');
     console.error('- Sorting algorithms: quick-sort, merge-sort, heap-sort, array-sort');

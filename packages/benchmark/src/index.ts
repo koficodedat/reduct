@@ -13,6 +13,7 @@ export * from './utils';
 export * from './complexity';
 export * from './cli';
 export * from './registry';
+export * from './analysis';
 // Export from comparison but avoid name conflicts
 export {
   ComparisonBuilder,

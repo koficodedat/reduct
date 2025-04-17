@@ -13,6 +13,8 @@ import { compareCommand } from './commands/compare';
 import { scalabilityCommand } from './commands/scalability';
 import { exportCommand } from './commands/export';
 import { registerTemplateExportCommand } from './commands/template-export';
+import { createAnalyzeCommand } from './commands/analyze';
+import { createTrendCommand } from './commands/trend';
 import { ComparisonBuilder, runComplexComparison, formatComplexComparisonResult } from '../comparison';
 import { exportToFormat } from '../visualization/exporters';
 import * as fs from 'fs';
@@ -81,6 +83,12 @@ export function createCLI(): Command {
 
   // Register template export command
   registerTemplateExportCommand(program);
+
+  // Register analyze command
+  program.addCommand(createAnalyzeCommand());
+
+  // Register trend command
+  program.addCommand(createTrendCommand());
 
   // Register complex compare command
   program

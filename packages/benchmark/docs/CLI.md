@@ -14,6 +14,8 @@ The `@reduct/benchmark` package provides a powerful command-line interface (CLI)
   - [scalability](#scalability-command)
   - [export](#export-command)
   - [template-export](#template-export-command)
+  - [analyze](#analyze-command)
+  - [trend](#trend-command)
 - [Global Options](#global-options)
 - [Examples](#examples)
 
@@ -303,6 +305,99 @@ npx reduct-benchmark template-export html -i benchmark-results.json -o results.h
 npx reduct-benchmark template-export html -i benchmark-results.json -o results.html -t html-comparison --title "List Comparison"
 ```
 
+### `analyze` Command
+
+Analyze benchmark results statistically.
+
+```bash
+npx reduct-benchmark analyze <file> [options]
+```
+
+#### Arguments
+
+- `file`: JSON file containing benchmark results
+
+#### Options
+
+- `-o, --output <file>`: Output file for analysis results
+- `-p, --precision <number>`: Number of decimal places for output (default: 4)
+- `-m, --method <method>`: Method for outlier detection (iqr, zscore) (default: iqr)
+- `-t, --threshold <number>`: Threshold for outlier detection (default: 1.5)
+- `-c, --confidence <number>`: Confidence level for intervals (0-1) (default: 0.95)
+
+#### Examples
+
+```bash
+# Analyze benchmark results
+npx reduct-benchmark analyze results.json
+
+# Specify output file
+npx reduct-benchmark analyze results.json -o analysis.txt
+
+# Customize analysis options
+npx reduct-benchmark analyze results.json -p 6 -m zscore -t 2 -c 0.99
+```
+
+### `trend` Command
+
+Analyze benchmark trends over time.
+
+```bash
+npx reduct-benchmark trend <name> [options]
+```
+
+#### Arguments
+
+- `name`: Name of the benchmark to analyze
+
+#### Options
+
+- `-d, --dir <directory>`: Directory containing benchmark history (default: .benchmark-history)
+- `-o, --output <file>`: Output file for trend analysis
+- `-f, --format <format>`: Output format (text, html) (default: text)
+- `-i, --implementation <name>`: Filter by implementation name
+- `-t, --threshold <number>`: Threshold for regression detection (0-1) (default: 0.1)
+- `-b, --baseline <number>`: Number of runs to use for baseline (default: 3)
+- `-c, --chart`: Include ASCII chart in text output
+
+#### Subcommands
+
+##### `trend record`
+
+Record benchmark results for trend analysis.
+
+```bash
+npx reduct-benchmark trend record <file> [options]
+```
+
+###### Arguments
+
+- `file`: JSON file containing benchmark results
+
+###### Options
+
+- `-d, --dir <directory>`: Directory to store benchmark history (default: .benchmark-history)
+- `--max-runs <number>`: Maximum number of runs to keep (default: 100)
+
+#### Examples
+
+```bash
+# Record benchmark results
+npx reduct-benchmark trend record results.json
+
+# Analyze trends for a specific benchmark
+npx reduct-benchmark trend comparison-get
+
+# Generate HTML report
+npx reduct-benchmark trend comparison-get -f html -o trends.html
+
+# Filter by implementation
+npx reduct-benchmark trend comparison-get -i reduct-list
+
+# Include ASCII chart in text output
+npx reduct-benchmark trend comparison-get -c
+```
+
 ## Global Options
 
 The following options are available for all commands:
@@ -367,3 +462,23 @@ npx reduct-benchmark template-export html -i benchmark-results.json -o results.h
 ```
 
 This will export the benchmark results using a custom HTML template with a specified title.
+
+### Analyzing Benchmark Results
+
+```bash
+npx reduct-benchmark analyze benchmark-results.json -o analysis.txt
+```
+
+This will analyze the benchmark results from a JSON file and output the statistical analysis to a text file.
+
+### Tracking Performance Over Time
+
+```bash
+# Record benchmark results
+npx reduct-benchmark adapter-compare reduct-list native-array -r
+
+# Analyze trends
+npx reduct-benchmark trend comparison-get -f html -o trends.html
+```
+
+This will run a comparison benchmark, record the results for trend analysis, and then generate an HTML report showing performance trends over time.

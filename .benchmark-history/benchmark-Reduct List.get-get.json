@@ -1,0 +1,108 @@
+[
+  {
+    "timestamp": "2025-04-17T16:07:48.773Z",
+    "results": [
+      {
+        "name": "Reduct List.get",
+        "operation": "get",
+        "timeMs": 0.0215,
+        "opsPerSecond": 46533,
+        "inputSize": 1000
+      },
+      {
+        "name": "Native Array.get",
+        "operation": "get",
+        "timeMs": 0.0107,
+        "opsPerSecond": 93211,
+        "inputSize": 1000
+      },
+      {
+        "name": "Reduct List.map",
+        "operation": "map",
+        "timeMs": 0.0199,
+        "opsPerSecond": 50272,
+        "inputSize": 1000
+      },
+      {
+        "name": "Native Array.map",
+        "operation": "map",
+        "timeMs": 0.0208,
+        "opsPerSecond": 48133,
+        "inputSize": 1000
+      },
+      {
+        "name": "Reduct List.filter",
+        "operation": "filter",
+        "timeMs": 0.0204,
+        "opsPerSecond": 49064,
+        "inputSize": 1000
+      },
+      {
+        "name": "Native Array.filter",
+        "operation": "filter",
+        "timeMs": 0.0215,
+        "opsPerSecond": 46551,
+        "inputSize": 1000
+      }
+    ],
+    "type": "results",
+    "metadata": {
+      "nodeVersion": "v20.19.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    }
+  },
+  {
+    "timestamp": "2025-04-17T16:08:47.324Z",
+    "results": [
+      {
+        "name": "Reduct List.get",
+        "operation": "get",
+        "timeMs": 0.0215,
+        "opsPerSecond": 46533,
+        "inputSize": 1000
+      },
+      {
+        "name": "Native Array.get",
+        "operation": "get",
+        "timeMs": 0.0107,
+        "opsPerSecond": 93211,
+        "inputSize": 1000
+      },
+      {
+        "name": "Reduct List.map",
+        "operation": "map",
+        "timeMs": 0.0199,
+        "opsPerSecond": 50272,
+        "inputSize": 1000
+      },
+      {
+        "name": "Native Array.map",
+        "operation": "map",
+        "timeMs": 0.0208,
+        "opsPerSecond": 48133,
+        "inputSize": 1000
+      },
+      {
+        "name": "Reduct List.filter",
+        "operation": "filter",
+        "timeMs": 0.0204,
+        "opsPerSecond": 49064,
+        "inputSize": 1000
+      },
+      {
+        "name": "Native Array.filter",
+        "operation": "filter",
+        "timeMs": 0.0215,
+        "opsPerSecond": 46551,
+        "inputSize": 1000
+      }
+    ],
+    "type": "results",
+    "metadata": {
+      "nodeVersion": "v20.19.0",
+      "platform": "darwin",
+      "arch": "arm64"
+    }
+  }
+]

@@ -1,9 +1,9 @@
 /**
  * Complex Compare Command
- * 
+ *
  * Provides a command for running complex comparisons between different
  * implementations based on capabilities.
- * 
+ *
  * @packageDocumentation
  */
 
@@ -12,10 +12,11 @@ import { ComparisonBuilder, runComplexComparison, formatComplexComparisonResult 
 import { exportToFormat } from '../../visualization/exporters';
 import * as fs from 'fs';
 import * as path from 'path';
+import { resolveReportPath } from '../../utils/paths';
 
 /**
  * Creates the complex-compare command
- * 
+ *
  * @returns The command
  */
 export function createComplexCompareCommand(): Command {
@@ -41,7 +42,7 @@ export function createComplexCompareCommand(): Command {
         const chartType = options.chartType;
         const logScale = options.logScale;
         const testCase = options.testCase || 'random';
-        
+
         // Create builder
         const builder = new ComparisonBuilder()
           .name(`${capability.charAt(0).toUpperCase() + capability.slice(1)} Comparison`)
@@ -52,12 +53,12 @@ export function createComplexCompareCommand(): Command {
             iterations,
             warmupIterations: 10
           });
-        
+
         // Add operations if specified
         if (operations) {
           builder.withOperations(operations);
         }
-        
+
         // Add test case based on type
         if (testCase === 'random') {
           builder.addTestCase('Random', (size) => {
@@ -84,11 +85,11 @@ export function createComplexCompareCommand(): Command {
             };
           });
         }
-        
+
         // Build and run comparison
         const config = builder.build();
         const results = runComplexComparison(config);
-        
+
         // Output results
         if (outputFormat === 'console') {
           console.log(formatComplexComparisonResult(results));
@@ -99,9 +100,9 @@ export function createComplexCompareCommand(): Command {
             title: results.name,
             description: results.description
           });
-          
+
           if (outputFile) {
-            const filePath = path.resolve(process.cwd(), outputFile);
+            const filePath = resolveReportPath(outputFile);
             fs.writeFileSync(filePath, output);
             console.log(`Results saved to ${filePath}`);
           } else {
@@ -113,6 +114,6 @@ export function createComplexCompareCommand(): Command {
         process.exit(1);
       }
     });
-  
+
   return command;
 }

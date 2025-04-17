@@ -312,4 +312,5 @@ For detailed adapter documentation, see [ADAPTERS.md](./docs/ADAPTERS.md).
 - [Exporters Documentation](./docs/EXPORTERS.md)
 - [Templates Documentation](./docs/TEMPLATES.md)
 - [Adapters Documentation](./docs/ADAPTERS.md)
+- [Analysis Tools](./docs/ANALYSIS.md)
 - [Examples](./docs/EXAMPLES.md)
