@@ -8,7 +8,7 @@
  */
 
 import { Option, some, none } from '@reduct/core';
-import { List } from './list';
+import { List } from '../list';
 
 /**
  * Immutable Map class
