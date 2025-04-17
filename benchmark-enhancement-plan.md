@@ -51,15 +51,15 @@ The current benchmark system has:
 
 ### 2. Flexible Comparison System
 
-- [ ] **2.1. Create Data Structure Registry**
-  - [ ] Define interface for registering data structures and algorithms
-  - [ ] Implement registry for core data structures (List, Map, Stack)
-  - [ ] Add registry for algorithms (sorting, searching)
+- [x] **2.1. Create Data Structure Registry**
+  - [x] Define interface for registering data structures and algorithms
+  - [x] Implement registry for core data structures (List, Map, Stack)
+  - [x] Add registry for algorithms (sorting, searching)
 
-- [ ] **2.2. Implement Flexible Comparison Engine**
-  - [ ] Create system to identify common operations between data structures
-  - [ ] Implement benchmarking logic for compatible operations
-  - [ ] Support comparing data structures of different types
+- [x] **2.2. Implement Flexible Comparison Engine**
+  - [x] Create system to identify common operations between data structures
+  - [x] Implement benchmarking logic for compatible operations
+  - [x] Support comparing data structures of different types
 
 - [ ] **2.3. Create Operation Adapters**
   - [ ] Define standard operation interfaces (get, set, add, remove, etc.)
