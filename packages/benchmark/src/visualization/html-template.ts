@@ -1,12 +1,12 @@
 /**
  * HTML templates for benchmark visualization
- * 
+ *
  * @packageDocumentation
  */
 
 /**
  * Base HTML template with Chart.js
- * 
+ *
  * @param title - Page title
  * @param content - HTML content
  * @param scripts - Additional scripts to include
@@ -85,15 +85,15 @@ export function baseTemplate(title: string, content: string, scripts: string = '
 <body>
   <h1>${title}</h1>
   <p><em>Generated: ${new Date().toISOString()}</em></p>
-  
+
   ${content}
-  
+
   <script>
     // Chart.js configuration
     Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
     Chart.defaults.font.size = 14;
     Chart.defaults.color = '#333';
-    
+
     ${scripts}
   </script>
 </body>
@@ -101,13 +101,66 @@ export function baseTemplate(title: string, content: string, scripts: string = '
 }
 
 /**
+ * Chart configuration options
+ */
+export interface ChartOptions {
+  /** Chart title */
+  title?: string;
+  /** Color scheme for the chart */
+  colorScheme?: string[];
+  /** Type of y-axis scale (linear, logarithmic) */
+  yAxisScale?: 'linear' | 'logarithmic';
+  /** Custom labels for the axes */
+  axisLabels?: {
+    x?: string;
+    y?: string;
+    y2?: string;
+  };
+  /** Whether to show the legend */
+  showLegend?: boolean;
+  /** Legend position */
+  legendPosition?: 'top' | 'bottom' | 'left' | 'right';
+  /** Whether to show tooltips */
+  showTooltips?: boolean;
+  /** Whether to animate the chart */
+  animate?: boolean;
+}
+
+/**
+ * Default chart options
+ */
+const defaultChartOptions: ChartOptions = {
+  colorScheme: [
+    'rgba(54, 162, 235, 0.5)',   // Blue
+    'rgba(75, 192, 192, 0.5)',    // Teal
+    'rgba(255, 99, 132, 0.5)',    // Red
+    'rgba(255, 159, 64, 0.5)',    // Orange
+    'rgba(153, 102, 255, 0.5)',   // Purple
+    'rgba(255, 205, 86, 0.5)',    // Yellow
+    'rgba(201, 203, 207, 0.5)',   // Grey
+    'rgba(0, 204, 150, 0.5)',     // Green
+  ],
+  yAxisScale: 'linear',
+  axisLabels: {
+    x: 'Implementation',
+    y: 'Time (ms)',
+    y2: 'Operations/sec'
+  },
+  showLegend: true,
+  legendPosition: 'top',
+  showTooltips: true,
+  animate: true
+};
+
+/**
  * Creates a bar chart script for benchmark comparison
- * 
+ *
  * @param chartId - Canvas element ID
  * @param title - Chart title
  * @param labels - Chart labels (implementations)
  * @param timeData - Time data in milliseconds
  * @param opsData - Operations per second data
+ * @param options - Chart configuration options
  * @returns JavaScript code to create the chart
  */
 export function createBarChartScript(
@@ -115,8 +168,12 @@ export function createBarChartScript(
   title: string,
   labels: string[],
   timeData: number[],
-  opsData: number[]
+  opsData: number[],
+  options?: ChartOptions
 ): string {
+  const opts = { ...defaultChartOptions, ...options };
+  const colors = opts.colorScheme || defaultChartOptions.colorScheme;
+
   return `
   // Create ${title} chart
   const ${chartId}Ctx = document.getElementById('${chartId}').getContext('2d');
@@ -128,15 +185,15 @@ export function createBarChartScript(
         {
           label: 'Time (ms)',
           data: ${JSON.stringify(timeData)},
-          backgroundColor: 'rgba(54, 162, 235, 0.5)',
-          borderColor: 'rgba(54, 162, 235, 1)',
+          backgroundColor: '${colors[0]}',
+          borderColor: '${colors[0].replace('0.5', '1')}',
           borderWidth: 1
         },
         {
           label: 'Operations/sec',
           data: ${JSON.stringify(opsData)},
-          backgroundColor: 'rgba(75, 192, 192, 0.5)',
-          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: '${colors[1]}',
+          borderColor: '${colors[1].replace('0.5', '1')}',
           borderWidth: 1,
           yAxisID: 'y1'
         }
@@ -145,6 +202,7 @@ export function createBarChartScript(
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: ${opts.animate !== false},
       plugins: {
         title: {
           display: true,
@@ -155,6 +213,7 @@ export function createBarChartScript(
           }
         },
         tooltip: {
+          enabled: ${opts.showTooltips !== false},
           callbacks: {
             label: function(context) {
               let label = context.dataset.label || '';
@@ -167,31 +226,35 @@ export function createBarChartScript(
               return label;
             }
           }
+        },
+        legend: {
+          display: ${opts.showLegend !== false},
+          position: '${opts.legendPosition || 'top'}'
         }
       },
       scales: {
         x: {
           title: {
             display: true,
-            text: 'Implementation'
+            text: '${opts.axisLabels?.x || 'Implementation'}'
           }
         },
         y: {
-          type: 'linear',
+          type: '${opts.yAxisScale || 'linear'}',
           display: true,
           position: 'left',
           title: {
             display: true,
-            text: 'Time (ms)'
+            text: '${opts.axisLabels?.y || 'Time (ms)'}'
           }
         },
         y1: {
-          type: 'linear',
+          type: '${opts.yAxisScale || 'linear'}',
           display: true,
           position: 'right',
           title: {
             display: true,
-            text: 'Operations/sec'
+            text: '${opts.axisLabels?.y2 || 'Operations/sec'}'
           },
           grid: {
             drawOnChartArea: false
@@ -204,12 +267,13 @@ export function createBarChartScript(
 
 /**
  * Creates a line chart script for scalability results
- * 
+ *
  * @param chartId - Canvas element ID
  * @param title - Chart title
  * @param labels - Chart labels (input sizes)
  * @param timeData - Time data in milliseconds
  * @param opsData - Operations per second data
+ * @param options - Chart configuration options
  * @returns JavaScript code to create the chart
  */
 export function createLineChartScript(
@@ -217,8 +281,12 @@ export function createLineChartScript(
   title: string,
   labels: number[],
   timeData: number[],
-  opsData: number[]
+  opsData: number[],
+  options?: ChartOptions
 ): string {
+  const opts = { ...defaultChartOptions, ...options };
+  const colors = opts.colorScheme || defaultChartOptions.colorScheme;
+
   return `
   // Create ${title} chart
   const ${chartId}Ctx = document.getElementById('${chartId}').getContext('2d');
@@ -230,16 +298,16 @@ export function createLineChartScript(
         {
           label: 'Time (ms)',
           data: ${JSON.stringify(timeData)},
-          backgroundColor: 'rgba(54, 162, 235, 0.5)',
-          borderColor: 'rgba(54, 162, 235, 1)',
+          backgroundColor: '${colors[0]}',
+          borderColor: '${colors[0].replace('0.5', '1')}',
           borderWidth: 2,
           tension: 0.1
         },
         {
           label: 'Operations/sec',
           data: ${JSON.stringify(opsData)},
-          backgroundColor: 'rgba(75, 192, 192, 0.5)',
-          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: '${colors[1]}',
+          borderColor: '${colors[1].replace('0.5', '1')}',
           borderWidth: 2,
           tension: 0.1,
           yAxisID: 'y1'
@@ -249,6 +317,7 @@ export function createLineChartScript(
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: ${opts.animate !== false},
       plugins: {
         title: {
           display: true,
@@ -259,6 +328,7 @@ export function createLineChartScript(
           }
         },
         tooltip: {
+          enabled: ${opts.showTooltips !== false},
           callbacks: {
             label: function(context) {
               let label = context.dataset.label || '';
@@ -271,31 +341,35 @@ export function createLineChartScript(
               return label;
             }
           }
+        },
+        legend: {
+          display: ${opts.showLegend !== false},
+          position: '${opts.legendPosition || 'top'}'
         }
       },
       scales: {
         x: {
           title: {
             display: true,
-            text: 'Input Size'
+            text: '${opts.axisLabels?.x || 'Input Size'}'
           }
         },
         y: {
-          type: 'linear',
+          type: '${opts.yAxisScale || 'linear'}',
           display: true,
           position: 'left',
           title: {
             display: true,
-            text: 'Time (ms)'
+            text: '${opts.axisLabels?.y || 'Time (ms)'}'
           }
         },
         y1: {
-          type: 'linear',
+          type: '${opts.yAxisScale || 'linear'}',
           display: true,
           position: 'right',
           title: {
             display: true,
-            text: 'Operations/sec'
+            text: '${opts.axisLabels?.y2 || 'Operations/sec'}'
           },
           grid: {
             drawOnChartArea: false
@@ -307,8 +381,162 @@ export function createLineChartScript(
 }
 
 /**
+ * Creates a pie chart script for operation distribution
+ *
+ * @param chartId - Canvas element ID
+ * @param title - Chart title
+ * @param labels - Chart labels (operation names)
+ * @param data - Data values (percentages or counts)
+ * @param options - Chart configuration options
+ * @returns JavaScript code to create the chart
+ */
+export function createPieChartScript(
+  chartId: string,
+  title: string,
+  labels: string[],
+  data: number[],
+  options?: ChartOptions
+): string {
+  const opts = { ...defaultChartOptions, ...options };
+  const colors = opts.colorScheme || defaultChartOptions.colorScheme;
+
+  // Generate background colors for each slice
+  const backgroundColors = labels.map((_, i) => colors[i % colors.length]);
+  const borderColors = backgroundColors.map(color => color.replace('0.5', '1'));
+
+  return `
+  // Create ${title} chart
+  const ${chartId}Ctx = document.getElementById('${chartId}').getContext('2d');
+  new Chart(${chartId}Ctx, {
+    type: 'pie',
+    data: {
+      labels: ${JSON.stringify(labels)},
+      datasets: [{
+        data: ${JSON.stringify(data)},
+        backgroundColor: ${JSON.stringify(backgroundColors)},
+        borderColor: ${JSON.stringify(borderColors)},
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: ${opts.animate !== false},
+      plugins: {
+        title: {
+          display: true,
+          text: '${title}',
+          font: {
+            size: 16,
+            weight: 'bold'
+          }
+        },
+        tooltip: {
+          enabled: ${opts.showTooltips !== false},
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.formattedValue;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percentage = Math.round((context.raw / total) * 100);
+              return label + ': ' + value + ' (' + percentage + '%)';
+            }
+          }
+        },
+        legend: {
+          display: ${opts.showLegend !== false},
+          position: '${opts.legendPosition || 'right'}'
+        }
+      }
+    }
+  });
+  `;
+}
+
+/**
+ * Creates a radar chart script for multi-dimensional comparison
+ *
+ * @param chartId - Canvas element ID
+ * @param title - Chart title
+ * @param labels - Chart labels (metrics)
+ * @param datasets - Array of datasets (implementations and their values)
+ * @param options - Chart configuration options
+ * @returns JavaScript code to create the chart
+ */
+export function createRadarChartScript(
+  chartId: string,
+  title: string,
+  labels: string[],
+  datasets: Array<{label: string, data: number[]}>,
+  options?: ChartOptions
+): string {
+  const opts = { ...defaultChartOptions, ...options };
+  const colors = opts.colorScheme || defaultChartOptions.colorScheme;
+
+  // Generate dataset configuration with colors
+  const datasetConfigs = datasets.map((dataset, i) => {
+    const color = colors[i % colors.length];
+    const borderColor = color.replace('0.5', '1');
+
+    return {
+      ...dataset,
+      backgroundColor: color,
+      borderColor: borderColor,
+      borderWidth: 2,
+      pointBackgroundColor: borderColor,
+      pointBorderColor: '#fff',
+      pointHoverBackgroundColor: '#fff',
+      pointHoverBorderColor: borderColor,
+      pointRadius: 4
+    };
+  });
+
+  return `
+  // Create ${title} chart
+  const ${chartId}Ctx = document.getElementById('${chartId}').getContext('2d');
+  new Chart(${chartId}Ctx, {
+    type: 'radar',
+    data: {
+      labels: ${JSON.stringify(labels)},
+      datasets: ${JSON.stringify(datasetConfigs)}
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: ${opts.animate !== false},
+      plugins: {
+        title: {
+          display: true,
+          text: '${title}',
+          font: {
+            size: 16,
+            weight: 'bold'
+          }
+        },
+        tooltip: {
+          enabled: ${opts.showTooltips !== false}
+        },
+        legend: {
+          display: ${opts.showLegend !== false},
+          position: '${opts.legendPosition || 'top'}'
+        }
+      },
+      scales: {
+        r: {
+          angleLines: {
+            display: true
+          },
+          suggestedMin: 0
+        }
+      }
+    }
+  });
+  `;
+}
+
+/**
  * Creates a table of contents HTML
- * 
+ *
  * @param sections - Array of section names and their IDs
  * @returns HTML for the table of contents
  */
@@ -316,13 +544,13 @@ export function createTableOfContents(sections: Array<{name: string, id: string}
   let html = '<div class="toc">\n';
   html += '  <h2>Table of Contents</h2>\n';
   html += '  <ul>\n';
-  
+
   for (const section of sections) {
     html += `    <li><a href="#${section.id}">${section.name}</a></li>\n`;
   }
-  
+
   html += '  </ul>\n';
   html += '</div>\n';
-  
+
   return html;
 }

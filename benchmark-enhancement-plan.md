@@ -79,11 +79,11 @@ The current benchmark system has:
   - [x] Create HTML exporter with embedded charts
   - [x] Improve console output formatting
 
-- [ ] **3.2. Implement Chart Generation**
-  - [ ] Create bar chart visualization for comparisons
-  - [ ] Implement line charts for scalability results
-  - [ ] Add pie charts for operation distribution
-  - [ ] Support customizable chart options
+- [x] **3.2. Implement Chart Generation**
+  - [x] Create bar chart visualization for comparisons
+  - [x] Implement line charts for scalability results
+  - [x] Add pie charts for operation distribution
+  - [x] Support customizable chart options
 
 - [ ] **3.3. Create Output Templates**
   - [ ] Design templates for different output formats

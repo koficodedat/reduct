@@ -67,8 +67,14 @@ export function exportCommand(format: string, options: any): void {
         result = exportToHTML(data, {
           includeCharts: options.charts !== false,
           chartType: options.chartType || 'bar',
-          formatNumbers: true,
+          formatNumbers: options.formatNumbers || true,
           title: options.title,
+          chartOptions: {
+            yAxisScale: options.logScale ? 'logarithmic' : 'linear',
+            showLegend: options.legend !== false,
+            legendPosition: options.legendPosition || 'top',
+            animate: options.animation !== false,
+          }
         });
         break;
       default:

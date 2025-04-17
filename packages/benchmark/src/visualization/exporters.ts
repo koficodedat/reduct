@@ -667,8 +667,29 @@ export interface HTMLExportOptions {
   includeTableOfContents?: boolean;
   /** Include charts */
   includeCharts?: boolean;
-  /** Chart type (bar, line, pie) */
-  chartType?: 'bar' | 'line' | 'pie';
+  /** Chart type (bar, line, pie, radar) */
+  chartType?: 'bar' | 'line' | 'pie' | 'radar';
+  /** Chart options */
+  chartOptions?: {
+    /** Color scheme for the chart */
+    colorScheme?: string[];
+    /** Type of y-axis scale (linear, logarithmic) */
+    yAxisScale?: 'linear' | 'logarithmic';
+    /** Custom labels for the axes */
+    axisLabels?: {
+      x?: string;
+      y?: string;
+      y2?: string;
+    };
+    /** Whether to show the legend */
+    showLegend?: boolean;
+    /** Legend position */
+    legendPosition?: 'top' | 'bottom' | 'left' | 'right';
+    /** Whether to show tooltips */
+    showTooltips?: boolean;
+    /** Whether to animate the chart */
+    animate?: boolean;
+  };
   /** Page title */
   title?: string;
 }
@@ -683,6 +704,21 @@ const defaultHTMLOptions: HTMLExportOptions = {
   includeTableOfContents: true,
   includeCharts: true,
   chartType: 'bar',
+  chartOptions: {
+    colorScheme: [
+      'rgba(54, 162, 235, 0.5)',   // Blue
+      'rgba(75, 192, 192, 0.5)',    // Teal
+      'rgba(255, 99, 132, 0.5)',    // Red
+      'rgba(255, 159, 64, 0.5)',    // Orange
+      'rgba(153, 102, 255, 0.5)',   // Purple
+      'rgba(255, 205, 86, 0.5)',    // Yellow
+    ],
+    yAxisScale: 'linear',
+    showLegend: true,
+    legendPosition: 'top',
+    showTooltips: true,
+    animate: true
+  },
   title: 'Benchmark Results',
 };
 
@@ -712,7 +748,14 @@ export function exportResultsToHTML(results: BenchmarkResult[], options?: HTMLEx
   const { includeMetadata, formatNumbers, includeTableOfContents, includeCharts, title } = opts;
 
   // Import the HTML template functions
-  const { baseTemplate, createBarChartScript, createTableOfContents } = require('./html-template');
+  const {
+    baseTemplate,
+    createBarChartScript,
+    createLineChartScript,
+    createPieChartScript,
+    createRadarChartScript,
+    createTableOfContents
+  } = require('./html-template');
 
   let content = '';
   let scripts = '';
@@ -820,14 +863,56 @@ export function exportResultsToHTML(results: BenchmarkResult[], options?: HTMLEx
       const timeData = sortedResults.map(r => r.timeMs);
       const opsData = sortedResults.map(r => Math.floor(r.opsPerSecond));
 
-      // Add chart script
-      scripts += createBarChartScript(
-        chartId,
-        `${operation} Operation Performance`,
-        labels,
-        timeData,
-        opsData
-      );
+      // Add chart script based on chart type
+      if (opts.chartType === 'line') {
+        scripts += createLineChartScript(
+          chartId,
+          `${operation} Operation Performance`,
+          labels,
+          timeData,
+          opsData,
+          opts.chartOptions
+        );
+      } else if (opts.chartType === 'pie') {
+        // For pie charts, we'll show the operations per second as a pie chart
+        scripts += createPieChartScript(
+          chartId,
+          `${operation} Operation Performance`,
+          labels,
+          opsData,
+          opts.chartOptions
+        );
+      } else if (opts.chartType === 'radar') {
+        // For radar charts, we need to restructure the data
+        const datasets = [
+          {
+            label: 'Time (ms)',
+            data: timeData
+          },
+          {
+            label: 'Operations/sec',
+            data: opsData
+          }
+        ];
+
+        scripts += createRadarChartScript(
+          chartId,
+          `${operation} Operation Performance`,
+          labels,
+          datasets,
+          opts.chartOptions
+        );
+      } else {
+        // Default to bar chart
+        scripts += createBarChartScript(
+          chartId,
+          `${operation} Operation Performance`,
+          labels,
+          timeData,
+          opsData,
+          opts.chartOptions
+        );
+      }
     }
 
     content += '</div>\n';
@@ -875,7 +960,14 @@ export function exportComparisonToHTML(comparison: BenchmarkComparison, options?
   const { includeMetadata, formatNumbers, includeTableOfContents, includeCharts, title } = opts;
 
   // Import the HTML template functions
-  const { baseTemplate, createBarChartScript, createTableOfContents } = require('./html-template');
+  const {
+    baseTemplate,
+    createBarChartScript,
+    createLineChartScript,
+    createPieChartScript,
+    createRadarChartScript,
+    createTableOfContents
+  } = require('./html-template');
 
   let content = '';
   let scripts = '';
@@ -971,14 +1063,51 @@ export function exportComparisonToHTML(comparison: BenchmarkComparison, options?
     const timeData = chartResults.map(r => r.timeMs);
     const opsData = chartResults.map(r => Math.floor(r.opsPerSecond));
 
-    // Add chart script
-    scripts += createBarChartScript(
-      chartId,
-      `${comparison.operation} Operation (Size: ${comparison.inputSize})`,
-      labels,
-      timeData,
-      opsData
-    );
+    // Add chart script based on chart type
+    if (opts.chartType === 'line') {
+      scripts += createLineChartScript(
+        chartId,
+        `${comparison.operation} Operation (Size: ${comparison.inputSize})`,
+        labels,
+        timeData,
+        opsData,
+        opts.chartOptions
+      );
+    } else if (opts.chartType === 'pie') {
+      // For pie charts, we'll show the operations per second as a pie chart
+      scripts += createPieChartScript(
+        chartId,
+        `${comparison.operation} Operation (Size: ${comparison.inputSize})`,
+        labels,
+        opsData,
+        opts.chartOptions
+      );
+    } else if (opts.chartType === 'radar') {
+      // For radar charts, we need to restructure the data
+      const metrics = ['Time (ms)', 'Ops/Sec', 'Relative Factor'];
+      const datasets = comparison.results.map(result => ({
+        label: result.implementation,
+        data: [result.timeMs, result.opsPerSecond, result.relativeFactor]
+      }));
+
+      scripts += createRadarChartScript(
+        chartId,
+        `${comparison.operation} Operation (Size: ${comparison.inputSize})`,
+        metrics,
+        datasets,
+        opts.chartOptions
+      );
+    } else {
+      // Default to bar chart
+      scripts += createBarChartScript(
+        chartId,
+        `${comparison.operation} Operation (Size: ${comparison.inputSize})`,
+        labels,
+        timeData,
+        opsData,
+        opts.chartOptions
+      );
+    }
 
     content += '</div>\n';
   }
@@ -1015,7 +1144,14 @@ export function exportScalabilityToHTML(result: ScalabilityResult, options?: HTM
   const { includeMetadata, formatNumbers, includeTableOfContents, includeCharts, title } = opts;
 
   // Import the HTML template functions
-  const { baseTemplate, createLineChartScript, createTableOfContents } = require('./html-template');
+  const {
+    baseTemplate,
+    createBarChartScript,
+    createLineChartScript,
+    createPieChartScript,
+    createRadarChartScript,
+    createTableOfContents
+  } = require('./html-template');
 
   let content = '';
   let scripts = '';
@@ -1102,14 +1238,56 @@ export function exportScalabilityToHTML(result: ScalabilityResult, options?: HTM
     const timeData = sortedResults.map(r => r.timeMs);
     const opsData = sortedResults.map(r => Math.floor(r.opsPerSecond));
 
-    // Add chart script
-    scripts += createLineChartScript(
-      chartId,
-      `${result.operation} Scalability for ${result.implementation}`,
-      labels,
-      timeData,
-      opsData
-    );
+    // Add chart script based on chart type
+    if (opts.chartType === 'bar') {
+      scripts += createBarChartScript(
+        chartId,
+        `${result.operation} Scalability for ${result.implementation}`,
+        labels.map(String),
+        timeData,
+        opsData,
+        opts.chartOptions
+      );
+    } else if (opts.chartType === 'pie') {
+      // For pie charts, we'll show the operations per second as a pie chart
+      scripts += createPieChartScript(
+        chartId,
+        `${result.operation} Scalability for ${result.implementation}`,
+        labels.map(size => `Size ${size}`),
+        opsData,
+        opts.chartOptions
+      );
+    } else if (opts.chartType === 'radar') {
+      // For radar charts, we need to restructure the data
+      const datasets = [
+        {
+          label: 'Time (ms)',
+          data: timeData
+        },
+        {
+          label: 'Operations/sec',
+          data: opsData
+        }
+      ];
+
+      scripts += createRadarChartScript(
+        chartId,
+        `${result.operation} Scalability for ${result.implementation}`,
+        labels.map(size => `Size ${size}`),
+        datasets,
+        opts.chartOptions
+      );
+    } else {
+      // Default to line chart for scalability
+      scripts += createLineChartScript(
+        chartId,
+        `${result.operation} Scalability for ${result.implementation}`,
+        labels,
+        timeData,
+        opsData,
+        opts.chartOptions
+      );
+    }
 
     content += '</div>\n';
   }
