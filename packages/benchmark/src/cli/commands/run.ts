@@ -13,7 +13,12 @@ import { runStackBenchmarks } from '../../data-structures/stack';
 import { runSortingBenchmarks } from '../../algorithms/sorting';
 import { runSearchingBenchmarks } from '../../algorithms/searching';
 import { formatBenchmarkSuite } from '../../visualization/formatters';
-import { exportSuiteToCSV } from '../../visualization/exporters';
+import {
+  exportSuiteToCSV,
+  exportSuiteToMarkdown,
+  exportSuiteToHTML,
+  exportToJSON
+} from '../../visualization/exporters';
 import * as fs from 'fs';
 import { resolveReportPath } from '../../utils/paths';
 
@@ -71,7 +76,37 @@ export function runCommand(type: string, options: any): void {
         console.log(csv);
       }
       break;
-    // Additional output formats will be implemented later
+    case 'md':
+    case 'markdown':
+      const md = exportSuiteToMarkdown(result);
+      if (options.outputFile) {
+        const outputPath = resolveReportPath(options.outputFile);
+        fs.writeFileSync(outputPath, md);
+        console.log(`Results saved to ${outputPath}`);
+      } else {
+        console.log(md);
+      }
+      break;
+    case 'html':
+      const html = exportSuiteToHTML(result, { includeCharts: true });
+      if (options.outputFile) {
+        const outputPath = resolveReportPath(options.outputFile);
+        fs.writeFileSync(outputPath, html);
+        console.log(`Results saved to ${outputPath}`);
+      } else {
+        console.log(html);
+      }
+      break;
+    case 'json':
+      const json = exportToJSON(result);
+      if (options.outputFile) {
+        const outputPath = resolveReportPath(options.outputFile);
+        fs.writeFileSync(outputPath, json);
+        console.log(`Results saved to ${outputPath}`);
+      } else {
+        console.log(json);
+      }
+      break;
     default:
       console.log(formatBenchmarkSuite(result));
   }

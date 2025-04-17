@@ -9,7 +9,12 @@
 import { compareImplementationsWithAdapters, AdapterComparisonOptions } from '../../comparison/adapter-based';
 // import { getAdapter } from '../../adapters';
 import { formatBenchmarkComparison } from '../../visualization/formatters';
-import { exportComparisonToCSV } from '../../visualization/exporters';
+import {
+  exportComparisonToCSV,
+  exportComparisonToMarkdown,
+  exportComparisonToHTML,
+  exportToJSON
+} from '../../visualization/exporters';
 import * as fs from 'fs';
 import { resolveReportPath } from '../../utils/paths';
 import { recordBenchmarkRun } from '../../analysis/trends';
@@ -81,7 +86,7 @@ export function adapterCompareCommand(types: string[], options: any): void {
         }
         break;
       case 'csv':
-        // For CSV, we'll just output the first comparison for now
+        // For CSV output
         if (comparisons.length > 0) {
           const csv = exportComparisonToCSV(comparisons[0]);
           if (options.outputFile) {
@@ -93,8 +98,48 @@ export function adapterCompareCommand(types: string[], options: any): void {
           }
         }
         break;
-      // Additional output formats will be implemented later
+      case 'md':
+      case 'markdown':
+        // For Markdown output
+        if (comparisons.length > 0) {
+          const md = exportComparisonToMarkdown(comparisons[0]);
+          if (options.outputFile) {
+            const outputPath = resolveReportPath(options.outputFile);
+            fs.writeFileSync(outputPath, md);
+            console.log(`Results saved to ${outputPath}`);
+          } else {
+            console.log(md);
+          }
+        }
+        break;
+      case 'html':
+        // For HTML output
+        if (comparisons.length > 0) {
+          const html = exportComparisonToHTML(comparisons[0], { includeCharts: true });
+          if (options.outputFile) {
+            const outputPath = resolveReportPath(options.outputFile);
+            fs.writeFileSync(outputPath, html);
+            console.log(`Results saved to ${outputPath}`);
+          } else {
+            console.log(html);
+          }
+        }
+        break;
+      case 'json':
+        // For JSON output
+        if (comparisons.length > 0) {
+          const json = exportToJSON(comparisons[0]);
+          if (options.outputFile) {
+            const outputPath = resolveReportPath(options.outputFile);
+            fs.writeFileSync(outputPath, json);
+            console.log(`Results saved to ${outputPath}`);
+          } else {
+            console.log(json);
+          }
+        }
+        break;
       default:
+        // Default to console output
         for (const comparison of comparisons) {
           console.log(formatBenchmarkComparison(comparison));
           console.log(); // Add a blank line between comparisons

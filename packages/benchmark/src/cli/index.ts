@@ -15,6 +15,7 @@ import { exportCommand } from './commands/export';
 import { registerTemplateExportCommand } from './commands/template-export';
 import { createAnalyzeCommand } from './commands/analyze';
 import { createTrendCommand } from './commands/trend';
+import { registerBenchmarkCommand } from './commands/benchmark';
 import { ComparisonBuilder, runComplexComparison, formatComplexComparisonResult } from '../comparison';
 import { exportToFormat } from '../visualization/exporters';
 import * as fs from 'fs';
@@ -89,6 +90,9 @@ export function createCLI(): Command {
 
   // Register trend command
   program.addCommand(createTrendCommand());
+
+  // Register benchmark command
+  registerBenchmarkCommand(program);
 
   // Register complex compare command
   program

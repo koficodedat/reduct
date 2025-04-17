@@ -1,28 +1,29 @@
 /**
  * Adapter Factory Pattern
- * 
+ *
  * Provides a factory for creating operation adapters dynamically.
- * 
+ *
  * @packageDocumentation
  */
 
-import { OperationAdapter } from '../adapters/types';
+// Define a simpler adapter type for our registry
+export type SimpleOperationAdapter = (...args: any[]) => any;
 
 /**
  * Factory for creating operation adapters
  */
 export class AdapterFactory {
   /** Map of adapters by data structure and operation */
-  private static adapters: Map<string, Map<string, OperationAdapter>> = new Map();
+  private static adapters: Map<string, Map<string, SimpleOperationAdapter>> = new Map();
 
   /**
    * Registers an adapter for a data structure and operation
-   * 
+   *
    * @param dataStructure - Type of data structure
    * @param operation - Name of the operation
    * @param adapter - Adapter function
    */
-  static registerAdapter(dataStructure: string, operation: string, adapter: OperationAdapter): void {
+  static registerAdapter(dataStructure: string, operation: string, adapter: SimpleOperationAdapter): void {
     if (!this.adapters.has(dataStructure)) {
       this.adapters.set(dataStructure, new Map());
     }
@@ -31,18 +32,18 @@ export class AdapterFactory {
 
   /**
    * Gets an adapter for a data structure and operation
-   * 
+   *
    * @param dataStructure - Type of data structure
    * @param operation - Name of the operation
    * @returns Adapter function or undefined if not found
    */
-  static getAdapter(dataStructure: string, operation: string): OperationAdapter | undefined {
+  static getAdapter(dataStructure: string, operation: string): SimpleOperationAdapter | undefined {
     return this.adapters.get(dataStructure)?.get(operation);
   }
 
   /**
    * Gets all supported operations for a data structure
-   * 
+   *
    * @param dataStructure - Type of data structure
    * @returns Array of operation names
    */
@@ -52,7 +53,7 @@ export class AdapterFactory {
 
   /**
    * Gets all data structures that support an operation
-   * 
+   *
    * @param operation - Name of the operation
    * @returns Array of data structure types
    */
@@ -68,7 +69,7 @@ export class AdapterFactory {
 
   /**
    * Checks if a data structure supports an operation
-   * 
+   *
    * @param dataStructure - Type of data structure
    * @param operation - Name of the operation
    * @returns True if the operation is supported
@@ -79,7 +80,7 @@ export class AdapterFactory {
 
   /**
    * Gets all registered data structures
-   * 
+   *
    * @returns Array of data structure types
    */
   static getAllDataStructures(): string[] {
@@ -88,7 +89,7 @@ export class AdapterFactory {
 
   /**
    * Gets all registered operations
-   * 
+   *
    * @returns Array of operation names
    */
   static getAllOperations(): string[] {
@@ -103,7 +104,7 @@ export class AdapterFactory {
 
   /**
    * Removes an adapter
-   * 
+   *
    * @param dataStructure - Type of data structure
    * @param operation - Name of the operation
    * @returns True if the adapter was removed
@@ -114,7 +115,7 @@ export class AdapterFactory {
 
   /**
    * Removes all adapters for a data structure
-   * 
+   *
    * @param dataStructure - Type of data structure
    * @returns True if any adapters were removed
    */

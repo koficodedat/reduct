@@ -13,7 +13,12 @@ import { measureStackScalability } from '../../data-structures/stack';
 import { measureSortingScalability } from '../../algorithms/sorting';
 import { measureSearchingScalability } from '../../algorithms/searching';
 import { formatScalabilityResult } from '../../visualization/formatters';
-import { exportScalabilityToCSV } from '../../visualization/exporters';
+import {
+  exportScalabilityToCSV,
+  exportScalabilityToMarkdown,
+  exportScalabilityToHTML,
+  exportToJSON
+} from '../../visualization/exporters';
 import { quickSort, binarySearch } from '@reduct/algorithms';
 import * as fs from 'fs';
 import { resolveReportPath } from '../../utils/paths';
@@ -116,7 +121,37 @@ export function scalabilityCommand(type: string, operation: string, options: any
         console.log(csv);
       }
       break;
-    // Additional output formats will be implemented later
+    case 'md':
+    case 'markdown':
+      const md = exportScalabilityToMarkdown(result);
+      if (options.outputFile) {
+        const outputPath = resolveReportPath(options.outputFile);
+        fs.writeFileSync(outputPath, md);
+        console.log(`Results saved to ${outputPath}`);
+      } else {
+        console.log(md);
+      }
+      break;
+    case 'html':
+      const html = exportScalabilityToHTML(result, { includeCharts: true });
+      if (options.outputFile) {
+        const outputPath = resolveReportPath(options.outputFile);
+        fs.writeFileSync(outputPath, html);
+        console.log(`Results saved to ${outputPath}`);
+      } else {
+        console.log(html);
+      }
+      break;
+    case 'json':
+      const json = exportToJSON(result);
+      if (options.outputFile) {
+        const outputPath = resolveReportPath(options.outputFile);
+        fs.writeFileSync(outputPath, json);
+        console.log(`Results saved to ${outputPath}`);
+      } else {
+        console.log(json);
+      }
+      break;
     default:
       console.log(formatScalabilityResult(result));
   }

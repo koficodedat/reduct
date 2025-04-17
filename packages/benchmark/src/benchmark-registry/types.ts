@@ -1,10 +1,10 @@
 /**
  * Types for the benchmark registry system
- * 
+ *
  * @packageDocumentation
  */
 
-import { OperationAdapter } from '../adapters/types';
+import { SimpleOperationAdapter } from './adapter-factory';
 
 /**
  * Definition of a benchmark operation
@@ -15,7 +15,7 @@ export interface BenchmarkOperation {
   /** Description of the operation */
   description?: string;
   /** Adapter function for the operation */
-  adapter: OperationAdapter;
+  adapter: SimpleOperationAdapter;
 }
 
 /**
