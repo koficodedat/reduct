@@ -9,6 +9,10 @@ build/
 lib/
 coverage/
 
+# Benchmark reports
+packages/benchmark/reports/*
+!packages/benchmark/reports/.gitkeep
+
 # Logs
 logs
 *.log

@@ -13,7 +13,17 @@ export * from './utils';
 export * from './complexity';
 export * from './cli';
 export * from './registry';
-export * from './comparison';
+// Export from comparison but avoid name conflicts
+export {
+  ComparisonBuilder,
+  runComplexComparison,
+  formatComplexComparisonResult,
+  registerCapability,
+  getCapability,
+  getAllCapabilities,
+  hasCapability,
+  getImplementationCapabilities
+} from './comparison';
 export * from './adapters';
 
 // Explicit re-exports for examples compatibility

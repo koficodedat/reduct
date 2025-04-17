@@ -10,6 +10,7 @@ The `@reduct/benchmark` package provides a powerful command-line interface (CLI)
   - [run](#run-command)
   - [compare](#compare-command)
   - [adapter-compare](#adapter-compare-command)
+  - [complex-compare](#complex-compare-command)
   - [scalability](#scalability-command)
   - [export](#export-command)
   - [template-export](#template-export-command)
@@ -164,6 +165,42 @@ npx reduct-benchmark adapter-compare reduct-list native-array -o get,map,filter 
 npx reduct-benchmark adapter-compare reduct-map native-map -o get,set,has -s 1000
 ```
 
+### `complex-compare` Command
+
+Compare implementations based on capabilities.
+
+```bash
+npx reduct-benchmark complex-compare <capability> [options]
+```
+
+#### Arguments
+
+- `capability`: The capability to compare (e.g., sequence, key-value-store, stack)
+
+#### Options
+
+- `-s, --size <number>`: Size of the data structure to test (default: 10000)
+- `-i, --iterations <number>`: Number of iterations for each benchmark (default: 100)
+- `-o, --operations <list>`: Comma-separated list of operations to compare (default: all)
+- `--output <format>`: Output format (console, csv, md, html) (default: console)
+- `-f, --output-file <file>`: Output file path
+- `--chart-type <type>`: Chart type for HTML output (bar, line, pie) (default: bar)
+- `--log-scale`: Use logarithmic scale for charts
+- `--test-case <type>`: Test case type (random, sequential, reversed) (default: random)
+
+#### Examples
+
+```bash
+# Compare implementations with the sequence capability
+npx reduct-benchmark complex-compare sequence -s 10000
+
+# Compare specific operations for key-value-store capability
+npx reduct-benchmark complex-compare key-value-store -o get,set,has -s 5000
+
+# Compare stack implementations with different test cases
+npx reduct-benchmark complex-compare stack -o push,pop,peek -s 1000 --test-case sequential
+```
+
 ### `scalability` Command
 
 Measure how performance scales with input size.
@@ -306,6 +343,14 @@ npx reduct-benchmark adapter-compare reduct-list native-array -o get,map,filter 
 ```
 
 This will compare the Reduct List implementation with native JavaScript arrays using the operation adapter system, focusing on the get, map, and filter operations.
+
+### Using Capability-Based Comparison
+
+```bash
+npx reduct-benchmark complex-compare sequence -o get,map,filter -s 10000 --output html -f sequence-comparison.html
+```
+
+This will compare all implementations that have the 'sequence' capability, focusing on the get, map, and filter operations, and export the results to an HTML file.
 
 ### Exporting Results
 

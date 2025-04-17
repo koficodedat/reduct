@@ -54,6 +54,9 @@ npx reduct-benchmark compare list array -s 10000
 # Compare using operation adapters
 npx reduct-benchmark adapter-compare list array -o get,map,filter -s 10000
 
+# Compare implementations based on capabilities
+npx reduct-benchmark complex-compare sequence -o get,map,filter -s 10000
+
 # Measure scalability
 npx reduct-benchmark scalability list get -s 5 -m 100000
 

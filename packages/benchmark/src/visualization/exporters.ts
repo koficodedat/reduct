@@ -5,6 +5,7 @@
  */
 
 import { BenchmarkResult, BenchmarkSuite, BenchmarkComparison, ScalabilityResult } from '../types';
+import { ComplexComparisonResult } from '../comparison/complex';
 
 /**
  * CSV export options
@@ -1323,4 +1324,146 @@ export function exportScalabilityToHTML(result: ScalabilityResult, options?: HTM
  */
 export function exportToJSON(data: BenchmarkResult[] | BenchmarkSuite | BenchmarkComparison | ScalabilityResult): string {
   return JSON.stringify(data, null, 2);
+}
+
+/**
+ * Exports data to a specific format
+ *
+ * @param format - Output format (csv, md, html)
+ * @param data - Data to export
+ * @param options - Export options
+ * @returns Formatted string
+ */
+export function exportToFormat(
+  format: string,
+  data: BenchmarkResult[] | BenchmarkSuite | BenchmarkComparison | BenchmarkComparison[] | ScalabilityResult | ComplexComparisonResult,
+  options?: any
+): string {
+  switch (format.toLowerCase()) {
+    case 'csv':
+      if (Array.isArray(data) && data.length > 0 && 'name' in data[0] && 'operation' in data[0]) {
+        return exportResultsToCSV(data as BenchmarkResult[], options);
+      } else if ('benchmarks' in data) {
+        return exportSuiteToCSV(data as BenchmarkSuite, options);
+      } else if ('results' in data && 'operation' in data && !('testCases' in data)) {
+        return exportComparisonToCSV(data as BenchmarkComparison, options);
+      } else if (Array.isArray(data) && data.length > 0 && 'results' in data[0] && 'operation' in data[0]) {
+        return data.map(comp => exportComparisonToCSV(comp as BenchmarkComparison, options)).join('\n\n');
+      } else if ('results' in data && 'implementation' in data && 'operation' in data) {
+        return exportScalabilityToCSV(data as ScalabilityResult, options);
+      } else if ('results' in data && 'testCases' in data) {
+        // For complex comparison, use markdown format as fallback
+        return exportComparisonToCSV((data as any).results[Object.keys((data as any).results)[0]][0], options);
+      }
+      break;
+
+    case 'md':
+    case 'markdown':
+      if (Array.isArray(data) && data.length > 0 && 'name' in data[0] && 'operation' in data[0]) {
+        return exportResultsToMarkdown(data as BenchmarkResult[], options);
+      } else if ('benchmarks' in data) {
+        return exportSuiteToMarkdown(data as BenchmarkSuite, options);
+      } else if ('results' in data && 'operation' in data && !('testCases' in data)) {
+        return exportComparisonToMarkdown(data as BenchmarkComparison, options);
+      } else if (Array.isArray(data) && data.length > 0 && 'results' in data[0] && 'operation' in data[0]) {
+        return data.map(comp => exportComparisonToMarkdown(comp as BenchmarkComparison, options)).join('\n\n');
+      } else if ('results' in data && 'implementation' in data && 'operation' in data) {
+        return exportScalabilityToMarkdown(data as ScalabilityResult, options);
+      } else if ('results' in data && 'testCases' in data) {
+        // For complex comparison, use markdown format
+        const result = data as any;
+        let md = `# ${result.name}\n\n`;
+
+        if (result.description) {
+          md += `${result.description}\n\n`;
+        }
+
+        md += `## Test Cases\n\n`;
+        for (const testCase of result.testCases) {
+          md += `- ${testCase}\n`;
+        }
+
+        md += `\n## Input Sizes\n\n`;
+        for (const size of result.inputSizes) {
+          md += `- ${size.toLocaleString()}\n`;
+        }
+
+        md += `\n## Results\n\n`;
+
+        for (const [opName, comparisons] of Object.entries(result.results)) {
+          md += `### ${opName} Operation\n\n`;
+
+          for (const comparison of comparisons as any[]) {
+            md += exportComparisonToMarkdown(comparison as BenchmarkComparison, options) + '\n\n';
+          }
+        }
+
+        return md;
+      }
+      break;
+
+    case 'html':
+      if (Array.isArray(data) && data.length > 0 && 'name' in data[0] && 'operation' in data[0]) {
+        return exportResultsToHTML(data as BenchmarkResult[], options);
+      } else if ('benchmarks' in data) {
+        return exportSuiteToHTML(data as BenchmarkSuite, options);
+      } else if ('results' in data && 'operation' in data && !('testCases' in data)) {
+        return exportComparisonToHTML(data as BenchmarkComparison, options);
+      } else if (Array.isArray(data) && data.length > 0 && 'results' in data[0] && 'operation' in data[0]) {
+        // For multiple comparisons, concatenate the results
+        return data.map(comp => exportComparisonToHTML(comp as BenchmarkComparison, options)).join('\n');
+      } else if ('results' in data && 'implementation' in data && 'operation' in data) {
+        return exportScalabilityToHTML(data as ScalabilityResult, options);
+      } else if ('results' in data && 'testCases' in data) {
+        // For complex comparison, use HTML format
+        const result = data as any;
+        // Use options directly
+
+        // Import the HTML template functions
+        const { baseTemplate } = require('./html-template');
+
+        let content = `<h1>${result.name}</h1>\n`;
+
+        if (result.description) {
+          content += `<p>${result.description}</p>\n`;
+        }
+
+        content += `<h2>Test Cases</h2>\n<ul>\n`;
+        for (const testCase of result.testCases) {
+          content += `<li>${testCase}</li>\n`;
+        }
+        content += `</ul>\n`;
+
+        content += `<h2>Input Sizes</h2>\n<ul>\n`;
+        for (const size of result.inputSizes) {
+          content += `<li>${size.toLocaleString()}</li>\n`;
+        }
+        content += `</ul>\n`;
+
+        content += `<h2>Results</h2>\n`;
+
+        for (const [opName, comparisons] of Object.entries(result.results)) {
+          content += `<h3>${opName} Operation</h3>\n`;
+
+          for (const comparison of comparisons as any[]) {
+            // Extract just the content part from the HTML
+            const html = exportComparisonToHTML(comparison as BenchmarkComparison, options);
+            const contentMatch = html.match(/<body>(.*?)<\/body>/s);
+            if (contentMatch && contentMatch[1]) {
+              content += contentMatch[1].replace(/<h1>.*?<\/h1>/s, '');
+            } else {
+              content += `<div><pre>${JSON.stringify(comparison, null, 2)}</pre></div>`;
+            }
+          }
+        }
+
+        return baseTemplate(result.name, content, '');
+      }
+      break;
+
+    default:
+      throw new Error(`Unsupported format: ${format}`);
+  }
+
+  throw new Error(`Could not determine how to export the provided data to ${format} format`);
 }

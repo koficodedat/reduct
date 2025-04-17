@@ -19,6 +19,13 @@ import { generateRandomArray } from '../utils';
 // Export adapter-based comparison
 export * from './adapter-based';
 
+// Export capabilities system
+export * from './capabilities';
+
+// Export builder and complex comparison
+export * from './builder';
+export * from './complex';
+
 /**
  * Options for comparing implementations
  */
