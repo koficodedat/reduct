@@ -115,10 +115,7 @@ export class OptimizedList<T> {
    * @returns A new OptimizedList with the element at the beginning
    */
   prepend(element: T): OptimizedList<T> {
-    // Create a new vector with the element at the beginning
-    // This is not as efficient as append, but maintains the API
-    const array = [element, ...this.toArray()];
-    return OptimizedList.from(array);
+    return new OptimizedList<T>(this.vector.prepend(element));
   }
 
   /**
@@ -154,15 +151,18 @@ export class OptimizedList<T> {
    */
   insert(index: number, element: T): OptimizedList<T> {
     if (index < 0) {
-      index = 0;
-    } else if (index > this.size) {
-      index = this.size;
+      // Insert at the beginning
+      return this.prepend(element);
+    } else if (index >= this.size) {
+      // Insert at the end
+      return this.append(element);
     }
 
-    // Create a new array with the element inserted
-    const array = this.toArray();
-    array.splice(index, 0, element);
-    return OptimizedList.from(array);
+    // Insert in the middle - split and concat
+    const firstPart = this.slice(0, index);
+    const secondPart = this.slice(index);
+
+    return firstPart.append(element).concat(secondPart);
   }
 
   /**
@@ -176,10 +176,11 @@ export class OptimizedList<T> {
       return this;
     }
 
-    // Create a new array with the element removed
-    const array = this.toArray();
-    array.splice(index, 1);
-    return OptimizedList.from(array);
+    // Remove by splitting and concatenating
+    const firstPart = this.slice(0, index);
+    const secondPart = this.slice(index + 1);
+
+    return firstPart.concat(secondPart);
   }
 
   /**
@@ -220,7 +221,7 @@ export class OptimizedList<T> {
    * @returns A new OptimizedList containing elements from both lists
    */
   concat(other: OptimizedList<T>): OptimizedList<T> {
-    return OptimizedList.from([...this.toArray(), ...other.toArray()]);
+    return new OptimizedList<T>(this.vector.concat(other.vector));
   }
 
   /**
@@ -231,7 +232,7 @@ export class OptimizedList<T> {
    * @returns A new OptimizedList with the specified elements
    */
   slice(start?: number, end?: number): OptimizedList<T> {
-    return OptimizedList.from(this.toArray().slice(start, end));
+    return new OptimizedList<T>(this.vector.slice(start, end));
   }
 
   /**
@@ -241,7 +242,7 @@ export class OptimizedList<T> {
    * @returns True if any element matches
    */
   some(predicate: (element: T, index: number) => boolean): boolean {
-    return this.toArray().some(predicate);
+    return this.vector.some(predicate);
   }
 
   /**
@@ -251,7 +252,7 @@ export class OptimizedList<T> {
    * @returns True if all elements match
    */
   every(predicate: (element: T, index: number) => boolean): boolean {
-    return this.toArray().every(predicate);
+    return this.vector.every(predicate);
   }
 
   /**
@@ -261,7 +262,7 @@ export class OptimizedList<T> {
    * @returns The index or -1
    */
   indexOf(element: T): number {
-    return this.toArray().indexOf(element);
+    return this.vector.indexOf(element);
   }
 
   /**
@@ -271,7 +272,7 @@ export class OptimizedList<T> {
    * @returns True if the element is found
    */
   includes(element: T): boolean {
-    return this.toArray().includes(element);
+    return this.vector.includes(element);
   }
 
   /**
@@ -280,7 +281,7 @@ export class OptimizedList<T> {
    * @param fn - Function to execute
    */
   forEach(fn: (element: T, index: number) => void): void {
-    this.toArray().forEach(fn);
+    this.vector.forEach(fn);
   }
 
   /**

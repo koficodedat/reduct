@@ -7,7 +7,7 @@
  * - O(1) access to first and last elements
  * - Efficient slicing and concatenation
  * - Memory-efficient structural sharing
- * 
+ *
  * @packageDocumentation
  */
 
@@ -255,6 +255,37 @@ export class PersistentVector<T> {
   }
 
   /**
+   * Prepends an element to the beginning of the vector
+   * Returns a new vector with the element at the beginning
+   */
+  prepend(value: T): PersistentVector<T> {
+    // Special case: empty vector
+    if (this.size === 0) {
+      return new PersistentVector<T>(1, BITS, [], [value]);
+    }
+
+    // If the tail has space, we can just add to it
+    if (this.tail.length < BRANCH_SIZE) {
+      // Create a new tail with the value at the beginning
+      const newTail = [value, ...this.tail];
+
+      // Create a new vector with the updated tail and size
+      return new PersistentVector<T>(
+        this.size + 1,
+        this.shift,
+        this.root,
+        newTail
+      );
+    }
+
+    // We need to create a new root and shift the elements
+    // This is more complex and less efficient than append
+    // For now, we'll use a simple but less efficient approach
+    const array = [value, ...this.toArray()];
+    return PersistentVector.from(array);
+  }
+
+  /**
    * Maps each element in the vector using the provided function
    * Returns a new vector with the mapped elements
    */
@@ -304,6 +335,66 @@ export class PersistentVector<T> {
   }
 
   /**
+   * Concatenates this vector with another vector
+   * Returns a new vector containing all elements from both vectors
+   */
+  concat(other: PersistentVector<T>): PersistentVector<T> {
+    // Special cases
+    if (other.size === 0) return this;
+    if (this.size === 0) return other;
+
+    // For small vectors, use a simple approach
+    if (this.size + other.size < 1000) {
+      return PersistentVector.from([...this.toArray(), ...other.toArray()]);
+    }
+
+    // For larger vectors, build incrementally
+    let result: PersistentVector<T> = this;
+    for (let i = 0; i < other.size; i++) {
+      result = result.append(other.get(i).get());
+    }
+    return result;
+  }
+
+  /**
+   * Returns a slice of the vector as a new vector
+   *
+   * @param start - Start index (inclusive)
+   * @param end - End index (exclusive)
+   * @returns A new vector with the specified elements
+   */
+  slice(start?: number, end?: number): PersistentVector<T> {
+    // Handle undefined parameters
+    const startIndex = start !== undefined ? start : 0;
+    const endIndex = end !== undefined ? end : this.size;
+
+    // Normalize indices
+    const normalizedStart = Math.max(0, startIndex < 0 ? this.size + startIndex : startIndex);
+    const normalizedEnd = Math.min(this.size, endIndex < 0 ? this.size + endIndex : endIndex);
+
+    // Handle empty slice
+    if (normalizedStart >= normalizedEnd) {
+      return PersistentVector.empty<T>();
+    }
+
+    // For small slices or small vectors, use a simple approach
+    if (normalizedEnd - normalizedStart < 1000 || this.size < 1000) {
+      let result = PersistentVector.empty<T>();
+      for (let i = normalizedStart; i < normalizedEnd; i++) {
+        result = result.append(this.get(i).get());
+      }
+      return result;
+    }
+
+    // For larger slices, we could implement a more efficient algorithm
+    // that works directly with the trie structure, but for now we'll use
+    // the simple approach
+    return PersistentVector.from(
+      this.toArray().slice(normalizedStart, normalizedEnd)
+    );
+  }
+
+  /**
    * Converts the vector to an array
    */
   toArray(): T[] {
@@ -315,6 +406,60 @@ export class PersistentVector<T> {
     }
 
     return result;
+  }
+
+  /**
+   * Checks if any element satisfies the predicate
+   */
+  some(predicate: (value: T, index: number) => boolean): boolean {
+    for (let i = 0; i < this.size; i++) {
+      if (predicate(this.get(i).get(), i)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Checks if all elements satisfy the predicate
+   */
+  every(predicate: (value: T, index: number) => boolean): boolean {
+    for (let i = 0; i < this.size; i++) {
+      if (!predicate(this.get(i).get(), i)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Executes a function for each element
+   */
+  forEach(fn: (value: T, index: number) => void): void {
+    for (let i = 0; i < this.size; i++) {
+      fn(this.get(i).get(), i);
+    }
+  }
+
+  /**
+   * Returns the index of the first occurrence of the element, or -1 if not found
+   */
+  indexOf(element: T, fromIndex: number = 0): number {
+    const start = fromIndex < 0 ? Math.max(0, this.size + fromIndex) : fromIndex;
+
+    for (let i = start; i < this.size; i++) {
+      if (this.get(i).get() === element) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  /**
+   * Checks if the vector includes the element
+   */
+  includes(element: T): boolean {
+    return this.indexOf(element) !== -1;
   }
 
   /**
