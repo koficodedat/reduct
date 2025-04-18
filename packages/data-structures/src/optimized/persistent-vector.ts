@@ -7,6 +7,8 @@
  * - O(1) access to first and last elements
  * - Efficient slicing and concatenation
  * - Memory-efficient structural sharing
+ * 
+ * @packageDocumentation
  */
 
 import { Option, some, none } from '@reduct/core';
