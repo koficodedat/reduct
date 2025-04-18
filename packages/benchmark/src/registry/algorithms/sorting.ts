@@ -1,11 +1,22 @@
 /**
  * Sorting algorithm registry
- * 
+ *
  * Registers sorting algorithms for benchmarking.
- * 
+ *
  * @packageDocumentation
  */
 
+// TODO: Import sorting algorithms when they're implemented
+// import {
+//   quickSort,
+//   mergeSort,
+//   heapSort,
+//   functionalQuickSort,
+//   bottomUpMergeSort,
+//   functionalHeapSort,
+// } from '@reduct/algorithms';
+
+// Use the temporary implementations from the benchmark package
 import {
   quickSort,
   mergeSort,
@@ -13,7 +24,7 @@ import {
   functionalQuickSort,
   bottomUpMergeSort,
   functionalHeapSort,
-} from '@reduct/algorithms';
+} from '../../algorithms/sorting';
 import { Registry, Implementation } from '../types';
 import { generateRandomArray } from '../../utils';
 
@@ -22,7 +33,7 @@ type SortingAlgorithm<T> = (arr: T[]) => T[];
 
 /**
  * Creates a sorting algorithm implementation
- * 
+ *
  * @param name - Name of the algorithm
  * @param description - Description of the algorithm
  * @param sortFn - Sorting function

@@ -4,7 +4,88 @@
  * @packageDocumentation
  */
 
-import { ImmutableMap } from '@reduct/data-structures';
+// TODO: Import ImmutableMap when it's implemented
+// import { ImmutableMap } from '@reduct/data-structures';
+
+/**
+ * Temporary ImmutableMap implementation for benchmarking
+ */
+export class ImmutableMap<K, V> {
+  private readonly _data: Map<K, V>;
+
+  constructor(data: Map<K, V> = new Map()) {
+    this._data = data;
+  }
+
+  static empty<K, V>(): ImmutableMap<K, V> {
+    return new ImmutableMap<K, V>();
+  }
+
+  static from<K, V>(entries: [K, V][]): ImmutableMap<K, V> {
+    return new ImmutableMap<K, V>(new Map(entries));
+  }
+
+  get size(): number {
+    return this._data.size;
+  }
+
+  get isEmpty(): boolean {
+    return this._data.size === 0;
+  }
+
+  has(key: K): boolean {
+    return this._data.has(key);
+  }
+
+  get(key: K): V | undefined {
+    return this._data.get(key);
+  }
+
+  set(key: K, value: V): ImmutableMap<K, V> {
+    const newMap = new Map(this._data);
+    newMap.set(key, value);
+    return new ImmutableMap<K, V>(newMap);
+  }
+
+  delete(key: K): ImmutableMap<K, V> {
+    if (!this._data.has(key)) {
+      return this;
+    }
+    const newMap = new Map(this._data);
+    newMap.delete(key);
+    return new ImmutableMap<K, V>(newMap);
+  }
+
+  map<U>(fn: (value: V, key: K) => U): ImmutableMap<K, U> {
+    const newMap = new Map<K, U>();
+    this._data.forEach((value, key) => {
+      newMap.set(key, fn(value, key));
+    });
+    return new ImmutableMap<K, U>(newMap);
+  }
+
+  filter(fn: (value: V, key: K) => boolean): ImmutableMap<K, V> {
+    const newMap = new Map<K, V>();
+    this._data.forEach((value, key) => {
+      if (fn(value, key)) {
+        newMap.set(key, value);
+      }
+    });
+    return new ImmutableMap<K, V>(newMap);
+  }
+
+  keys(): K[] {
+    return Array.from(this._data.keys());
+  }
+
+  values(): V[] {
+    return Array.from(this._data.values());
+  }
+
+  entries(): [K, V][] {
+    return Array.from(this._data.entries());
+  }
+}
 import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../../types';
 import { benchmark, generateRandomEntries } from '../../utils';
 

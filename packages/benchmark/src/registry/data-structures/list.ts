@@ -6,16 +6,16 @@
  * @packageDocumentation
  */
 
-import { List, OptimizedList } from '@reduct/data-structures';
+import { List } from '@reduct/data-structures';
 import { Registry, Implementation } from '../types';
 import { generateRandomArray } from '../../utils';
 
 /**
  * Reduct List implementation
  */
-const reductList: Implementation<List<number>> = {
-  name: 'Reduct List',
-  description: 'Immutable List implementation from @reduct/data-structures',
+const reductList: Implementation<any> = {
+  name: 'List',
+  description: 'Immutable List implementation with size-based adaptation',
   category: 'data-structure',
   type: 'list',
   create: (size) => {
@@ -60,36 +60,9 @@ const nativeArray: Implementation<number[]> = {
 };
 
 /**
- * Optimized List implementation
- */
-const optimizedList: Implementation<OptimizedList<number>> = {
-  name: 'Optimized List',
-  description: 'Optimized immutable List implementation using PersistentVector',
-  category: 'data-structure',
-  type: 'list',
-  create: (size) => {
-    // Create an OptimizedList with random elements
-    return OptimizedList.from(generateRandomArray(size));
-  },
-  operations: {
-    get: (list, index) => list.get(index),
-    map: (list, fn) => list.map(fn),
-    filter: (list, fn) => list.filter(fn),
-    reduce: (list, fn, initial) => list.reduce(fn, initial),
-    append: (list, value) => list.append(value),
-    prepend: (list, value) => list.prepend(value),
-    concat: (list, other) => list.concat(other),
-    toArray: (list) => list.toArray(),
-    size: (list) => list.size,
-    isEmpty: (list) => list.isEmpty,
-  },
-};
-
-/**
  * List registry
  */
 export const listRegistry: Registry = {
   'reduct-list': reductList,
-  'optimized-list': optimizedList,
   'native-array': nativeArray,
 };

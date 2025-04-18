@@ -1,12 +1,16 @@
 /**
  * Searching algorithm registry
- * 
+ *
  * Registers searching algorithms for benchmarking.
- * 
+ *
  * @packageDocumentation
  */
 
-import { linearSearch, binarySearch } from '@reduct/algorithms';
+// TODO: Import searching algorithms when they're implemented
+// import { linearSearch, binarySearch } from '@reduct/algorithms';
+
+// Use the temporary implementations from the benchmark package
+import { linearSearch, binarySearch } from '../../algorithms/searching';
 import { Registry, Implementation } from '../types';
 import { generateRandomArray, generateSortedArray } from '../../utils';
 
@@ -15,7 +19,7 @@ type SearchingAlgorithm<T, V> = (arr: T[], value: V) => number;
 
 /**
  * Creates a searching algorithm implementation
- * 
+ *
  * @param name - Name of the algorithm
  * @param description - Description of the algorithm
  * @param searchFn - Searching function

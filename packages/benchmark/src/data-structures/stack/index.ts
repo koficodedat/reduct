@@ -4,7 +4,58 @@
  * @packageDocumentation
  */
 
-import { Stack } from '@reduct/data-structures';
+// TODO: Import Stack when it's implemented
+// import { Stack } from '@reduct/data-structures';
+
+/**
+ * Temporary Stack implementation for benchmarking
+ */
+export class Stack<T> {
+  private readonly _data: T[];
+
+  constructor(data: T[] = []) {
+    this._data = data;
+  }
+
+  static empty<T>(): Stack<T> {
+    return new Stack<T>();
+  }
+
+  static from<T>(elements: T[]): Stack<T> {
+    return new Stack<T>([...elements]);
+  }
+
+  get size(): number {
+    return this._data.length;
+  }
+
+  get isEmpty(): boolean {
+    return this._data.length === 0;
+  }
+
+  peek(): T | undefined {
+    return this._data[this._data.length - 1];
+  }
+
+  push(value: T): Stack<T> {
+    return new Stack<T>([...this._data, value]);
+  }
+
+  pop(): Stack<T> {
+    if (this._data.length === 0) {
+      return this;
+    }
+    return new Stack<T>(this._data.slice(0, -1));
+  }
+
+  map<U>(fn: (value: T, index: number) => U): Stack<U> {
+    return new Stack<U>(this._data.map(fn));
+  }
+
+  filter(fn: (value: T, index: number) => boolean): Stack<T> {
+    return new Stack<T>(this._data.filter(fn));
+  }
+}
 import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../../types';
 import { benchmark, generateRandomArray } from '../../utils';
 

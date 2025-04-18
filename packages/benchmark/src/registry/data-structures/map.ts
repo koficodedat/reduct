@@ -6,7 +6,11 @@
  * @packageDocumentation
  */
 
-import { ImmutableMap } from '@reduct/data-structures';
+// TODO: Import ImmutableMap when it's implemented
+// import { ImmutableMap } from '@reduct/data-structures';
+
+// Use the temporary ImmutableMap implementation from the benchmark package
+import { ImmutableMap } from '../../data-structures/map';
 import { Registry, Implementation } from '../types';
 import { generateRandomEntries } from '../../utils';
 

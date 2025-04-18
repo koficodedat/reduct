@@ -6,14 +6,18 @@
  * @packageDocumentation
  */
 
-import { Stack } from '@reduct/data-structures';
+// TODO: Import Stack when it's implemented
+// import { Stack } from '@reduct/data-structures';
+
+// Use the temporary Stack implementation from the benchmark package
+import { Stack } from '../../data-structures/stack';
 import { Registry, Implementation } from '../types';
 import { generateRandomArray } from '../../utils';
 
 /**
  * Reduct Stack implementation
  */
-const reductStack: Implementation<Stack<number>> = {
+const reductStack: Implementation<any> = {
   name: 'Reduct Stack',
   description: 'Immutable Stack implementation from @reduct/data-structures',
   category: 'data-structure',
