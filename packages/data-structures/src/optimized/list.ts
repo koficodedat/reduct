@@ -9,6 +9,7 @@
 
 import { Option } from '@reduct/core';
 import { PersistentVector } from './persistent-vector';
+import { TransientVector } from './transient-vector';
 
 /**
  * Optimized Immutable List class
@@ -47,7 +48,19 @@ export class OptimizedList<T> {
    * @returns A new OptimizedList containing the array elements
    */
   static from<T>(elements: ReadonlyArray<T>): OptimizedList<T> {
-    return new OptimizedList<T>(PersistentVector.from(elements));
+    // For small arrays, use the native array operations directly
+    if (elements.length < 1000) {
+      const list = new OptimizedList<T>(PersistentVector.empty<T>());
+      (list as any).vector = PersistentVector.from(elements);
+      return list;
+    }
+
+    // For larger arrays, use a transient vector for efficient batch operations
+    const transient = TransientVector.empty<T>();
+    for (let i = 0; i < elements.length; i++) {
+      transient.append(elements[i]);
+    }
+    return new OptimizedList<T>(transient.persistent());
   }
 
   /**
@@ -158,7 +171,8 @@ export class OptimizedList<T> {
       return this.append(element);
     }
 
-    // Insert in the middle - split and concat
+    // For now, use the split and concat approach which is more reliable
+    // We'll optimize this further in the future
     const firstPart = this.slice(0, index);
     const secondPart = this.slice(index);
 
@@ -176,7 +190,8 @@ export class OptimizedList<T> {
       return this;
     }
 
-    // Remove by splitting and concatenating
+    // For now, use the split and concat approach which is more reliable
+    // We'll optimize this further in the future
     const firstPart = this.slice(0, index);
     const secondPart = this.slice(index + 1);
 
@@ -190,6 +205,12 @@ export class OptimizedList<T> {
    * @returns A new OptimizedList with transformed elements
    */
   map<U>(fn: (element: T, index: number) => U): OptimizedList<U> {
+    // For small lists, use the native array operations which are faster
+    if (this.size < 1000) {
+      return OptimizedList.from(this.toArray().map(fn));
+    }
+
+    // For larger lists, use the optimized operation from PersistentVector
     return new OptimizedList<U>(this.vector.map(fn));
   }
 
@@ -200,6 +221,12 @@ export class OptimizedList<T> {
    * @returns A filtered OptimizedList
    */
   filter(predicate: (element: T, index: number) => boolean): OptimizedList<T> {
+    // For small lists, use the native array operations which are faster
+    if (this.size < 1000) {
+      return OptimizedList.from(this.toArray().filter(predicate));
+    }
+
+    // For larger lists, use the optimized operation from PersistentVector
     return new OptimizedList<T>(this.vector.filter(predicate));
   }
 
@@ -211,6 +238,12 @@ export class OptimizedList<T> {
    * @returns The final accumulated value
    */
   reduce<U>(fn: (accumulator: U, element: T, index: number) => U, initialValue: U): U {
+    // For small lists, use the native array operations which are faster
+    if (this.size < 1000) {
+      return this.toArray().reduce(fn, initialValue);
+    }
+
+    // For larger lists, use the optimized operation from PersistentVector
     return this.vector.reduce(fn, initialValue);
   }
 

@@ -7,11 +7,13 @@
  * - O(1) access to first and last elements
  * - Efficient slicing and concatenation
  * - Memory-efficient structural sharing
+ * - Support for transient mutations for batch operations
  *
  * @packageDocumentation
  */
 
 import { Option, some, none } from '@reduct/core';
+import { TransientVector } from './transient-vector';
 
 // Constants for the trie implementation
 const BITS = 5;
@@ -65,14 +67,83 @@ export class PersistentVector<T> {
    * Creates a PersistentVector from an array of elements
    */
   static from<T>(elements: ReadonlyArray<T>): PersistentVector<T> {
-    let vector = PersistentVector.empty<T>();
-
-    // Add each element to the vector
-    for (const element of elements) {
-      vector = vector.append(element);
+    // Handle empty array
+    if (elements.length === 0) {
+      return PersistentVector.empty<T>();
     }
 
-    return vector;
+    // For small arrays, use the transient approach which is more efficient
+    if (elements.length < 1000) {
+      const transient = TransientVector.empty<T>();
+      for (let i = 0; i < elements.length; i++) {
+        transient.append(elements[i]);
+      }
+      return transient.persistent();
+    }
+
+    // For larger arrays, use a more efficient bulk loading algorithm
+    return PersistentVector.bulkLoad(elements);
+  }
+
+  /**
+   * Efficiently creates a PersistentVector from a large array by building the trie bottom-up
+   * This is much faster than appending elements one by one
+   * @private
+   */
+  private static bulkLoad<T>(elements: ReadonlyArray<T>): PersistentVector<T> {
+    const size = elements.length;
+
+    // Calculate the height of the trie needed to hold all elements
+    let shift = 0;
+    let treeSize = BRANCH_SIZE;
+    while (treeSize < size) {
+      shift += BITS;
+      treeSize *= BRANCH_SIZE;
+    }
+
+    // Create leaf nodes first
+    const leaves: T[][] = [];
+    let i = 0;
+    while (i < size) {
+      const leaf: T[] = [];
+      const end = Math.min(i + BRANCH_SIZE, size);
+      for (let j = i; j < end; j++) {
+        leaf.push(elements[j]);
+      }
+      leaves.push(leaf);
+      i += BRANCH_SIZE;
+    }
+
+    // If we have only one leaf, use it as the tail
+    if (leaves.length === 1) {
+      return new PersistentVector<T>(size, 0, [], leaves[0]);
+    }
+
+    // Extract the tail (last leaf, which might be partially filled)
+    const tail = leaves.pop()!;
+
+    // Build the trie bottom-up
+    let nodes: Node<T>[] = leaves as Node<T>[];
+    let level = 0;
+
+    while (level < shift) {
+      const nextLevel: Node<T>[] = [];
+      for (let j = 0; j < nodes.length; j += BRANCH_SIZE) {
+        const node = [] as Array<Node<T>>;
+        const end = Math.min(j + BRANCH_SIZE, nodes.length);
+        for (let k = j; k < end; k++) {
+          node[k - j] = nodes[k];
+        }
+        nextLevel.push(node);
+      }
+      nodes = nextLevel;
+      level += BITS;
+    }
+
+    // The root is the single node at the top level
+    const root = nodes.length === 1 ? nodes[0] : nodes;
+
+    return new PersistentVector<T>(size, shift, root, tail);
   }
 
   /**
@@ -290,15 +361,17 @@ export class PersistentVector<T> {
    * Returns a new vector with the mapped elements
    */
   map<U>(fn: (value: T, index: number) => U): PersistentVector<U> {
-    let result = PersistentVector.empty<U>();
+    // Use a transient vector for efficient batch operations
+    const transient = TransientVector.empty<U>();
 
-    // Map each element and append to the result
+    // Map each element and append to the transient result
     for (let i = 0; i < this.size; i++) {
       const value = this.get(i).get();
-      result = result.append(fn(value, i));
+      transient.append(fn(value, i));
     }
 
-    return result;
+    // Convert back to a persistent vector
+    return transient.persistent();
   }
 
   /**
@@ -306,17 +379,19 @@ export class PersistentVector<T> {
    * Returns a new vector with only the elements that satisfy the predicate
    */
   filter(predicate: (value: T, index: number) => boolean): PersistentVector<T> {
-    let result = PersistentVector.empty<T>();
+    // Use a transient vector for efficient batch operations
+    const transient = TransientVector.empty<T>();
 
-    // Filter elements and append to the result
+    // Filter elements and append to the transient result
     for (let i = 0; i < this.size; i++) {
       const value = this.get(i).get();
       if (predicate(value, i)) {
-        result = result.append(value);
+        transient.append(value);
       }
     }
 
-    return result;
+    // Convert back to a persistent vector
+    return transient.persistent();
   }
 
   /**
@@ -348,12 +423,16 @@ export class PersistentVector<T> {
       return PersistentVector.from([...this.toArray(), ...other.toArray()]);
     }
 
-    // For larger vectors, build incrementally
-    let result: PersistentVector<T> = this;
+    // For larger vectors, use a transient vector for efficient batch operations
+    const transient = this.asTransient();
+
+    // Add all elements from the other vector
     for (let i = 0; i < other.size; i++) {
-      result = result.append(other.get(i).get());
+      transient.append(other.get(i).get());
     }
-    return result;
+
+    // Convert back to a persistent vector
+    return transient.persistent();
   }
 
   /**
@@ -377,21 +456,16 @@ export class PersistentVector<T> {
       return PersistentVector.empty<T>();
     }
 
-    // For small slices or small vectors, use a simple approach
-    if (normalizedEnd - normalizedStart < 1000 || this.size < 1000) {
-      let result = PersistentVector.empty<T>();
-      for (let i = normalizedStart; i < normalizedEnd; i++) {
-        result = result.append(this.get(i).get());
-      }
-      return result;
+    // Use a transient vector for efficient batch operations
+    const transient = TransientVector.empty<T>();
+
+    // Add elements from the specified range
+    for (let i = normalizedStart; i < normalizedEnd; i++) {
+      transient.append(this.get(i).get());
     }
 
-    // For larger slices, we could implement a more efficient algorithm
-    // that works directly with the trie structure, but for now we'll use
-    // the simple approach
-    return PersistentVector.from(
-      this.toArray().slice(normalizedStart, normalizedEnd)
-    );
+    // Convert back to a persistent vector
+    return transient.persistent();
   }
 
   /**
@@ -460,6 +534,13 @@ export class PersistentVector<T> {
    */
   includes(element: T): boolean {
     return this.indexOf(element) !== -1;
+  }
+
+  /**
+   * Creates a transient version of this vector for efficient batch operations
+   */
+  asTransient(): TransientVector<T> {
+    return TransientVector.from(this);
   }
 
   /**
