@@ -75,12 +75,12 @@ describe('SmartList Performance', () => {
   describe('creation from array', () => {
     it('should compare creation performance for different sizes', () => {
       const sizes = [10, 100, 1000, 10000, 100000];
-      
+
       for (const size of sizes) {
         console.log(`\n=== Creation performance for size ${size} ===`);
-        
+
         const array = Array.from({ length: size }, (_, i) => i);
-        
+
         runBenchmark(
           'Creation',
           () => List.from(array),
@@ -95,15 +95,15 @@ describe('SmartList Performance', () => {
   describe('map operation', () => {
     it('should compare map performance', () => {
       const sizes = [10, 100, 1000, 10000];
-      
+
       for (const size of sizes) {
         console.log(`\n=== Map performance for size ${size} ===`);
-        
+
         const array = Array.from({ length: size }, (_, i) => i);
         const originalList = List.from(array);
         const optimizedList = OptimizedList.from(array);
         const smartList = SmartList.from(array);
-        
+
         runBenchmark(
           'Map',
           () => originalList.map(x => x * 2),
@@ -118,15 +118,15 @@ describe('SmartList Performance', () => {
   describe('filter operation', () => {
     it('should compare filter performance', () => {
       const sizes = [10, 100, 1000, 10000];
-      
+
       for (const size of sizes) {
         console.log(`\n=== Filter performance for size ${size} ===`);
-        
+
         const array = Array.from({ length: size }, (_, i) => i);
         const originalList = List.from(array);
         const optimizedList = OptimizedList.from(array);
         const smartList = SmartList.from(array);
-        
+
         runBenchmark(
           'Filter',
           () => originalList.filter(x => x % 2 === 0),
@@ -141,15 +141,15 @@ describe('SmartList Performance', () => {
   describe('reduce operation', () => {
     it('should compare reduce performance', () => {
       const sizes = [10, 100, 1000, 10000];
-      
+
       for (const size of sizes) {
         console.log(`\n=== Reduce performance for size ${size} ===`);
-        
+
         const array = Array.from({ length: size }, (_, i) => i);
         const originalList = List.from(array);
         const optimizedList = OptimizedList.from(array);
         const smartList = SmartList.from(array);
-        
+
         runBenchmark(
           'Reduce',
           () => originalList.reduce((acc, x) => acc + x, 0),
@@ -164,17 +164,17 @@ describe('SmartList Performance', () => {
   describe('chained operations', () => {
     it('should compare performance for a sequence of operations', () => {
       const sizes = [10, 100, 1000, 10000];
-      
+
       for (const size of sizes) {
         console.log(`\n=== Chained operations performance for size ${size} ===`);
-        
+
         const array = Array.from({ length: size }, (_, i) => i);
         const originalList = List.from(array);
         const optimizedList = OptimizedList.from(array);
         const smartList = SmartList.from(array);
-        
+
         runBenchmark(
-          'Map + Filter + Reduce',
+          'Map + Filter + Reduce (separate calls)',
           () => originalList
             .map(x => x * 2)
             .filter(x => x % 4 === 0)
@@ -192,6 +192,37 @@ describe('SmartList Performance', () => {
             .filter(x => x % 4 === 0)
             .reduce((acc, x) => acc + x, 0)
         );
+
+        // Test specialized method for chained operations
+        runBenchmark(
+          'Map + Filter + Reduce (specialized)',
+          () => originalList
+            .map(x => x * 2)
+            .filter(x => x % 4 === 0)
+            .reduce((acc, x) => acc + x, 0),
+          () => optimizedList
+            .map(x => x * 2)
+            .filter(x => x % 4 === 0)
+            .reduce((acc, x) => acc + x, 0),
+          () => smartList
+            .mapFilterReduce(
+              x => x * 2,
+              x => x % 4 === 0,
+              (acc, x) => acc + x,
+              0
+            ),
+          () => {
+            // Optimized native implementation without intermediate arrays
+            let sum = 0;
+            for (let i = 0; i < array.length; i++) {
+              const mapped = array[i] * 2;
+              if (mapped % 4 === 0) {
+                sum += mapped;
+              }
+            }
+            return sum;
+          }
+        );
       }
     });
   });
@@ -199,15 +230,15 @@ describe('SmartList Performance', () => {
   describe('append operation', () => {
     it('should compare append performance', () => {
       const sizes = [10, 100, 1000, 10000];
-      
+
       for (const size of sizes) {
         console.log(`\n=== Append performance for size ${size} ===`);
-        
+
         const array = Array.from({ length: size }, (_, i) => i);
         const originalList = List.from(array);
         const optimizedList = OptimizedList.from(array);
         const smartList = SmartList.from(array);
-        
+
         runBenchmark(
           'Append',
           () => originalList.append(999),
@@ -222,15 +253,15 @@ describe('SmartList Performance', () => {
   describe('prepend operation', () => {
     it('should compare prepend performance', () => {
       const sizes = [10, 100, 1000, 10000];
-      
+
       for (const size of sizes) {
         console.log(`\n=== Prepend performance for size ${size} ===`);
-        
+
         const array = Array.from({ length: size }, (_, i) => i);
         const originalList = List.from(array);
         const optimizedList = OptimizedList.from(array);
         const smartList = SmartList.from(array);
-        
+
         runBenchmark(
           'Prepend',
           () => originalList.prepend(999),
@@ -245,17 +276,17 @@ describe('SmartList Performance', () => {
   describe('get operation', () => {
     it('should compare get performance', () => {
       const sizes = [10, 100, 1000, 10000];
-      
+
       for (const size of sizes) {
         console.log(`\n=== Get performance for size ${size} ===`);
-        
+
         const array = Array.from({ length: size }, (_, i) => i);
         const originalList = List.from(array);
         const optimizedList = OptimizedList.from(array);
         const smartList = SmartList.from(array);
-        
+
         const index = Math.floor(size / 2);
-        
+
         runBenchmark(
           'Get',
           () => originalList.get(index),
@@ -270,17 +301,17 @@ describe('SmartList Performance', () => {
   describe('set operation', () => {
     it('should compare set performance', () => {
       const sizes = [10, 100, 1000, 10000];
-      
+
       for (const size of sizes) {
         console.log(`\n=== Set performance for size ${size} ===`);
-        
+
         const array = Array.from({ length: size }, (_, i) => i);
         const originalList = List.from(array);
         const optimizedList = OptimizedList.from(array);
         const smartList = SmartList.from(array);
-        
+
         const index = Math.floor(size / 2);
-        
+
         runBenchmark(
           'Set',
           () => originalList.set(index, 999),

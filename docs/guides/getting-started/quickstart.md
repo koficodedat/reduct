@@ -142,6 +142,19 @@ const filtered = fromArray.filter(x => x % 2 === 1); // [1, 3]
 const head = fromArray.head.getOrElse(0); // 1
 const item = fromArray.get(1).getOrElse(0); // 2
 const allItems = fromArray.toArray(); // [1, 2, 3]
+
+// Efficient operation chains
+const result = fromArray
+  .map(x => x * 2)
+  .filter(x => x > 2)
+  .reduce((sum, x) => sum + x, 0); // 10
+
+// Batch operations for efficiency
+const newList = fromArray.withMutations(mutable => {
+  for (let i = 0; i < 100; i++) {
+    mutable.append(i);
+  }
+});
 ```
 
 ### Persistent Stack
@@ -334,9 +347,33 @@ console.log(topUsers);
 // [{ name: "Alice", score: 95 }, { name: "Charlie", score: 90 }, { name: "Diana", score: 87 }]
 ```
 
+## Performance Considerations
+
+Reduct uses a hybrid implementation strategy that adapts based on collection size:
+
+```typescript
+// Small collections use optimized implementations for small size
+const smallList = List.of(1, 2, 3, 4, 5);
+
+// Large collections use specialized persistent data structures
+const largeList = List.from(Array.from({ length: 10000 }, (_, i) => i));
+
+// The API remains the same regardless of implementation
+const smallItem = smallList.get(2); // Optimized for small collections
+const largeItem = largeList.get(5000); // Optimized for large collections
+```
+
+For best performance:
+
+1. **Chain operations** to enable specialized optimizations
+2. **Use batch operations** for multiple updates
+3. **Leverage specialized methods** for common operations
+
 ## Next Steps
 
-- Learn about [Reduct's architecture](architecture.md)
-- Explore [performance considerations](performance.md)
-- See the [type system utilities](types.md)
-- Check out [API documentation](api/index.md)
+- Learn about [Reduct's architecture](../architecture.md)
+- Explore [performance considerations](../performance/performance-guarantees.md)
+- Learn about [hybrid implementations](../performance/hybrid-implementations.md)
+- Understand [JavaScript engine optimizations](../performance/engine-optimization.md)
+- See [WebAssembly integration](../performance/webassembly-integration.md)
+- Check out [API documentation](../../api/index.md)

@@ -31,11 +31,18 @@ We view algorithms not as isolated implementations, but as:
    - Optimized without sacrificing readability
    - Benchmarked across multiple dimensions
    - Predictable computational characteristics
+   - Pragmatic optimization strategies
 
 3. **Developer Experience**
    - Intuitive interfaces
    - Minimal cognitive overhead
    - Encouraging exploration and learning
+
+4. **Pragmatic Functional Programming**
+   - Immutability without excessive performance costs
+   - Leveraging platform strengths rather than fighting them
+   - Adaptive implementation strategies
+   - Balancing purity with practical performance
 
 ### Our Computational Worldview
 
@@ -44,6 +51,9 @@ We believe that:
 - Algorithms are tools for understanding
 - Every implementation tells a story of problem-solving
 - Technology should empower human thinking
+- Pragmatism and theory can coexist harmoniously
+- Implementation details should adapt to their environment
+- Performance is an essential aspect of correctness
 
 ### The Reduct Promise
 
