@@ -11,9 +11,14 @@
  */
 export enum RepresentationType {
   /**
-   * Simple array representation for small collections
+   * Simple array representation for very small collections
    */
   ARRAY = 'array',
+
+  /**
+   * SmallList representation for small collections
+   */
+  SMALL = 'small',
 
   /**
    * Chunked array representation for medium collections

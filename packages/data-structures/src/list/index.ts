@@ -10,6 +10,7 @@
 import { IList, IListFactory, TransientList, RepresentationType } from './types';
 import { ChunkedList } from './chunked-list';
 import { PersistentVector } from './persistent-vector';
+import { SmallList } from './small-list';
 
 /**
  * Threshold for small collections
@@ -168,8 +169,9 @@ export class List<T> implements IList<T> {
     }
 
     if (size < SMALL_COLLECTION_THRESHOLD) {
-      // For small collections, use a simple array copy for optimal performance
-      return new List<T>(size, RepresentationType.ARRAY, [...elements]);
+      // For small collections, use SmallList for optimal performance
+      const smallList = new SmallList<T>(elements);
+      return new List<T>(size, RepresentationType.SMALL, smallList);
     } else if (size < MEDIUM_COLLECTION_THRESHOLD) {
       // For medium collections, use a ChunkedList for better performance
       // with operations that access elements by index
@@ -202,8 +204,9 @@ export class List<T> implements IList<T> {
 
     // Create the appropriate representation based on size
     if (size < SMALL_COLLECTION_THRESHOLD) {
-      // For small collections, use a simple array
-      return new List<T>(size, RepresentationType.ARRAY, data);
+      // For small collections, use SmallList
+      const smallList = new SmallList<T>(data);
+      return new List<T>(size, RepresentationType.SMALL, smallList);
     } else if (size < MEDIUM_COLLECTION_THRESHOLD) {
       // For medium collections, use a ChunkedList
       const chunkedList = ChunkedList.from(data);
@@ -243,12 +246,17 @@ export class List<T> implements IList<T> {
       case RepresentationType.ARRAY:
         // For array representation, direct access is fastest
         return this._data[index];
+      case RepresentationType.SMALL:
+        // For small list, use the small list's get method
+        return (this._data as SmallList<T>).get(index);
       case RepresentationType.CHUNKED:
         // For chunked list, use the chunked list's get method
         return (this._data as ChunkedList<T>).get(index);
       case RepresentationType.VECTOR:
         // For vector representation, use the vector's get method
         return (this._data as PersistentVector<T>).get(index);
+      default:
+        return undefined;
     }
   }
 
@@ -296,6 +304,12 @@ export class List<T> implements IList<T> {
         newData[index] = value;
         return new List<T>(this._size, RepresentationType.ARRAY, newData);
       }
+      case RepresentationType.SMALL: {
+        // For small list, use the small list's set method
+        const smallList = this._data as SmallList<T>;
+        const newSmallList = smallList.set(index, value);
+        return new List<T>(this._size, RepresentationType.SMALL, newSmallList);
+      }
       case RepresentationType.CHUNKED: {
         // For chunked list, use the chunked list's set method
         const chunkedList = this._data as ChunkedList<T>;
@@ -308,6 +322,8 @@ export class List<T> implements IList<T> {
         const newVector = vector.set(index, value);
         return new List<T>(this._size, RepresentationType.VECTOR, newVector);
       }
+      default:
+        return this;
     }
   }
 
@@ -341,9 +357,16 @@ export class List<T> implements IList<T> {
     }
 
     // Convert to array for insertion operation
-    const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedList<T>).toArray()
-      : [...this._data];
+    let dataArray: T[];
+    if (this._representation === RepresentationType.CHUNKED) {
+      dataArray = (this._data as ChunkedList<T>).toArray();
+    } else if (this._representation === RepresentationType.SMALL) {
+      dataArray = (this._data as SmallList<T>).toArray();
+    } else if (this._representation === RepresentationType.VECTOR) {
+      dataArray = (this._data as PersistentVector<T>).toArray();
+    } else {
+      dataArray = [...this._data];
+    }
 
     // Insert the value
     const newDataArray = [...dataArray.slice(0, index), value, ...dataArray.slice(index)];
@@ -382,9 +405,16 @@ export class List<T> implements IList<T> {
     }
 
     // Convert to array for removal operation
-    const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedList<T>).toArray()
-      : [...this._data];
+    let dataArray: T[];
+    if (this._representation === RepresentationType.CHUNKED) {
+      dataArray = (this._data as ChunkedList<T>).toArray();
+    } else if (this._representation === RepresentationType.SMALL) {
+      dataArray = (this._data as SmallList<T>).toArray();
+    } else if (this._representation === RepresentationType.VECTOR) {
+      dataArray = (this._data as PersistentVector<T>).toArray();
+    } else {
+      dataArray = [...this._data];
+    }
 
     // Remove the element
     const newDataArray = [...dataArray.slice(0, index), ...dataArray.slice(index + 1)];
@@ -420,9 +450,16 @@ export class List<T> implements IList<T> {
     }
 
     // Convert to array for append operation
-    const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedList<T>).toArray()
-      : [...this._data];
+    let dataArray: T[];
+    if (this._representation === RepresentationType.CHUNKED) {
+      dataArray = (this._data as ChunkedList<T>).toArray();
+    } else if (this._representation === RepresentationType.SMALL) {
+      dataArray = (this._data as SmallList<T>).toArray();
+    } else if (this._representation === RepresentationType.VECTOR) {
+      dataArray = (this._data as PersistentVector<T>).toArray();
+    } else {
+      dataArray = [...this._data];
+    }
 
     // Append the value
     const newDataArray = [...dataArray, value];
@@ -458,9 +495,16 @@ export class List<T> implements IList<T> {
     }
 
     // Convert to array for prepend operation
-    const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedList<T>).toArray()
-      : [...this._data];
+    let dataArray: T[];
+    if (this._representation === RepresentationType.CHUNKED) {
+      dataArray = (this._data as ChunkedList<T>).toArray();
+    } else if (this._representation === RepresentationType.SMALL) {
+      dataArray = (this._data as SmallList<T>).toArray();
+    } else if (this._representation === RepresentationType.VECTOR) {
+      dataArray = (this._data as PersistentVector<T>).toArray();
+    } else {
+      dataArray = [...this._data];
+    }
 
     // Prepend the value
     const newDataArray = [value, ...dataArray];
@@ -505,9 +549,16 @@ export class List<T> implements IList<T> {
     }
 
     // Convert to array for concat operation
-    const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedList<T>).toArray()
-      : [...this._data];
+    let dataArray: T[];
+    if (this._representation === RepresentationType.CHUNKED) {
+      dataArray = (this._data as ChunkedList<T>).toArray();
+    } else if (this._representation === RepresentationType.SMALL) {
+      dataArray = (this._data as SmallList<T>).toArray();
+    } else if (this._representation === RepresentationType.VECTOR) {
+      dataArray = (this._data as PersistentVector<T>).toArray();
+    } else {
+      dataArray = [...this._data];
+    }
 
     // Concatenate the arrays
     const newDataArray = [...dataArray, ...otherArray];
@@ -748,16 +799,39 @@ export class List<T> implements IList<T> {
       return [];
     }
 
-    switch (this._representation) {
-      case RepresentationType.ARRAY:
-        // For array representation, return a copy of the array
+    try {
+      switch (this._representation) {
+        case RepresentationType.ARRAY:
+          // For array representation, return a copy of the array
+          return [...this._data];
+        case RepresentationType.SMALL:
+          // For small list, use the small list's toArray method
+          return (this._data as SmallList<T>).toArray();
+        case RepresentationType.CHUNKED:
+          // For chunked list, use the chunked list's toArray method
+          return (this._data as ChunkedList<T>).toArray();
+        case RepresentationType.VECTOR:
+          // For vector representation, use the vector's toArray method
+          return (this._data as PersistentVector<T>).toArray();
+        default:
+          // Fallback for any other representation
+          if (Array.isArray(this._data)) {
+            return [...this._data];
+          } else if (this._data && typeof this._data.toArray === 'function') {
+            return this._data.toArray();
+          } else {
+            console.warn(`Unknown representation type: ${this._representation}`);
+            return [];
+          }
+      }
+    } catch (error) {
+      console.error(`Error in toArray: ${error}`);
+      // Fallback to a safe implementation
+      if (Array.isArray(this._data)) {
         return [...this._data];
-      case RepresentationType.CHUNKED:
-        // For chunked list, use the chunked list's toArray method
-        return (this._data as ChunkedList<T>).toArray();
-      case RepresentationType.VECTOR:
-        // For vector representation, use the vector's toArray method
-        return (this._data as PersistentVector<T>).toArray();
+      } else {
+        return [];
+      }
     }
   }
 
@@ -785,17 +859,25 @@ export class List<T> implements IList<T> {
     }
 
     // Convert to array for slice operation
-    const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedList<T>).toArray()
-      : [...this._data];
+    let dataArray: T[];
+    if (this._representation === RepresentationType.CHUNKED) {
+      dataArray = (this._data as ChunkedList<T>).toArray();
+    } else if (this._representation === RepresentationType.SMALL) {
+      dataArray = (this._data as SmallList<T>).toArray();
+    } else if (this._representation === RepresentationType.VECTOR) {
+      dataArray = (this._data as PersistentVector<T>).toArray();
+    } else {
+      dataArray = [...this._data];
+    }
 
     // Slice the array
     const slicedArray = dataArray.slice(normalizedStart, normalizedEnd);
     const sliceSize = slicedArray.length;
 
-    // For small slices, use array representation
+    // For small slices, use SmallList representation
     if (sliceSize < SMALL_COLLECTION_THRESHOLD) {
-      return new List<T>(sliceSize, RepresentationType.ARRAY, slicedArray);
+      const smallList = new SmallList<T>(slicedArray);
+      return new List<T>(sliceSize, RepresentationType.SMALL, smallList);
     }
     // For medium slices, use chunked list
     else if (sliceSize < MEDIUM_COLLECTION_THRESHOLD) {
@@ -804,7 +886,8 @@ export class List<T> implements IList<T> {
     }
     // For large slices, use vector
     else {
-      return new List<T>(sliceSize, RepresentationType.VECTOR, slicedArray);
+      const persistentVector = PersistentVector.from(slicedArray);
+      return new List<T>(sliceSize, RepresentationType.VECTOR, persistentVector);
     }
   }
 
@@ -947,20 +1030,9 @@ export class List<T> implements IList<T> {
       return List.empty<U>();
     }
 
-    // For very small collections, optimize for native array operations
-    if (this._size < NATIVE_RETURN_THRESHOLD) {
-      const filtered = [];
-      for (let i = 0; i < this._size; i++) {
-        if (filterFn(this._data[i], i)) {
-          filtered.push(mapFn(this._data[i], i));
-        }
-      }
-      return new List<U>(filtered.length, RepresentationType.ARRAY, filtered);
-    }
-
-    // For chunked list, convert to array first
-    if (this._representation === RepresentationType.CHUNKED) {
-      const dataArray = (this._data as ChunkedList<T>).toArray();
+    try {
+      // Get the data array safely
+      const dataArray = this.toArray();
       const result: U[] = [];
 
       for (let i = 0; i < dataArray.length; i++) {
@@ -970,18 +1042,10 @@ export class List<T> implements IList<T> {
       }
 
       return List.from(result);
+    } catch (error) {
+      console.error(`Error in filterMap: ${error}`);
+      return List.empty<U>();
     }
-
-    // For array and vector representations
-    const result: U[] = [];
-
-    for (let i = 0; i < this._size; i++) {
-      if (filterFn(this._data[i], i)) {
-        result.push(mapFn(this._data[i], i));
-      }
-    }
-
-    return List.from(result);
   }
 
   /**
@@ -990,12 +1054,22 @@ export class List<T> implements IList<T> {
    * @returns A transient list with the current values
    */
   transient(): TransientList<T> {
-    // Convert to array for transient operations
-    const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedList<T>).toArray()
-      : [...this._data];
-
-    return new TransientListImpl<T>(dataArray);
+    // Use the appropriate transient implementation based on representation
+    switch (this._representation) {
+      case RepresentationType.SMALL:
+        // For small list, use the small list's transient method
+        return (this._data as SmallList<T>).transient();
+      case RepresentationType.CHUNKED:
+        // For chunked list, use the chunked list's transient method
+        return (this._data as ChunkedList<T>).transient();
+      case RepresentationType.VECTOR:
+        // For vector representation, use the vector's transient method
+        return (this._data as PersistentVector<T>).transient();
+      case RepresentationType.ARRAY:
+      default:
+        // For array representation, use the generic transient implementation
+        return new TransientListImpl<T>([...this._data]);
+    }
   }
 }
 
