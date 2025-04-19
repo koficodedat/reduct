@@ -8,6 +8,7 @@
  */
 
 import { IList, IListFactory, TransientList, RepresentationType } from './types';
+import { ChunkedList } from './chunked-list';
 
 /**
  * Threshold for small collections
@@ -27,13 +28,7 @@ const SMALL_COLLECTION_THRESHOLD = 64;
  */
 const MEDIUM_COLLECTION_THRESHOLD = 2048;
 
-/**
- * Chunk size for medium collections
- * This determines the size of each chunk in the chunked array implementation
- *
- * 32 is a good balance between performance and memory usage
- */
-const CHUNK_SIZE = 32;
+
 
 /**
  * Threshold for returning native arrays directly from operations
@@ -120,84 +115,7 @@ class TransientListImpl<T> implements TransientList<T> {
   }
 }
 
-/**
- * ChunkedArray class for medium-sized collections
- *
- * This implementation divides the array into chunks of fixed size
- * for better performance with medium-sized collections.
- */
-class ChunkedArray<T> {
-  private readonly chunks: T[][];
-  private readonly size: number;
 
-  /**
-   * Create a new ChunkedArray
-   *
-   * @param elements - The elements to store in the chunked array
-   * @param chunkSize - The size of each chunk
-   */
-  constructor(elements: T[], chunkSize: number = CHUNK_SIZE) {
-    this.size = elements.length;
-    this.chunks = [];
-
-    // Divide the elements into chunks
-    for (let i = 0; i < elements.length; i += chunkSize) {
-      this.chunks.push(elements.slice(i, i + chunkSize));
-    }
-  }
-
-  /**
-   * Get the element at the specified index
-   *
-   * @param index - The index of the element to get
-   */
-  get(index: number): T | undefined {
-    if (index < 0 || index >= this.size) {
-      return undefined;
-    }
-
-    const chunkIndex = Math.floor(index / CHUNK_SIZE);
-    const indexInChunk = index % CHUNK_SIZE;
-
-    return this.chunks[chunkIndex][indexInChunk];
-  }
-
-  /**
-   * Set the element at the specified index
-   *
-   * @param index - The index of the element to set
-   * @param value - The new value
-   */
-  set(index: number, value: T): ChunkedArray<T> {
-    if (index < 0 || index >= this.size) {
-      return this;
-    }
-
-    const chunkIndex = Math.floor(index / CHUNK_SIZE);
-    const indexInChunk = index % CHUNK_SIZE;
-
-    // Create a new chunked array with the updated value
-    const newChunks = this.chunks.map((chunk, i) => {
-      if (i === chunkIndex) {
-        const newChunk = [...chunk];
-        newChunk[indexInChunk] = value;
-        return newChunk;
-      }
-      return chunk;
-    });
-
-    const newArray = new ChunkedArray<T>([], CHUNK_SIZE);
-    newArray.chunks.push(...newChunks);
-    return newArray;
-  }
-
-  /**
-   * Convert the chunked array to a flat array
-   */
-  toArray(): T[] {
-    return this.chunks.flat();
-  }
-}
 
 /**
  * Enhanced List implementation
@@ -252,10 +170,10 @@ export class List<T> implements IList<T> {
       // For small collections, use a simple array copy for optimal performance
       return new List<T>(size, RepresentationType.ARRAY, [...elements]);
     } else if (size < MEDIUM_COLLECTION_THRESHOLD) {
-      // For medium collections, use a chunked array for better performance
+      // For medium collections, use a ChunkedList for better performance
       // with operations that access elements by index
-      const chunkedArray = new ChunkedArray<T>(elements);
-      return new List<T>(size, RepresentationType.CHUNKED, chunkedArray);
+      const chunkedList = ChunkedList.from(elements);
+      return new List<T>(size, RepresentationType.CHUNKED, chunkedList);
     } else {
       // For large collections, use a persistent vector trie
       // Currently simplified - in a full implementation, we would use
@@ -286,9 +204,9 @@ export class List<T> implements IList<T> {
       // For small collections, use a simple array
       return new List<T>(size, RepresentationType.ARRAY, data);
     } else if (size < MEDIUM_COLLECTION_THRESHOLD) {
-      // For medium collections, use a chunked array
-      const chunkedArray = new ChunkedArray<T>(data);
-      return new List<T>(size, RepresentationType.CHUNKED, chunkedArray);
+      // For medium collections, use a ChunkedList
+      const chunkedList = ChunkedList.from(data);
+      return new List<T>(size, RepresentationType.CHUNKED, chunkedList);
     } else {
       // For large collections, use a persistent vector trie
       // In a full implementation, we would use a proper persistent vector trie
@@ -325,8 +243,8 @@ export class List<T> implements IList<T> {
         // For array representation, direct access is fastest
         return this._data[index];
       case RepresentationType.CHUNKED:
-        // For chunked array, use the chunked array's get method
-        return (this._data as ChunkedArray<T>).get(index);
+        // For chunked list, use the chunked list's get method
+        return (this._data as ChunkedList<T>).get(index);
       case RepresentationType.VECTOR:
         // For vector representation, direct access for now
         // In a full implementation, we would use the vector's get method
@@ -379,10 +297,10 @@ export class List<T> implements IList<T> {
         return new List<T>(this._size, RepresentationType.ARRAY, newData);
       }
       case RepresentationType.CHUNKED: {
-        // For chunked array, use the chunked array's set method
-        const chunkedArray = this._data as ChunkedArray<T>;
-        const newChunkedArray = chunkedArray.set(index, value);
-        return new List<T>(this._size, RepresentationType.CHUNKED, newChunkedArray);
+        // For chunked list, use the chunked list's set method
+        const chunkedList = this._data as ChunkedList<T>;
+        const newChunkedList = chunkedList.set(index, value);
+        return new List<T>(this._size, RepresentationType.CHUNKED, newChunkedList);
       }
       case RepresentationType.VECTOR: {
         // For vector representation, create a new array with the updated value
@@ -425,7 +343,7 @@ export class List<T> implements IList<T> {
 
     // Convert to array for insertion operation
     const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedArray<T>).toArray()
+      ? (this._data as ChunkedList<T>).toArray()
       : [...this._data];
 
     // Insert the value
@@ -433,8 +351,8 @@ export class List<T> implements IList<T> {
 
     // Create the appropriate representation based on the new size
     if (newRepresentation === RepresentationType.CHUNKED) {
-      const chunkedArray = new ChunkedArray<T>(newDataArray);
-      return new List<T>(newSize, RepresentationType.CHUNKED, chunkedArray);
+      const chunkedList = ChunkedList.from(newDataArray);
+      return new List<T>(newSize, RepresentationType.CHUNKED, chunkedList);
     } else {
       return new List<T>(newSize, newRepresentation, newDataArray);
     }
@@ -466,7 +384,7 @@ export class List<T> implements IList<T> {
 
     // Convert to array for removal operation
     const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedArray<T>).toArray()
+      ? (this._data as ChunkedList<T>).toArray()
       : [...this._data];
 
     // Remove the element
@@ -474,8 +392,8 @@ export class List<T> implements IList<T> {
 
     // Create the appropriate representation based on the new size
     if (newRepresentation === RepresentationType.CHUNKED) {
-      const chunkedArray = new ChunkedArray<T>(newDataArray);
-      return new List<T>(newSize, RepresentationType.CHUNKED, chunkedArray);
+      const chunkedList = ChunkedList.from(newDataArray);
+      return new List<T>(newSize, RepresentationType.CHUNKED, chunkedList);
     } else {
       return new List<T>(newSize, newRepresentation, newDataArray);
     }
@@ -504,7 +422,7 @@ export class List<T> implements IList<T> {
 
     // Convert to array for append operation
     const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedArray<T>).toArray()
+      ? (this._data as ChunkedList<T>).toArray()
       : [...this._data];
 
     // Append the value
@@ -512,8 +430,8 @@ export class List<T> implements IList<T> {
 
     // Create the appropriate representation based on the new size
     if (newRepresentation === RepresentationType.CHUNKED) {
-      const chunkedArray = new ChunkedArray<T>(newDataArray);
-      return new List<T>(newSize, RepresentationType.CHUNKED, chunkedArray);
+      const chunkedList = ChunkedList.from(newDataArray);
+      return new List<T>(newSize, RepresentationType.CHUNKED, chunkedList);
     } else {
       return new List<T>(newSize, newRepresentation, newDataArray);
     }
@@ -542,7 +460,7 @@ export class List<T> implements IList<T> {
 
     // Convert to array for prepend operation
     const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedArray<T>).toArray()
+      ? (this._data as ChunkedList<T>).toArray()
       : [...this._data];
 
     // Prepend the value
@@ -550,8 +468,8 @@ export class List<T> implements IList<T> {
 
     // Create the appropriate representation based on the new size
     if (newRepresentation === RepresentationType.CHUNKED) {
-      const chunkedArray = new ChunkedArray<T>(newDataArray);
-      return new List<T>(newSize, RepresentationType.CHUNKED, chunkedArray);
+      const chunkedList = ChunkedList.from(newDataArray);
+      return new List<T>(newSize, RepresentationType.CHUNKED, chunkedList);
     } else {
       return new List<T>(newSize, newRepresentation, newDataArray);
     }
@@ -589,7 +507,7 @@ export class List<T> implements IList<T> {
 
     // Convert to array for concat operation
     const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedArray<T>).toArray()
+      ? (this._data as ChunkedList<T>).toArray()
       : [...this._data];
 
     // Concatenate the arrays
@@ -597,8 +515,8 @@ export class List<T> implements IList<T> {
 
     // Create the appropriate representation based on the new size
     if (newRepresentation === RepresentationType.CHUNKED) {
-      const chunkedArray = new ChunkedArray<T>(newDataArray);
-      return new List<T>(newSize, RepresentationType.CHUNKED, chunkedArray);
+      const chunkedList = ChunkedList.from(newDataArray);
+      return new List<T>(newSize, RepresentationType.CHUNKED, chunkedList);
     } else {
       return new List<T>(newSize, newRepresentation, newDataArray);
     }
@@ -620,17 +538,17 @@ export class List<T> implements IList<T> {
       return new List<U>(this._size, RepresentationType.ARRAY, this._data.map(fn));
     }
 
-    // For chunked array, convert to array first
+    // For chunked list, convert to array first
     if (this._representation === RepresentationType.CHUNKED) {
-      const dataArray = (this._data as ChunkedArray<T>).toArray();
+      const dataArray = (this._data as ChunkedList<T>).toArray();
       const mappedArray = dataArray.map(fn);
 
       // Create the appropriate representation based on the size
       if (this._size >= MEDIUM_COLLECTION_THRESHOLD) {
         return new List<U>(this._size, RepresentationType.VECTOR, mappedArray);
       } else if (this._size >= SMALL_COLLECTION_THRESHOLD) {
-        const chunkedArray = new ChunkedArray<U>(mappedArray);
-        return new List<U>(this._size, RepresentationType.CHUNKED, chunkedArray);
+        const chunkedList = ChunkedList.from(mappedArray);
+        return new List<U>(this._size, RepresentationType.CHUNKED, chunkedList);
       } else {
         return new List<U>(this._size, RepresentationType.ARRAY, mappedArray);
       }
@@ -650,8 +568,8 @@ export class List<T> implements IList<T> {
     if (this._size >= MEDIUM_COLLECTION_THRESHOLD) {
       return new List<U>(this._size, RepresentationType.VECTOR, newDataArray);
     } else if (this._size >= SMALL_COLLECTION_THRESHOLD) {
-      const chunkedArray = new ChunkedArray<U>(newDataArray);
-      return new List<U>(this._size, RepresentationType.CHUNKED, chunkedArray);
+      const chunkedList = ChunkedList.from(newDataArray);
+      return new List<U>(this._size, RepresentationType.CHUNKED, chunkedList);
     } else {
       return new List<U>(this._size, RepresentationType.ARRAY, newDataArray);
     }
@@ -682,9 +600,9 @@ export class List<T> implements IList<T> {
       return new List<T>(filtered.length, RepresentationType.ARRAY, filtered);
     }
 
-    // For chunked array, convert to array first
+    // For chunked list, convert to array first
     if (this._representation === RepresentationType.CHUNKED) {
-      const dataArray = (this._data as ChunkedArray<T>).toArray();
+      const dataArray = (this._data as ChunkedList<T>).toArray();
       const filteredArray = dataArray.filter(fn);
 
       // If all elements pass the filter, return this list
@@ -736,9 +654,9 @@ export class List<T> implements IList<T> {
       return initial;
     }
 
-    // For chunked array, convert to array first
+    // For chunked list, convert to array first
     if (this._representation === RepresentationType.CHUNKED) {
-      const dataArray = (this._data as ChunkedArray<T>).toArray();
+      const dataArray = (this._data as ChunkedList<T>).toArray();
       return dataArray.reduce(fn, initial);
     }
 
@@ -757,9 +675,9 @@ export class List<T> implements IList<T> {
       return undefined;
     }
 
-    // For chunked array, convert to array first
+    // For chunked list, convert to array first
     if (this._representation === RepresentationType.CHUNKED) {
-      const dataArray = (this._data as ChunkedArray<T>).toArray();
+      const dataArray = (this._data as ChunkedList<T>).toArray();
       return dataArray.find(fn);
     }
 
@@ -777,9 +695,9 @@ export class List<T> implements IList<T> {
       return -1;
     }
 
-    // For chunked array, convert to array first
+    // For chunked list, convert to array first
     if (this._representation === RepresentationType.CHUNKED) {
-      const dataArray = (this._data as ChunkedArray<T>).toArray();
+      const dataArray = (this._data as ChunkedList<T>).toArray();
       return dataArray.findIndex(fn);
     }
 
@@ -800,8 +718,8 @@ export class List<T> implements IList<T> {
         // For array representation, return a copy of the array
         return [...this._data];
       case RepresentationType.CHUNKED:
-        // For chunked array, use the chunked array's toArray method
-        return (this._data as ChunkedArray<T>).toArray();
+        // For chunked list, use the chunked list's toArray method
+        return (this._data as ChunkedList<T>).toArray();
       case RepresentationType.VECTOR:
         // For vector representation, return a copy of the array
         return [...this._data];
@@ -833,7 +751,7 @@ export class List<T> implements IList<T> {
 
     // Convert to array for slice operation
     const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedArray<T>).toArray()
+      ? (this._data as ChunkedList<T>).toArray()
       : [...this._data];
 
     // Slice the array
@@ -844,10 +762,10 @@ export class List<T> implements IList<T> {
     if (sliceSize < SMALL_COLLECTION_THRESHOLD) {
       return new List<T>(sliceSize, RepresentationType.ARRAY, slicedArray);
     }
-    // For medium slices, use chunked array
+    // For medium slices, use chunked list
     else if (sliceSize < MEDIUM_COLLECTION_THRESHOLD) {
-      const chunkedArray = new ChunkedArray<T>(slicedArray);
-      return new List<T>(sliceSize, RepresentationType.CHUNKED, chunkedArray);
+      const chunkedList = ChunkedList.from(slicedArray);
+      return new List<T>(sliceSize, RepresentationType.CHUNKED, chunkedList);
     }
     // For large slices, use vector
     else {
@@ -873,9 +791,9 @@ export class List<T> implements IList<T> {
       return initial;
     }
 
-    // For chunked array, convert to array first
+    // For chunked list, convert to array first
     if (this._representation === RepresentationType.CHUNKED) {
-      const dataArray = (this._data as ChunkedArray<T>).toArray();
+      const dataArray = (this._data as ChunkedList<T>).toArray();
 
       // For very small collections, use separate native operations
       if (this._size < NATIVE_RETURN_THRESHOLD) {
@@ -939,9 +857,9 @@ export class List<T> implements IList<T> {
       return initial;
     }
 
-    // For chunked array, convert to array first
+    // For chunked list, convert to array first
     if (this._representation === RepresentationType.CHUNKED) {
-      const dataArray = (this._data as ChunkedArray<T>).toArray();
+      const dataArray = (this._data as ChunkedList<T>).toArray();
 
       // For very small collections, use separate native operations
       if (this._size < NATIVE_RETURN_THRESHOLD) {
@@ -1005,9 +923,9 @@ export class List<T> implements IList<T> {
       return new List<U>(filtered.length, RepresentationType.ARRAY, filtered);
     }
 
-    // For chunked array, convert to array first
+    // For chunked list, convert to array first
     if (this._representation === RepresentationType.CHUNKED) {
-      const dataArray = (this._data as ChunkedArray<T>).toArray();
+      const dataArray = (this._data as ChunkedList<T>).toArray();
       const result: U[] = [];
 
       for (let i = 0; i < dataArray.length; i++) {
@@ -1039,7 +957,7 @@ export class List<T> implements IList<T> {
   transient(): TransientList<T> {
     // Convert to array for transient operations
     const dataArray = this._representation === RepresentationType.CHUNKED
-      ? (this._data as ChunkedArray<T>).toArray()
+      ? (this._data as ChunkedList<T>).toArray()
       : [...this._data];
 
     return new TransientListImpl<T>(dataArray);
