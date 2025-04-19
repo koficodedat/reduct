@@ -14,6 +14,7 @@ import { SmallList } from './small-list';
 import { LazyList, lazy } from './lazy-list';
 import { getProfilingSystem, OperationType, DataStructureType } from '../profiling';
 import { recordDataStructureCreation, estimateMemoryUsage } from '../profiling/memory-monitor';
+import * as specializedOps from './specialized-operations';
 
 /**
  * Threshold for small collections
@@ -1288,6 +1289,119 @@ export class List<T> implements IList<T> {
     return this.asLazy().concat(other);
   }
 
+  /**
+   * Perform a map and filter operation in a single pass
+   *
+   * @param mapFn - The mapping function
+   * @param filterFn - The filter predicate
+   */
+  mapFilter<U>(
+    mapFn: (value: T, index: number) => U,
+    filterFn: (value: U, index: number) => boolean
+  ): IList<U> {
+    return specializedOps.mapFilter(this, mapFn, filterFn);
+  }
+
+  /**
+   * Perform a map and slice operation in a single pass
+   *
+   * @param mapFn - The mapping function
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   */
+  mapSlice<U>(
+    mapFn: (value: T, index: number) => U,
+    start?: number,
+    end?: number
+  ): IList<U> {
+    return specializedOps.mapSlice(this, mapFn, start, end);
+  }
+
+  /**
+   * Perform a slice and map operation in a single pass
+   *
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @param mapFn - The mapping function
+   */
+  sliceMap<U>(
+    start: number,
+    end: number | undefined,
+    mapFn: (value: T, index: number) => U
+  ): IList<U> {
+    return specializedOps.sliceMap(this, start, end, mapFn);
+  }
+
+  /**
+   * Perform a filter and slice operation in a single pass
+   *
+   * @param filterFn - The filter predicate
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   */
+  filterSlice(
+    filterFn: (value: T, index: number) => boolean,
+    start?: number,
+    end?: number
+  ): IList<T> {
+    return specializedOps.filterSlice(this, filterFn, start, end);
+  }
+
+  /**
+   * Perform a slice and filter operation in a single pass
+   *
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @param filterFn - The filter predicate
+   */
+  sliceFilter(
+    start: number,
+    end: number | undefined,
+    filterFn: (value: T, index: number) => boolean
+  ): IList<T> {
+    return specializedOps.sliceFilter(this, start, end, filterFn);
+  }
+
+  /**
+   * Perform a filter and reduce operation in a single pass
+   *
+   * @param filterFn - The filter predicate
+   * @param reduceFn - The reducer function
+   * @param initial - The initial value
+   */
+  filterReduce<V>(
+    filterFn: (value: T, index: number) => boolean,
+    reduceFn: (acc: V, value: T, index: number) => V,
+    initial: V
+  ): V {
+    return specializedOps.filterReduce(this, filterFn, reduceFn, initial);
+  }
+
+  /**
+   * Perform a concat and map operation in a single pass
+   *
+   * @param other - The list to concatenate
+   * @param mapFn - The mapping function
+   */
+  concatMap<U>(
+    other: IList<T>,
+    mapFn: (value: T, index: number) => U
+  ): IList<U> {
+    return specializedOps.concatMap(this, other, mapFn);
+  }
+
+  /**
+   * Perform a map and concat operation in a single pass
+   *
+   * @param other - The list to concatenate
+   * @param mapFn - The mapping function
+   */
+  mapConcat<U>(
+    other: IList<T>,
+    mapFn: (value: T, index: number) => U
+  ): IList<U> {
+    return specializedOps.mapConcat(this, other, mapFn);
+  }
 
 
   /**

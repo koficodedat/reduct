@@ -243,6 +243,112 @@ export interface IList<T> {
   ): IList<U>;
 
   /**
+   * Perform a map and filter operation in a single pass.
+   *
+   * @param mapFn - The mapping function
+   * @param filterFn - The filter predicate
+   * @returns A new list with mapped and filtered elements
+   */
+  mapFilter<U>(
+    mapFn: (value: T, index: number) => U,
+    filterFn: (value: U, index: number) => boolean
+  ): IList<U>;
+
+  /**
+   * Perform a map and slice operation in a single pass.
+   *
+   * @param mapFn - The mapping function
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @returns A new list with mapped and sliced elements
+   */
+  mapSlice<U>(
+    mapFn: (value: T, index: number) => U,
+    start?: number,
+    end?: number
+  ): IList<U>;
+
+  /**
+   * Perform a slice and map operation in a single pass.
+   *
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @param mapFn - The mapping function
+   * @returns A new list with sliced and mapped elements
+   */
+  sliceMap<U>(
+    start: number,
+    end: number | undefined,
+    mapFn: (value: T, index: number) => U
+  ): IList<U>;
+
+  /**
+   * Perform a filter and slice operation in a single pass.
+   *
+   * @param filterFn - The filter predicate
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @returns A new list with filtered and sliced elements
+   */
+  filterSlice(
+    filterFn: (value: T, index: number) => boolean,
+    start?: number,
+    end?: number
+  ): IList<T>;
+
+  /**
+   * Perform a slice and filter operation in a single pass.
+   *
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @param filterFn - The filter predicate
+   * @returns A new list with sliced and filtered elements
+   */
+  sliceFilter(
+    start: number,
+    end: number | undefined,
+    filterFn: (value: T, index: number) => boolean
+  ): IList<T>;
+
+  /**
+   * Perform a filter and reduce operation in a single pass.
+   *
+   * @param filterFn - The filter predicate
+   * @param reduceFn - The reducer function
+   * @param initial - The initial value for reduction
+   * @returns The reduced value
+   */
+  filterReduce<V>(
+    filterFn: (value: T, index: number) => boolean,
+    reduceFn: (acc: V, value: T, index: number) => V,
+    initial: V
+  ): V;
+
+  /**
+   * Perform a concat and map operation in a single pass.
+   *
+   * @param other - The list to concatenate
+   * @param mapFn - The mapping function
+   * @returns A new list with concatenated and mapped elements
+   */
+  concatMap<U>(
+    other: IList<T>,
+    mapFn: (value: T, index: number) => U
+  ): IList<U>;
+
+  /**
+   * Perform a map and concat operation in a single pass.
+   *
+   * @param other - The list to concatenate
+   * @param mapFn - The mapping function
+   * @returns A new list with mapped and concatenated elements
+   */
+  mapConcat<U>(
+    other: IList<T>,
+    mapFn: (value: T, index: number) => U
+  ): IList<U>;
+
+  /**
    * Create a transient (temporarily mutable) version of the list
    *
    * @returns A transient list with the current values

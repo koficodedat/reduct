@@ -8,6 +8,7 @@
  */
 
 import { IList } from './types';
+import * as specializedOps from './specialized-operations';
 
 /**
  * Type of lazy operation
@@ -652,6 +653,152 @@ export class LazyList<T> implements IList<T> {
    */
   lazyConcat(other: IList<T>): LazyList<T> {
     return this.concat(other) as LazyList<T>;
+  }
+
+  /**
+   * Perform a map and filter operation in a single pass
+   *
+   * This method forces evaluation of the lazy operations
+   * to perform the map and filter operations.
+   *
+   * @param mapFn - The mapping function
+   * @param filterFn - The filter predicate
+   * @returns A new list with mapped and filtered elements
+   */
+  mapFilter<U>(
+    mapFn: (value: T, index: number) => U,
+    filterFn: (value: U, index: number) => boolean
+  ): IList<U> {
+    return specializedOps.mapFilter(this.evaluate(), mapFn, filterFn);
+  }
+
+  /**
+   * Perform a map and slice operation in a single pass
+   *
+   * This method forces evaluation of the lazy operations
+   * to perform the map and slice operations.
+   *
+   * @param mapFn - The mapping function
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @returns A new list with mapped and sliced elements
+   */
+  mapSlice<U>(
+    mapFn: (value: T, index: number) => U,
+    start?: number,
+    end?: number
+  ): IList<U> {
+    return specializedOps.mapSlice(this.evaluate(), mapFn, start, end);
+  }
+
+  /**
+   * Perform a slice and map operation in a single pass
+   *
+   * This method forces evaluation of the lazy operations
+   * to perform the slice and map operations.
+   *
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @param mapFn - The mapping function
+   * @returns A new list with sliced and mapped elements
+   */
+  sliceMap<U>(
+    start: number,
+    end: number | undefined,
+    mapFn: (value: T, index: number) => U
+  ): IList<U> {
+    return specializedOps.sliceMap(this.evaluate(), start, end, mapFn);
+  }
+
+  /**
+   * Perform a filter and slice operation in a single pass
+   *
+   * This method forces evaluation of the lazy operations
+   * to perform the filter and slice operations.
+   *
+   * @param filterFn - The filter predicate
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @returns A new list with filtered and sliced elements
+   */
+  filterSlice(
+    filterFn: (value: T, index: number) => boolean,
+    start?: number,
+    end?: number
+  ): IList<T> {
+    return specializedOps.filterSlice(this.evaluate(), filterFn, start, end);
+  }
+
+  /**
+   * Perform a slice and filter operation in a single pass
+   *
+   * This method forces evaluation of the lazy operations
+   * to perform the slice and filter operations.
+   *
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @param filterFn - The filter predicate
+   * @returns A new list with sliced and filtered elements
+   */
+  sliceFilter(
+    start: number,
+    end: number | undefined,
+    filterFn: (value: T, index: number) => boolean
+  ): IList<T> {
+    return specializedOps.sliceFilter(this.evaluate(), start, end, filterFn);
+  }
+
+  /**
+   * Perform a filter and reduce operation in a single pass
+   *
+   * This method forces evaluation of the lazy operations
+   * to perform the filter and reduce operations.
+   *
+   * @param filterFn - The filter predicate
+   * @param reduceFn - The reducer function
+   * @param initial - The initial value
+   * @returns The reduced value
+   */
+  filterReduce<V>(
+    filterFn: (value: T, index: number) => boolean,
+    reduceFn: (acc: V, value: T, index: number) => V,
+    initial: V
+  ): V {
+    return specializedOps.filterReduce(this.evaluate(), filterFn, reduceFn, initial);
+  }
+
+  /**
+   * Perform a concat and map operation in a single pass
+   *
+   * This method forces evaluation of the lazy operations
+   * to perform the concat and map operations.
+   *
+   * @param other - The list to concatenate
+   * @param mapFn - The mapping function
+   * @returns A new list with concatenated and mapped elements
+   */
+  concatMap<U>(
+    other: IList<T>,
+    mapFn: (value: T, index: number) => U
+  ): IList<U> {
+    return specializedOps.concatMap(this.evaluate(), other, mapFn);
+  }
+
+  /**
+   * Perform a map and concat operation in a single pass
+   *
+   * This method forces evaluation of the lazy operations
+   * to perform the map and concat operations.
+   *
+   * @param other - The list to concatenate
+   * @param mapFn - The mapping function
+   * @returns A new list with mapped and concatenated elements
+   */
+  mapConcat<U>(
+    other: IList<T>,
+    mapFn: (value: T, index: number) => U
+  ): IList<U> {
+    return specializedOps.mapConcat(this.evaluate(), other, mapFn);
   }
 
   /**

@@ -1,11 +1,14 @@
 /**
  * Specialized operations tests
  *
- * Tests for specialized operations like mapFilterReduce, mapReduce, and filterMap.
+ * Tests for specialized operations like mapFilterReduce, mapReduce, filterMap,
+ * mapFilter, mapSlice, sliceMap, filterSlice, sliceFilter, filterReduce,
+ * concatMap, and mapConcat.
  */
 
 import { describe, it, expect } from 'vitest';
 import { List } from '../../../src';
+import * as specializedOps from '../../../src/list/specialized-operations';
 
 describe('List specialized operations', () => {
   describe('mapFilterReduce', () => {
@@ -150,6 +153,138 @@ describe('List specialized operations', () => {
     });
   });
 
+  describe('mapFilter', () => {
+    it('should map and filter elements in a single pass', () => {
+      const list = List.from([1, 2, 3, 4, 5]);
+      const result = list.mapFilter(x => x * 2, x => x > 5);
+
+      expect(result.toArray()).toEqual([6, 8, 10]);
+    });
+
+    it('should handle empty lists', () => {
+      const list = List.empty<number>();
+      const result = list.mapFilter(x => x * 2, x => x > 5);
+
+      expect(result.isEmpty).toBe(true);
+    });
+
+    it('should handle lists with no matching elements', () => {
+      const list = List.from([1, 2, 3]);
+      const result = list.mapFilter(x => x * 2, x => x > 10);
+
+      expect(result.isEmpty).toBe(true);
+    });
+  });
+
+  describe('mapSlice', () => {
+    it('should map and slice elements in a single pass', () => {
+      const list = List.from([1, 2, 3, 4, 5]);
+      const result = list.mapSlice(x => x * 2, 1, 4);
+
+      expect(result.toArray()).toEqual([4, 6, 8]);
+    });
+
+    it('should handle empty lists', () => {
+      const list = List.empty<number>();
+      const result = list.mapSlice(x => x * 2, 1, 4);
+
+      expect(result.isEmpty).toBe(true);
+    });
+
+    it('should handle out of bounds indices', () => {
+      const list = List.from([1, 2, 3]);
+      const result = list.mapSlice(x => x * 2, 5, 10);
+
+      expect(result.isEmpty).toBe(true);
+    });
+  });
+
+  describe('sliceMap', () => {
+    it('should slice and map elements in a single pass', () => {
+      const list = List.from([1, 2, 3, 4, 5]);
+      const result = list.sliceMap(1, 4, x => x * 2);
+
+      expect(result.toArray()).toEqual([4, 6, 8]);
+    });
+  });
+
+  describe('filterSlice', () => {
+    it('should filter and slice elements in a single pass', () => {
+      const list = List.from([1, 2, 3, 4, 5, 6, 7, 8]);
+      const result = list.filterSlice(x => x % 2 === 0, 1, 3);
+
+      expect(result.toArray()).toEqual([4, 6]);
+    });
+
+    it('should handle empty lists', () => {
+      const list = List.empty<number>();
+      const result = list.filterSlice(x => x % 2 === 0, 1, 3);
+
+      expect(result.isEmpty).toBe(true);
+    });
+  });
+
+  describe('sliceFilter', () => {
+    it('should slice and filter elements in a single pass', () => {
+      const list = List.from([1, 2, 3, 4, 5, 6, 7, 8]);
+      const result = list.sliceFilter(1, 6, x => x % 2 === 0);
+
+      expect(result.toArray()).toEqual([2, 4, 6]);
+    });
+  });
+
+  describe('filterReduce', () => {
+    it('should filter and reduce elements in a single pass', () => {
+      const list = List.from([1, 2, 3, 4, 5]);
+      const result = list.filterReduce(
+        x => x % 2 === 0,
+        (acc, x) => acc + x,
+        0
+      );
+
+      expect(result).toBe(6); // 2 + 4
+    });
+
+    it('should handle empty lists', () => {
+      const list = List.empty<number>();
+      const result = list.filterReduce(
+        x => x % 2 === 0,
+        (acc, x) => acc + x,
+        0
+      );
+
+      expect(result).toBe(0);
+    });
+  });
+
+  describe('concatMap', () => {
+    it('should concatenate and map elements in a single pass', () => {
+      const list1 = List.from([1, 2, 3]);
+      const list2 = List.from([4, 5, 6]);
+      const result = list1.concatMap(list2, x => x * 2);
+
+      expect(result.toArray()).toEqual([2, 4, 6, 8, 10, 12]);
+    });
+
+    it('should handle empty lists', () => {
+      const list1 = List.empty<number>();
+      const list2 = List.empty<number>();
+      const result = list1.concatMap(list2, x => x * 2);
+
+      expect(result.isEmpty).toBe(true);
+    });
+  });
+
+  describe('mapConcat', () => {
+    it('should map and concatenate elements in a single pass', () => {
+      const list1 = List.from([1, 2, 3]);
+      const list2 = List.from([4, 5, 6]);
+      const result = list1.mapConcat(list2, x => x * 2);
+
+      expect(result.toArray()).toEqual([2, 4, 6, 8, 10, 12]);
+    });
+  });
+
   describe('performance comparison', () => {
     it('mapFilterReduce should be more efficient than separate operations for large collections', () => {
       // Create a large list
@@ -188,6 +323,48 @@ describe('List specialized operations', () => {
 
       // Log the times
       console.log(`mapFilterReduce: ${timeCombined.toFixed(2)}ms`);
+      console.log(`separate operations: ${timeSeparate.toFixed(2)}ms`);
+      console.log(`ratio: ${(timeSeparate / timeCombined).toFixed(2)}x`);
+
+      // For large collections, the combined operation should be faster
+      // But this is not always deterministic in tests, so we'll skip the assertion
+      // expect(timeCombined).toBeLessThan(timeSeparate);
+    });
+
+    it('mapFilter should be more efficient than separate operations for large collections', () => {
+      // Create a large list
+      const size = 100000;
+      const list = List.of(size, i => i);
+
+      // Define operations
+      const mapFn = (x: number) => x * 2;
+      const filterFn = (x: number) => x % 3 === 0;
+
+      // Run multiple iterations to warm up
+      for (let i = 0; i < 5; i++) {
+        list.mapFilter(mapFn, filterFn);
+        list.map(mapFn).filter(filterFn);
+      }
+
+      // Measure time for mapFilter
+      const startCombined = performance.now();
+      const resultCombined = list.mapFilter(mapFn, filterFn);
+      const endCombined = performance.now();
+      const timeCombined = endCombined - startCombined;
+
+      // Measure time for separate operations
+      const startSeparate = performance.now();
+      const resultSeparate = list
+        .map(mapFn)
+        .filter(filterFn);
+      const endSeparate = performance.now();
+      const timeSeparate = endSeparate - startSeparate;
+
+      // Verify results are the same
+      expect(resultCombined.toArray()).toEqual(resultSeparate.toArray());
+
+      // Log the times
+      console.log(`mapFilter: ${timeCombined.toFixed(2)}ms`);
       console.log(`separate operations: ${timeSeparate.toFixed(2)}ms`);
       console.log(`ratio: ${(timeSeparate / timeCombined).toFixed(2)}x`);
 
