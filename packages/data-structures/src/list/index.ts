@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import { IList, IListFactory } from './types';
+import { IList, IListFactory, TransientList, RepresentationType } from './types';
 
 /**
  * Threshold for small collections
@@ -52,12 +52,72 @@ const NATIVE_RETURN_THRESHOLD = 32;
 const NATIVE_OPERATIONS_THRESHOLD = 128;
 
 /**
- * Representation types for the List
+ * TransientList implementation
+ *
+ * A mutable version of List for efficient batch operations.
  */
-enum RepresentationType {
-  ARRAY,   // Simple array for small collections
-  CHUNKED, // Chunked array for medium collections
-  VECTOR   // Persistent vector trie for large collections
+class TransientListImpl<T> implements TransientList<T> {
+  /**
+   * The underlying implementation
+   */
+  private _data: T[];
+
+  /**
+   * Create a new TransientList
+   *
+   * @param data - The initial data
+   */
+  constructor(data: T[]) {
+    this._data = data;
+  }
+
+  /**
+   * Append a value to the end of the list
+   *
+   * @param value - The value to append
+   * @returns The updated transient list
+   */
+  append(value: T): TransientListImpl<T> {
+    this._data.push(value);
+    return this;
+  }
+
+  /**
+   * Prepend a value to the beginning of the list
+   *
+   * @param value - The value to prepend
+   * @returns The updated transient list
+   */
+  prepend(value: T): TransientListImpl<T> {
+    this._data.unshift(value);
+    return this;
+  }
+
+  /**
+   * Set a value at a specific index
+   *
+   * @param index - The index to set
+   * @param value - The value to set
+   * @returns The updated transient list
+   * @throws {RangeError} If the index is out of bounds
+   */
+  set(index: number, value: T): TransientListImpl<T> {
+    if (index < 0 || index >= this._data.length) {
+      throw new RangeError(`Index ${index} out of bounds`);
+    }
+
+    this._data[index] = value;
+    return this;
+  }
+
+  /**
+   * Convert the transient list back to an immutable list
+   *
+   * @returns An immutable list with the current values
+   */
+  persistent(): IList<T> {
+    return List.from([...this._data]);
+  }
 }
 
 /**
@@ -272,6 +332,32 @@ export class List<T> implements IList<T> {
         // In a full implementation, we would use the vector's get method
         return this._data[index];
     }
+  }
+
+  /**
+   * Get the first element in the list
+   *
+   * @returns The first element, or undefined if the list is empty
+   */
+  first(): T | undefined {
+    if (this.isEmpty) {
+      return undefined;
+    }
+
+    return this.get(0);
+  }
+
+  /**
+   * Get the last element in the list
+   *
+   * @returns The last element, or undefined if the list is empty
+   */
+  last(): T | undefined {
+    if (this.isEmpty) {
+      return undefined;
+    }
+
+    return this.get(this._size - 1);
   }
 
   /**
@@ -943,6 +1029,20 @@ export class List<T> implements IList<T> {
     }
 
     return List.from(result);
+  }
+
+  /**
+   * Create a transient (temporarily mutable) version of the list
+   *
+   * @returns A transient list with the current values
+   */
+  transient(): TransientList<T> {
+    // Convert to array for transient operations
+    const dataArray = this._representation === RepresentationType.CHUNKED
+      ? (this._data as ChunkedArray<T>).toArray()
+      : [...this._data];
+
+    return new TransientListImpl<T>(dataArray);
   }
 }
 

@@ -7,6 +7,64 @@
  */
 
 /**
+ * Representation types for the List implementation
+ */
+export enum RepresentationType {
+  /**
+   * Simple array representation for small collections
+   */
+  ARRAY = 'array',
+
+  /**
+   * Chunked array representation for medium collections
+   */
+  CHUNKED = 'chunked',
+
+  /**
+   * Vector representation for large collections
+   */
+  VECTOR = 'vector'
+}
+
+/**
+ * Interface for a transient (temporarily mutable) list
+ */
+export interface TransientList<T> {
+  /**
+   * Append a value to the end of the list
+   *
+   * @param value - The value to append
+   * @returns The updated transient list
+   */
+  append(value: T): TransientList<T>;
+
+  /**
+   * Prepend a value to the beginning of the list
+   *
+   * @param value - The value to prepend
+   * @returns The updated transient list
+   */
+  prepend(value: T): TransientList<T>;
+
+  /**
+   * Set a value at a specific index
+   *
+   * @param index - The index to set
+   * @param value - The value to set
+   * @returns The updated transient list
+   * @throws {RangeError} If the index is out of bounds
+   */
+  set(index: number, value: T): TransientList<T>;
+
+  /**
+   * Convert the transient list back to an immutable list
+   *
+   * @returns An immutable list with the current values
+   */
+  persistent(): IList<T>;
+}
+
+/**
  * List interface
  *
  * Represents an immutable, ordered collection of elements.
@@ -178,6 +236,27 @@ export interface IList<T> {
     filterFn: (value: T, index: number) => boolean,
     mapFn: (value: T, index: number) => U
   ): IList<U>;
+
+  /**
+   * Create a transient (temporarily mutable) version of the list
+   *
+   * @returns A transient list with the current values
+   */
+  transient(): TransientList<T>;
+
+  /**
+   * Get the first element in the list
+   *
+   * @returns The first element, or undefined if the list is empty
+   */
+  first(): T | undefined;
+
+  /**
+   * Get the last element in the list
+   *
+   * @returns The last element, or undefined if the list is empty
+   */
+  last(): T | undefined;
 }
 
 /**
