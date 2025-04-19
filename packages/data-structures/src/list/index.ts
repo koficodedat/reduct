@@ -15,36 +15,35 @@ import { LazyList, lazy } from './lazy-list';
 import { HAMTPersistentVector } from './hamt-persistent-vector';
 import { getProfilingSystem, OperationType, DataStructureType } from '../profiling';
 import { recordDataStructureCreation, estimateMemoryUsage } from '../profiling/memory-monitor';
+import { recordOperation, getImplementationRecommendation } from '../profiling/usage-pattern-monitor';
 import * as specializedOps from './specialized-operations';
 
 /**
- * Threshold for small collections
+ * Default threshold for small collections
  * For collections smaller than this size, we use a SmallList implementation
  * and directly leverage native array methods for optimal performance
  *
  * Based on benchmark results, 31 is the optimal threshold for switching to chunked representation
  */
-const SMALL_COLLECTION_THRESHOLD = 31;
+const DEFAULT_SMALL_COLLECTION_THRESHOLD = 31;
 
 /**
- * Threshold for medium collections
+ * Default threshold for medium collections
  * For collections between SMALL_COLLECTION_THRESHOLD and this size,
  * we use a chunked array implementation
  *
  * Based on benchmark results, 26 is the optimal threshold for switching to vector representation
  */
-const MEDIUM_COLLECTION_THRESHOLD = 26;
+const DEFAULT_MEDIUM_COLLECTION_THRESHOLD = 26;
 
 /**
- * Threshold for large collections
+ * Default threshold for large collections
  * For collections between MEDIUM_COLLECTION_THRESHOLD and this size,
  * we use a PersistentVector implementation
  * For collections larger than this size, we use a HAMTPersistentVector implementation
  * for more efficient structural sharing and memory usage
  */
-const LARGE_COLLECTION_THRESHOLD = 10000;
-
-
+const DEFAULT_LARGE_COLLECTION_THRESHOLD = 10000;
 
 /**
  * Threshold for returning native arrays directly from operations
@@ -54,6 +53,87 @@ const LARGE_COLLECTION_THRESHOLD = 10000;
  * Based on benchmark results, 16 is optimal for direct native array operations
  */
 const NATIVE_RETURN_THRESHOLD = 16;
+
+/**
+ * Adaptive thresholds for collection sizes
+ * These thresholds can be adjusted based on usage patterns
+ */
+let SMALL_COLLECTION_THRESHOLD = DEFAULT_SMALL_COLLECTION_THRESHOLD;
+let MEDIUM_COLLECTION_THRESHOLD = DEFAULT_MEDIUM_COLLECTION_THRESHOLD;
+let LARGE_COLLECTION_THRESHOLD = DEFAULT_LARGE_COLLECTION_THRESHOLD;
+
+/**
+ * Whether to enable adaptive implementation selection
+ */
+let ADAPTIVE_IMPLEMENTATION_ENABLED = true;
+
+/**
+ * Update the thresholds based on usage patterns
+ */
+function updateThresholds(): void {
+  if (!ADAPTIVE_IMPLEMENTATION_ENABLED) {
+    return;
+  }
+
+  const recommendation = getImplementationRecommendation();
+
+  if (recommendation && recommendation.thresholds) {
+    // Update thresholds based on recommendation
+    if (recommendation.thresholds.small !== undefined) {
+      SMALL_COLLECTION_THRESHOLD = recommendation.thresholds.small;
+    }
+
+    if (recommendation.thresholds.medium !== undefined) {
+      MEDIUM_COLLECTION_THRESHOLD = recommendation.thresholds.medium;
+    }
+
+    if (recommendation.thresholds.large !== undefined) {
+      LARGE_COLLECTION_THRESHOLD = recommendation.thresholds.large;
+    }
+  }
+}
+
+/**
+ * Enable or disable adaptive implementation selection
+ *
+ * @param enabled - Whether to enable adaptive implementation selection
+ */
+export function setAdaptiveImplementationEnabled(enabled: boolean): void {
+  ADAPTIVE_IMPLEMENTATION_ENABLED = enabled;
+
+  if (!enabled) {
+    // Reset thresholds to defaults
+    SMALL_COLLECTION_THRESHOLD = DEFAULT_SMALL_COLLECTION_THRESHOLD;
+    MEDIUM_COLLECTION_THRESHOLD = DEFAULT_MEDIUM_COLLECTION_THRESHOLD;
+    LARGE_COLLECTION_THRESHOLD = DEFAULT_LARGE_COLLECTION_THRESHOLD;
+  }
+}
+
+/**
+ * Set custom thresholds for collection sizes
+ *
+ * @param thresholds - The custom thresholds
+ */
+export function setCollectionThresholds(thresholds: {
+  small?: number;
+  medium?: number;
+  large?: number;
+}): void {
+  if (thresholds.small !== undefined) {
+    SMALL_COLLECTION_THRESHOLD = thresholds.small;
+  }
+
+  if (thresholds.medium !== undefined) {
+    MEDIUM_COLLECTION_THRESHOLD = thresholds.medium;
+  }
+
+  if (thresholds.large !== undefined) {
+    LARGE_COLLECTION_THRESHOLD = thresholds.large;
+  }
+
+  // Disable adaptive implementation selection when custom thresholds are set
+  ADAPTIVE_IMPLEMENTATION_ENABLED = false;
+}
 
 /**
  * Threshold for using native array methods for operations
@@ -261,6 +341,9 @@ export class List<T> implements IList<T> {
    * @param index - The index of the element to get
    */
   get(index: number): T | undefined {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.GET, this._size);
+
     if (index < 0 || index >= this._size) {
       return undefined;
     }
@@ -319,6 +402,9 @@ export class List<T> implements IList<T> {
    * @param value - The new value
    */
   set(index: number, value: T): List<T> {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.SET, this._size);
+
     if (index < 0 || index >= this._size) {
       return this;
     }
@@ -366,6 +452,9 @@ export class List<T> implements IList<T> {
    * @param value - The element to insert
    */
   insert(index: number, value: T): List<T> {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.INSERT, this._size);
+
     if (index < 0 || index > this._size) {
       return this;
     }
@@ -461,6 +550,9 @@ export class List<T> implements IList<T> {
    * @param index - The index of the element to remove
    */
   remove(index: number): List<T> {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.REMOVE, this._size);
+
     if (index < 0 || index >= this._size) {
       return this;
     }
@@ -552,6 +644,9 @@ export class List<T> implements IList<T> {
    * @param value - The element to append
    */
   append(value: T): List<T> {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.APPEND, this._size);
+
     const newSize = this._size + 1;
 
     // For small collections, optimize for direct array operations
@@ -638,6 +733,9 @@ export class List<T> implements IList<T> {
    * @param value - The element to prepend
    */
   prepend(value: T): List<T> {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.PREPEND, this._size);
+
     const newSize = this._size + 1;
 
     // For small collections, optimize for direct array operations
@@ -724,6 +822,9 @@ export class List<T> implements IList<T> {
    * @param other - The list to concatenate with this list
    */
   concat(other: IList<T>): List<T> {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.CONCAT, this._size);
+
     try {
       if (!other || other.isEmpty) {
         return this;
@@ -824,6 +925,9 @@ export class List<T> implements IList<T> {
    * @param fn - The mapping function
    */
   map<U>(fn: (value: T, index: number) => U): List<U> {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.MAP, this._size);
+
     if (this.isEmpty) {
       return List.empty<U>();
     }
@@ -894,6 +998,9 @@ export class List<T> implements IList<T> {
    * @param fn - The predicate function
    */
   filter(fn: (value: T, index: number) => boolean): List<T> {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.FILTER, this._size);
+
     if (this.isEmpty) {
       return List.empty<T>();
     }
@@ -982,6 +1089,9 @@ export class List<T> implements IList<T> {
    * @param initial - The initial value
    */
   reduce<U>(fn: (acc: U, value: T, index: number) => U, initial: U): U {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.REDUCE, this._size);
+
     if (this.isEmpty) {
       return initial;
     }
@@ -1106,6 +1216,9 @@ export class List<T> implements IList<T> {
    * @param end - The end index (exclusive)
    */
   slice(start?: number, end?: number): List<T> {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.SLICE, this._size);
+
     if (this.isEmpty) {
       return List.empty<T>();
     }
@@ -1169,6 +1282,9 @@ export class List<T> implements IList<T> {
     reduceFn: (acc: V, value: U, index: number) => V,
     initial: V
   ): V {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.SPECIALIZED, this._size);
+
     if (this.isEmpty) {
       return initial;
     }
@@ -1500,25 +1616,41 @@ export class List<T> implements IList<T> {
       return [this._representation, this._data];
     }
 
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.TRANSITION, newSize);
+
+    // Update thresholds based on usage patterns
+    if (ADAPTIVE_IMPLEMENTATION_ENABLED) {
+      updateThresholds();
+    }
+
     // Determine the new representation based on the new size
     let newRepresentation = this._representation;
 
-    // Check if we need to transition to a different representation
-    if (newSize < SMALL_COLLECTION_THRESHOLD && this._representation !== RepresentationType.ARRAY) {
-      // Transition to array representation for small collections
-      newRepresentation = RepresentationType.ARRAY;
-    } else if (newSize >= SMALL_COLLECTION_THRESHOLD && newSize < MEDIUM_COLLECTION_THRESHOLD) {
-      if (this._representation !== RepresentationType.CHUNKED) {
-        // Transition to chunked representation for medium collections
-        newRepresentation = RepresentationType.CHUNKED;
+    // Check if we have a recommendation from the usage pattern monitor
+    const recommendation = ADAPTIVE_IMPLEMENTATION_ENABLED ? getImplementationRecommendation() : null;
+
+    if (recommendation && recommendation.confidence >= 0.7) {
+      // Use the recommended representation if confidence is high enough
+      newRepresentation = recommendation.representation;
+    } else {
+      // Otherwise, use the standard size-based selection
+      if (newSize < SMALL_COLLECTION_THRESHOLD && this._representation !== RepresentationType.ARRAY) {
+        // Transition to array representation for small collections
+        newRepresentation = RepresentationType.ARRAY;
+      } else if (newSize >= SMALL_COLLECTION_THRESHOLD && newSize < MEDIUM_COLLECTION_THRESHOLD) {
+        if (this._representation !== RepresentationType.CHUNKED) {
+          // Transition to chunked representation for medium collections
+          newRepresentation = RepresentationType.CHUNKED;
+        }
+      } else if (newSize >= MEDIUM_COLLECTION_THRESHOLD && newSize < LARGE_COLLECTION_THRESHOLD &&
+                 this._representation !== RepresentationType.VECTOR) {
+        // Transition to vector representation for large collections
+        newRepresentation = RepresentationType.VECTOR;
+      } else if (newSize >= LARGE_COLLECTION_THRESHOLD && this._representation !== RepresentationType.HAMT_VECTOR) {
+        // Transition to HAMT vector representation for very large collections
+        newRepresentation = RepresentationType.HAMT_VECTOR;
       }
-    } else if (newSize >= MEDIUM_COLLECTION_THRESHOLD && newSize < LARGE_COLLECTION_THRESHOLD &&
-               this._representation !== RepresentationType.VECTOR) {
-      // Transition to vector representation for large collections
-      newRepresentation = RepresentationType.VECTOR;
-    } else if (newSize >= LARGE_COLLECTION_THRESHOLD && this._representation !== RepresentationType.HAMT_VECTOR) {
-      // Transition to HAMT vector representation for very large collections
-      newRepresentation = RepresentationType.HAMT_VECTOR;
     }
 
     // If no transition is needed, return the current representation and data
