@@ -10,20 +10,130 @@
 import { IList, TransientList } from './types';
 
 /**
- * Branching factor for the trie structure
+ * Default branching factor for the trie structure
  * 32 is chosen for optimal performance with modern CPUs and memory systems
  */
-const BRANCHING_FACTOR = 32;
+const DEFAULT_BRANCHING_FACTOR = 32;
 
 /**
- * Bit mask for extracting the index within a node (5 bits for 32-way branching)
+ * Minimum branching factor for the trie structure
  */
-const MASK = BRANCHING_FACTOR - 1;
+const MIN_BRANCHING_FACTOR = 8;
 
 /**
- * Shift amount for each level of the trie (5 bits for 32-way branching)
+ * Maximum branching factor for the trie structure
  */
-const SHIFT = 5;
+const MAX_BRANCHING_FACTOR = 64;
+
+/**
+ * Adaptive branching factor based on usage patterns
+ * This will be adjusted dynamically based on the operations performed
+ */
+let ADAPTIVE_BRANCHING_FACTOR = DEFAULT_BRANCHING_FACTOR;
+
+/**
+ * Bit mask for extracting the index within a node
+ */
+let MASK = ADAPTIVE_BRANCHING_FACTOR - 1;
+
+/**
+ * Shift amount for each level of the trie
+ */
+let SHIFT = Math.log2(ADAPTIVE_BRANCHING_FACTOR);
+
+/**
+ * Counter for append operations
+ */
+let APPEND_COUNT = 0;
+
+/**
+ * Counter for prepend operations
+ */
+let PREPEND_COUNT = 0;
+
+/**
+ * Counter for insert operations
+ */
+let INSERT_COUNT = 0;
+
+/**
+ * Counter for remove operations
+ */
+let REMOVE_COUNT = 0;
+
+/**
+ * Counter for get operations
+ */
+let GET_COUNT = 0;
+
+/**
+ * Counter for set operations
+ */
+let SET_COUNT = 0;
+
+/**
+ * Threshold for adjusting the branching factor
+ */
+const ADJUSTMENT_THRESHOLD = 1000;
+
+/**
+ * Adjust the branching factor based on usage patterns
+ */
+function adjustBranchingFactor(): void {
+  // Only adjust after a certain number of operations
+  const totalOperations = APPEND_COUNT + PREPEND_COUNT + INSERT_COUNT + REMOVE_COUNT + GET_COUNT + SET_COUNT;
+  if (totalOperations < ADJUSTMENT_THRESHOLD) {
+    return;
+  }
+
+  // Calculate the ratio of different operations
+  const appendRatio = APPEND_COUNT / totalOperations;
+  const prependRatio = PREPEND_COUNT / totalOperations;
+  const insertRatio = INSERT_COUNT / totalOperations;
+  const removeRatio = REMOVE_COUNT / totalOperations;
+  const getRatio = GET_COUNT / totalOperations;
+  const setRatio = SET_COUNT / totalOperations;
+
+  // Determine the optimal branching factor based on the operation ratios
+  let optimalBranchingFactor = DEFAULT_BRANCHING_FACTOR;
+
+  // If append/prepend operations are dominant, use a larger branching factor
+  if (appendRatio + prependRatio > 0.7) {
+    optimalBranchingFactor = Math.min(MAX_BRANCHING_FACTOR, ADAPTIVE_BRANCHING_FACTOR + 8);
+  }
+  // If insert/remove operations are dominant, use a smaller branching factor
+  else if (insertRatio + removeRatio > 0.7) {
+    optimalBranchingFactor = Math.max(MIN_BRANCHING_FACTOR, ADAPTIVE_BRANCHING_FACTOR - 8);
+  }
+  // If get/set operations are dominant, use a medium branching factor
+  else if (getRatio + setRatio > 0.7) {
+    optimalBranchingFactor = DEFAULT_BRANCHING_FACTOR;
+  }
+
+  // Update the branching factor if it has changed
+  if (optimalBranchingFactor !== ADAPTIVE_BRANCHING_FACTOR) {
+    ADAPTIVE_BRANCHING_FACTOR = optimalBranchingFactor;
+    MASK = ADAPTIVE_BRANCHING_FACTOR - 1;
+    SHIFT = Math.log2(ADAPTIVE_BRANCHING_FACTOR);
+  }
+
+  // Reset the counters
+  APPEND_COUNT = 0;
+  PREPEND_COUNT = 0;
+  INSERT_COUNT = 0;
+  REMOVE_COUNT = 0;
+  GET_COUNT = 0;
+  SET_COUNT = 0;
+}
+
+/**
+ * Get the current branching factor
+ */
+function getBranchingFactor(): number {
+  return ADAPTIVE_BRANCHING_FACTOR;
+}
+
+import { recordChunkAcquire, recordChunkRelease } from '../profiling/chunk-pool-monitor';
 
 /**
  * Maximum size of the chunk pool
@@ -37,6 +147,16 @@ const MAX_POOL_SIZE = 100;
 class ChunkPool<T> {
   private static instances: Map<string, ChunkPool<any>> = new Map();
   private chunks: Array<T[]> = [];
+  private id: string;
+
+  /**
+   * Create a new chunk pool
+   *
+   * @param id - A unique identifier for the pool
+   */
+  private constructor(id: string) {
+    this.id = id;
+  }
 
   /**
    * Get a singleton instance of the chunk pool for a specific type
@@ -46,7 +166,7 @@ class ChunkPool<T> {
    */
   static getInstance<T>(id: string = 'default'): ChunkPool<T> {
     if (!ChunkPool.instances.has(id)) {
-      ChunkPool.instances.set(id, new ChunkPool<T>());
+      ChunkPool.instances.set(id, new ChunkPool<T>(id));
     }
     return ChunkPool.instances.get(id) as ChunkPool<T>;
   }
@@ -57,10 +177,18 @@ class ChunkPool<T> {
    * @returns A chunk array
    */
   acquire(): T[] {
+    const branchingFactor = getBranchingFactor();
+
     if (this.chunks.length > 0) {
-      return this.chunks.pop()!;
+      const chunk = this.chunks.pop()!;
+      // Record a chunk acquisition from the pool
+      recordChunkAcquire(this.id, true, branchingFactor);
+      return chunk;
     }
-    return new Array<T>(BRANCHING_FACTOR);
+
+    // Record a chunk creation (pool miss)
+    recordChunkAcquire(this.id, false, branchingFactor);
+    return new Array<T>(branchingFactor);
   }
 
   /**
@@ -74,9 +202,30 @@ class ChunkPool<T> {
       // Clear the chunk to avoid memory leaks
       chunk.length = 0;
       // Ensure the chunk has the correct capacity
-      chunk.length = BRANCHING_FACTOR;
+      chunk.length = getBranchingFactor();
       this.chunks.push(chunk);
+
+      // Record a chunk release
+      recordChunkRelease(this.id);
     }
+  }
+
+  /**
+   * Get the current size of the pool
+   *
+   * @returns The number of chunks in the pool
+   */
+  getPoolSize(): number {
+    return this.chunks.length;
+  }
+
+  /**
+   * Get the maximum size of the pool
+   *
+   * @returns The maximum number of chunks in the pool
+   */
+  getMaxPoolSize(): number {
+    return MAX_POOL_SIZE;
   }
 }
 
@@ -256,7 +405,7 @@ export class TransientChunkedList<T> implements TransientList<T> {
    */
   append(value: T): TransientChunkedList<T> {
     // Fast path: append to tail if not full
-    if (this.tail.length < BRANCHING_FACTOR) {
+    if (this.tail.length < getBranchingFactor()) {
       this.tail.push(value);
       this._size++;
       return this;
@@ -486,22 +635,22 @@ export class ChunkedList<T> implements IList<T> {
     }
 
     // For small arrays, just use the tail
-    if (elements.length <= BRANCHING_FACTOR) {
+    if (elements.length <= getBranchingFactor()) {
       return new ChunkedList<T>(null, elements, elements.length, 0);
     }
 
     // For medium-sized arrays (up to 100 elements), use a simple approach
     if (elements.length <= 100) {
-      // Use a single-level trie with chunks of BRANCHING_FACTOR
+      // Use a single-level trie with chunks of the current branching factor
       const chunks: T[][] = [];
       const chunkPool = ChunkPool.getInstance<T>();
 
-      for (let i = 0; i < elements.length; i += BRANCHING_FACTOR) {
+      for (let i = 0; i < elements.length; i += getBranchingFactor()) {
         // Get a chunk from the pool
         const chunk = chunkPool.acquire();
 
         // Fill the chunk with elements
-        const end = Math.min(i + BRANCHING_FACTOR, elements.length);
+        const end = Math.min(i + getBranchingFactor(), elements.length);
         for (let j = 0; j < end - i; j++) {
           chunk[j] = elements[i + j];
         }
@@ -533,7 +682,7 @@ export class ChunkedList<T> implements IList<T> {
     }
 
     // For larger arrays, build a proper trie
-    const tailSize = elements.length % BRANCHING_FACTOR;
+    const tailSize = elements.length % getBranchingFactor();
     const trieSize = elements.length - tailSize;
 
     // Extract the tail
@@ -577,7 +726,7 @@ export class ChunkedList<T> implements IList<T> {
     };
 
     // Calculate the height of the trie
-    const height = Math.floor(Math.log(trieSize) / Math.log(BRANCHING_FACTOR));
+    const height = Math.floor(Math.log(trieSize) / Math.log(getBranchingFactor()));
 
     // Build the trie
     const root = buildTrie(0, trieSize, height);
@@ -662,6 +811,10 @@ export class ChunkedList<T> implements IList<T> {
    * @returns The value at the index, or undefined if the index is out of bounds
    */
   get(index: number): T | undefined {
+    // Track the operation
+    GET_COUNT++;
+    adjustBranchingFactor();
+
     if (index < 0 || index >= this._size) {
       return undefined;
     }
@@ -716,6 +869,10 @@ export class ChunkedList<T> implements IList<T> {
    * @throws {RangeError} If the index is out of bounds
    */
   set(index: number, value: T): ChunkedList<T> {
+    // Track the operation
+    SET_COUNT++;
+    adjustBranchingFactor();
+
     if (index < 0 || index >= this._size) {
       throw new RangeError(`Index ${index} out of bounds`);
     }
@@ -1110,8 +1267,15 @@ export class ChunkedList<T> implements IList<T> {
    * @returns A new list with the appended value
    */
   append(value: T): ChunkedList<T> {
+    // Track the operation
+    APPEND_COUNT++;
+    adjustBranchingFactor();
+
+    // Get the current branching factor
+    const branchingFactor = getBranchingFactor();
+
     // Fast path: append to tail if not full
-    if (this.tail.length < BRANCHING_FACTOR) {
+    if (this.tail.length < branchingFactor) {
       // Use the chunk pool to create a new tail
       const chunkPool = ChunkPool.getInstance<T>();
       const newTail = chunkPool.acquire();
@@ -1276,13 +1440,13 @@ export class ChunkedList<T> implements IList<T> {
     }
 
     // Fast path: if the list is small, use a more efficient approach
-    if (this._size < BRANCHING_FACTOR) {
+    if (this._size < getBranchingFactor()) {
       const newTail = [value, ...this.tail];
       return new ChunkedList<T>(null, newTail, this._size + 1, 0);
     }
 
     // Fast path: if we have space in the first chunk, insert there
-    if (this.root !== null && this.height === 0 && this.root.children.length < BRANCHING_FACTOR) {
+    if (this.root !== null && this.height === 0 && this.root.children.length < getBranchingFactor()) {
       // We have a single-level trie with space in the root
       const newChildren = [value, ...this.root.children];
       const newRoot = {
@@ -1488,7 +1652,7 @@ export class ChunkedList<T> implements IList<T> {
             filteredElements[filteredCount++] = value as T;
 
             // If we've filled the current chunk, add it to our collection and start a new one
-            if (filteredCount === BRANCHING_FACTOR) {
+            if (filteredCount === getBranchingFactor()) {
               // Add the current chunk to our collection
               allFilteredChunks.push(filteredElements);
 
@@ -1503,7 +1667,7 @@ export class ChunkedList<T> implements IList<T> {
         for (let i = 0; i < node.children.length; i++) {
           const child = node.children[i];
           if (child !== undefined) {
-            const childOffset = indexOffset + (i * Math.pow(BRANCHING_FACTOR, level));
+            const childOffset = indexOffset + (i * Math.pow(getBranchingFactor(), level));
             collectFilteredElements(child as Node<T>, level - 1, childOffset);
           }
         }
@@ -1520,7 +1684,7 @@ export class ChunkedList<T> implements IList<T> {
         filteredElements[filteredCount++] = this.tail[i];
 
         // If we've filled the current chunk, add it to our collection and start a new one
-        if (filteredCount === BRANCHING_FACTOR) {
+        if (filteredCount === getBranchingFactor()) {
           // Add the current chunk to our collection
           allFilteredChunks.push(filteredElements);
 
@@ -1546,7 +1710,7 @@ export class ChunkedList<T> implements IList<T> {
     }
 
     // If we have only one chunk and it's small enough, use it as the tail
-    if (allFilteredChunks.length === 1 && allFilteredChunks[0].length <= BRANCHING_FACTOR) {
+    if (allFilteredChunks.length === 1 && allFilteredChunks[0].length <= getBranchingFactor()) {
       return new ChunkedList<T>(null, allFilteredChunks[0], allFilteredChunks[0].length, 0);
     }
 
@@ -1833,7 +1997,7 @@ export class ChunkedList<T> implements IList<T> {
         for (let i = 0; i < node.children.length; i++) {
           const child = node.children[i];
           if (child !== undefined) {
-            const childOffset = indexOffset + (i * Math.pow(BRANCHING_FACTOR, level));
+            const childOffset = indexOffset + (i * Math.pow(getBranchingFactor(), level));
             collectKeptElements(child as Node<T>, level - 1, childOffset);
           }
         }
