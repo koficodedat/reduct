@@ -262,6 +262,67 @@ export interface IList<T> {
    * @returns The last element, or undefined if the list is empty
    */
   last(): T | undefined;
+
+  /**
+   * Create a lazy version of the list
+   *
+   * This method creates a lazy wrapper around the list that defers operations
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @returns A lazy version of the list
+   */
+  asLazy?(): IList<T>;
+
+  /**
+   * Create a lazy map operation
+   *
+   * This method creates a lazy wrapper around the list that defers the map operation
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @typeParam R - The type of elements in the resulting list
+   * @param fn - The function to apply to each element
+   * @returns A lazy list with the map operation
+   */
+  lazyMap?<R>(fn: (value: T, index: number) => R): IList<R>;
+
+  /**
+   * Create a lazy filter operation
+   *
+   * This method creates a lazy wrapper around the list that defers the filter operation
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @param fn - The predicate function
+   * @returns A lazy list with the filter operation
+   */
+  lazyFilter?(fn: (value: T, index: number) => boolean): IList<T>;
+
+  /**
+   * Create a lazy slice operation
+   *
+   * This method creates a lazy wrapper around the list that defers the slice operation
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @returns A lazy list with the slice operation
+   */
+  lazySlice?(start: number, end?: number): IList<T>;
+
+  /**
+   * Create a lazy concat operation
+   *
+   * This method creates a lazy wrapper around the list that defers the concat operation
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @param other - The list to concatenate
+   * @returns A lazy list with the concat operation
+   */
+  lazyConcat?(other: IList<T>): IList<T>;
 }
 
 /**

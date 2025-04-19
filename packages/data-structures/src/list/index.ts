@@ -11,6 +11,7 @@ import { IList, IListFactory, TransientList, RepresentationType } from './types'
 import { ChunkedList } from './chunked-list';
 import { PersistentVector } from './persistent-vector';
 import { SmallList } from './small-list';
+import { LazyList, lazy } from './lazy-list';
 import { getProfilingSystem, OperationType, DataStructureType } from '../profiling';
 import { recordDataStructureCreation, estimateMemoryUsage } from '../profiling/memory-monitor';
 
@@ -1214,6 +1215,77 @@ export class List<T> implements IList<T> {
         // For array representation, use the generic transient implementation
         return new TransientListImpl<T>([...this._data]);
     }
+  }
+
+  /**
+   * Create a lazy version of the list
+   *
+   * This method creates a lazy wrapper around the list that defers operations
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @returns A lazy version of the list
+   */
+  asLazy(): LazyList<T> {
+    return lazy(this);
+  }
+
+  /**
+   * Create a lazy map operation
+   *
+   * This method creates a lazy wrapper around the list that defers the map operation
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @typeParam R - The type of elements in the resulting list
+   * @param fn - The function to apply to each element
+   * @returns A lazy list with the map operation
+   */
+  lazyMap<R>(fn: (value: T, index: number) => R): IList<R> {
+    return this.asLazy().map(fn);
+  }
+
+  /**
+   * Create a lazy filter operation
+   *
+   * This method creates a lazy wrapper around the list that defers the filter operation
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @param fn - The predicate function
+   * @returns A lazy list with the filter operation
+   */
+  lazyFilter(fn: (value: T, index: number) => boolean): IList<T> {
+    return this.asLazy().filter(fn);
+  }
+
+  /**
+   * Create a lazy slice operation
+   *
+   * This method creates a lazy wrapper around the list that defers the slice operation
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @returns A lazy list with the slice operation
+   */
+  lazySlice(start: number, end?: number): IList<T> {
+    return this.asLazy().slice(start, end);
+  }
+
+  /**
+   * Create a lazy concat operation
+   *
+   * This method creates a lazy wrapper around the list that defers the concat operation
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @param other - The list to concatenate
+   * @returns A lazy list with the concat operation
+   */
+  lazyConcat(other: IList<T>): IList<T> {
+    return this.asLazy().concat(other);
   }
 
 
