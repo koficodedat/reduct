@@ -14,21 +14,21 @@ import { SmallList } from './small-list';
 
 /**
  * Threshold for small collections
- * For collections smaller than this size, we use a simple array implementation
+ * For collections smaller than this size, we use a SmallList implementation
  * and directly leverage native array methods for optimal performance
  *
- * Based on benchmark results, 64 is a good balance between performance and memory usage
+ * Based on benchmark results, 29 is the optimal threshold for switching to chunked representation
  */
-const SMALL_COLLECTION_THRESHOLD = 64;
+const SMALL_COLLECTION_THRESHOLD = 29;
 
 /**
  * Threshold for medium collections
  * For collections between SMALL_COLLECTION_THRESHOLD and this size,
  * we use a chunked array implementation
  *
- * Based on benchmark results, 2048 is a good threshold for switching to vector representation
+ * Based on benchmark results, 30 is the optimal threshold for switching to vector representation
  */
-const MEDIUM_COLLECTION_THRESHOLD = 2048;
+const MEDIUM_COLLECTION_THRESHOLD = 30;
 
 
 
@@ -37,16 +37,16 @@ const MEDIUM_COLLECTION_THRESHOLD = 2048;
  * For collections smaller than this size, operations like map, filter
  * will return native arrays directly when possible for better performance
  *
- * Based on benchmark results, 32 is optimal for direct native array operations
+ * Based on benchmark results, 24 is optimal for direct native array operations
  */
-const NATIVE_RETURN_THRESHOLD = 32;
+const NATIVE_RETURN_THRESHOLD = 24;
 
 /**
  * Threshold for using native array methods for operations
  *
- * Based on benchmark results, 128 is optimal for leveraging native array methods
+ * Based on benchmark results, 32 is optimal for leveraging native array methods
  */
-const NATIVE_OPERATIONS_THRESHOLD = 128;
+const NATIVE_OPERATIONS_THRESHOLD = 32;
 
 /**
  * TransientList implementation
@@ -909,9 +909,9 @@ export class List<T> implements IList<T> {
       return initial;
     }
 
-    // For chunked list, convert to array first
-    if (this._representation === RepresentationType.CHUNKED) {
-      const dataArray = (this._data as ChunkedList<T>).toArray();
+    try {
+      // Get the data array safely
+      const dataArray = this.toArray();
 
       // For very small collections, use separate native operations
       if (this._size < NATIVE_RETURN_THRESHOLD) {
@@ -921,7 +921,7 @@ export class List<T> implements IList<T> {
           .reduce((acc: V, val: U, idx: number) => reduceFn(acc, val, idx), initial);
       }
 
-      // For larger collections, use a single-pass implementation
+      // For larger collections, use a single-pass implementation for better performance
       let result = initial;
       let filteredIndex = 0;
 
@@ -933,30 +933,10 @@ export class List<T> implements IList<T> {
       }
 
       return result;
+    } catch (error) {
+      console.error(`Error in mapFilterReduce: ${error}`);
+      return initial;
     }
-
-    // For array and vector representations
-    // For very small collections, use separate native operations
-    // JavaScript engines might optimize this better in some cases
-    if (this._size < NATIVE_RETURN_THRESHOLD) {
-      return this._data
-        .map(mapFn)
-        .filter(filterFn)
-        .reduce((acc: V, val: U, idx: number) => reduceFn(acc, val, idx), initial);
-    }
-
-    // For larger collections, use a single-pass implementation for better performance
-    let result = initial;
-    let filteredIndex = 0;
-
-    for (let i = 0; i < this._size; i++) {
-      const mappedValue = mapFn(this._data[i], i);
-      if (filterFn(mappedValue, i)) {
-        result = reduceFn(result, mappedValue, filteredIndex++);
-      }
-    }
-
-    return result;
   }
 
   /**
@@ -975,9 +955,9 @@ export class List<T> implements IList<T> {
       return initial;
     }
 
-    // For chunked list, convert to array first
-    if (this._representation === RepresentationType.CHUNKED) {
-      const dataArray = (this._data as ChunkedList<T>).toArray();
+    try {
+      // Get the data array safely
+      const dataArray = this.toArray();
 
       // For very small collections, use separate native operations
       if (this._size < NATIVE_RETURN_THRESHOLD) {
@@ -986,7 +966,7 @@ export class List<T> implements IList<T> {
           .reduce((acc: V, val: U, idx: number) => reduceFn(acc, val, idx), initial);
       }
 
-      // For larger collections, use a single-pass implementation
+      // For larger collections, use a single-pass implementation for better performance
       let result = initial;
 
       for (let i = 0; i < dataArray.length; i++) {
@@ -995,25 +975,10 @@ export class List<T> implements IList<T> {
       }
 
       return result;
+    } catch (error) {
+      console.error(`Error in mapReduce: ${error}`);
+      return initial;
     }
-
-    // For array and vector representations
-    // For very small collections, use separate native operations
-    if (this._size < NATIVE_RETURN_THRESHOLD) {
-      return this._data
-        .map(mapFn)
-        .reduce((acc: V, val: U, idx: number) => reduceFn(acc, val, idx), initial);
-    }
-
-    // For larger collections, use a single-pass implementation for better performance
-    let result = initial;
-
-    for (let i = 0; i < this._size; i++) {
-      const mappedValue = mapFn(this._data[i], i);
-      result = reduceFn(result, mappedValue, i);
-    }
-
-    return result;
   }
 
   /**

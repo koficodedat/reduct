@@ -153,47 +153,49 @@ describe('List', () => {
       const smallList = List.from(Array.from({ length: 10 }, (_, i) => i));
       expect(smallList.size).toBe(10);
       expect(smallList.get(5)).toBe(5);
-      
+
       // Test operations on small lists
       const mapped = smallList.map(x => x * 2);
       expect(mapped.toArray()).toEqual([0, 2, 4, 6, 8, 10, 12, 14, 16, 18]);
-      
+
       const filtered = smallList.filter(x => x % 2 === 0);
       expect(filtered.toArray()).toEqual([0, 2, 4, 6, 8]);
-      
+
       const sum = smallList.reduce((acc, x) => acc + x, 0);
       expect(sum).toBe(45);
     });
 
     it('should handle medium collections efficiently', () => {
+      // Create a list with 100 elements (which is > MEDIUM_COLLECTION_THRESHOLD)
       const mediumList = List.from(Array.from({ length: 100 }, (_, i) => i));
       expect(mediumList.size).toBe(100);
       expect(mediumList.get(50)).toBe(50);
-      
+
       // Test operations on medium lists
       const mapped = mediumList.map(x => x * 2);
       expect(mapped.get(50)).toBe(100);
-      
+
       const filtered = mediumList.filter(x => x % 10 === 0);
       expect(filtered.toArray()).toEqual([0, 10, 20, 30, 40, 50, 60, 70, 80, 90]);
-      
+
       const sum = mediumList.reduce((acc, x) => acc + x, 0);
       expect(sum).toBe(4950); // Sum of 0 to 99
     });
 
     it('should handle large collections efficiently', () => {
+      // Create a list with 1000 elements (which is > MEDIUM_COLLECTION_THRESHOLD)
       const largeList = List.from(Array.from({ length: 1000 }, (_, i) => i));
       expect(largeList.size).toBe(1000);
       expect(largeList.get(500)).toBe(500);
-      
+
       // Test operations on large lists
       const mapped = largeList.map(x => x * 2);
       expect(mapped.get(500)).toBe(1000);
-      
+
       const filtered = largeList.filter(x => x % 100 === 0);
       expect(filtered.size).toBe(10);
       expect(filtered.toArray()).toEqual([0, 100, 200, 300, 400, 500, 600, 700, 800, 900]);
-      
+
       const sum = largeList.reduce((acc, x) => acc + x, 0);
       expect(sum).toBe(499500); // Sum of 0 to 999
     });

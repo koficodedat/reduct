@@ -498,14 +498,16 @@ export class PersistentVector<T> implements IList<T> {
   /**
    * Insert an element at the specified index
    */
-  insert(index: number, value: T): IList<T> {
+  insert(_index: number, _value: T): IList<T> {
+    // TODO: Implement proper insertion
     return this;
   }
 
   /**
    * Remove the element at the specified index
    */
-  remove(index: number): IList<T> {
+  remove(_index: number): IList<T> {
+    // TODO: Implement proper removal
     return this;
   }
 
@@ -598,28 +600,32 @@ export class PersistentVector<T> implements IList<T> {
   /**
    * Prepend an element to the beginning of the list
    */
-  prepend(value: T): IList<T> {
+  prepend(_value: T): IList<T> {
+    // TODO: Implement proper prepend
     return this;
   }
 
   /**
    * Concatenate this list with another list
    */
-  concat(other: IList<T>): IList<T> {
+  concat(_other: IList<T>): IList<T> {
+    // TODO: Implement proper concat
     return this;
   }
 
   /**
    * Map each element in the list to a new value
    */
-  map<U>(fn: (value: T, index: number) => U): IList<U> {
+  map<U>(_fn: (value: T, index: number) => U): IList<U> {
+    // TODO: Implement proper map
     return new PersistentVector<U>(null, [], 0, 0);
   }
 
   /**
    * Filter elements in the list based on a predicate
    */
-  filter(fn: (value: T, index: number) => boolean): IList<T> {
+  filter(_fn: (value: T, index: number) => boolean): IList<T> {
+    // TODO: Implement proper filter
     return this;
   }
 
@@ -627,20 +633,28 @@ export class PersistentVector<T> implements IList<T> {
    * Reduce the list to a single value
    */
   reduce<U>(fn: (acc: U, value: T, index: number) => U, initial: U): U {
-    return initial;
+    if (this.isEmpty) {
+      return initial;
+    }
+
+    // Convert to array and use native reduce for simplicity
+    const elements = this.toArray();
+    return elements.reduce((acc, value, index) => fn(acc, value, index), initial);
   }
 
   /**
    * Find the first element in the list that satisfies a predicate
    */
-  find(fn: (value: T, index: number) => boolean): T | undefined {
+  find(_fn: (value: T, index: number) => boolean): T | undefined {
+    // TODO: Implement proper find
     return undefined;
   }
 
   /**
    * Find the index of the first element in the list that satisfies a predicate
    */
-  findIndex(fn: (value: T, index: number) => boolean): number {
+  findIndex(_fn: (value: T, index: number) => boolean): number {
+    // TODO: Implement proper findIndex
     return -1;
   }
 
@@ -683,7 +697,8 @@ export class PersistentVector<T> implements IList<T> {
   /**
    * Create a slice of the list
    */
-  slice(start?: number, end?: number): IList<T> {
+  slice(_start?: number, _end?: number): IList<T> {
+    // TODO: Implement proper slice
     return this;
   }
 
@@ -696,7 +711,22 @@ export class PersistentVector<T> implements IList<T> {
     reduceFn: (acc: V, value: U, index: number) => V,
     initial: V
   ): V {
-    return initial;
+    if (this.isEmpty) {
+      return initial;
+    }
+
+    // Convert to array and perform operations in a single pass
+    const elements = this.toArray();
+    let result = initial;
+
+    for (let i = 0; i < elements.length; i++) {
+      const mappedValue = mapFn(elements[i], i);
+      if (filterFn(mappedValue, i)) {
+        result = reduceFn(result, mappedValue, i);
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -707,7 +737,20 @@ export class PersistentVector<T> implements IList<T> {
     reduceFn: (acc: V, value: U, index: number) => V,
     initial: V
   ): V {
-    return initial;
+    if (this.isEmpty) {
+      return initial;
+    }
+
+    // Convert to array and perform operations in a single pass
+    const elements = this.toArray();
+    let result = initial;
+
+    for (let i = 0; i < elements.length; i++) {
+      const mappedValue = mapFn(elements[i], i);
+      result = reduceFn(result, mappedValue, i);
+    }
+
+    return result;
   }
 
   /**
@@ -717,7 +760,22 @@ export class PersistentVector<T> implements IList<T> {
     filterFn: (value: T, index: number) => boolean,
     mapFn: (value: T, index: number) => U
   ): IList<U> {
-    return new PersistentVector<U>(null, [], 0, 0);
+    if (this.isEmpty) {
+      return new PersistentVector<U>(null, [], 0, 0);
+    }
+
+    // Convert to array and perform operations in a single pass
+    const elements = this.toArray();
+    const result: U[] = [];
+
+    for (let i = 0; i < elements.length; i++) {
+      if (filterFn(elements[i], i)) {
+        result.push(mapFn(elements[i], i));
+      }
+    }
+
+    // Create a new vector with the result
+    return PersistentVector.from(result);
   }
 
   /**
