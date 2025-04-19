@@ -28,7 +28,13 @@ export enum RepresentationType {
   /**
    * Vector representation for large collections
    */
-  VECTOR = 'vector'
+  VECTOR = 'vector',
+
+  /**
+   * HAMT Vector representation for very large collections
+   * Uses Hash Array Mapped Trie for efficient structural sharing
+   */
+  HAMT_VECTOR = 'hamt_vector'
 }
 
 /**

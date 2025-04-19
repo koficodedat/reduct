@@ -12,6 +12,7 @@ import { ChunkedList } from './chunked-list';
 import { PersistentVector } from './persistent-vector';
 import { SmallList } from './small-list';
 import { LazyList, lazy } from './lazy-list';
+import { HAMTPersistentVector } from './hamt-persistent-vector';
 import { getProfilingSystem, OperationType, DataStructureType } from '../profiling';
 import { recordDataStructureCreation, estimateMemoryUsage } from '../profiling/memory-monitor';
 import * as specializedOps from './specialized-operations';
@@ -33,6 +34,15 @@ const SMALL_COLLECTION_THRESHOLD = 31;
  * Based on benchmark results, 26 is the optimal threshold for switching to vector representation
  */
 const MEDIUM_COLLECTION_THRESHOLD = 26;
+
+/**
+ * Threshold for large collections
+ * For collections between MEDIUM_COLLECTION_THRESHOLD and this size,
+ * we use a PersistentVector implementation
+ * For collections larger than this size, we use a HAMTPersistentVector implementation
+ * for more efficient structural sharing and memory usage
+ */
+const LARGE_COLLECTION_THRESHOLD = 10000;
 
 
 
@@ -181,11 +191,16 @@ export class List<T> implements IList<T> {
       // with operations that access elements by index
       const chunkedList = ChunkedList.from(elements);
       return new List<T>(size, RepresentationType.CHUNKED, chunkedList);
-    } else {
+    } else if (size < LARGE_COLLECTION_THRESHOLD) {
       // For large collections, use a persistent vector trie
       // for optimal performance with structural sharing
       const persistentVector = PersistentVector.from(elements);
       return new List<T>(size, RepresentationType.VECTOR, persistentVector);
+    } else {
+      // For very large collections, use a HAMT persistent vector
+      // for more efficient structural sharing and memory usage
+      const hamtVector = HAMTPersistentVector.from(elements);
+      return new List<T>(size, RepresentationType.HAMT_VECTOR, hamtVector);
     }
   }
 
@@ -215,10 +230,14 @@ export class List<T> implements IList<T> {
       // For medium collections, use a ChunkedList
       const chunkedList = ChunkedList.from(data);
       return new List<T>(size, RepresentationType.CHUNKED, chunkedList);
-    } else {
+    } else if (size < LARGE_COLLECTION_THRESHOLD) {
       // For large collections, use a persistent vector trie
       const persistentVector = PersistentVector.from(data);
       return new List<T>(size, RepresentationType.VECTOR, persistentVector);
+    } else {
+      // For very large collections, use a HAMT persistent vector
+      const hamtVector = HAMTPersistentVector.from(data);
+      return new List<T>(size, RepresentationType.HAMT_VECTOR, hamtVector);
     }
   }
 
@@ -259,6 +278,9 @@ export class List<T> implements IList<T> {
       case RepresentationType.VECTOR:
         // For vector representation, use the vector's get method
         return (this._data as PersistentVector<T>).get(index);
+      case RepresentationType.HAMT_VECTOR:
+        // For HAMT vector representation, use the HAMT vector's get method
+        return (this._data as HAMTPersistentVector<T>).get(index);
       default:
         return undefined;
     }
@@ -326,6 +348,12 @@ export class List<T> implements IList<T> {
         const newVector = vector.set(index, value);
         return new List<T>(this._size, RepresentationType.VECTOR, newVector);
       }
+      case RepresentationType.HAMT_VECTOR: {
+        // For HAMT vector representation, use the HAMT vector's set method
+        const hamtVector = this._data as HAMTPersistentVector<T>;
+        const newHamtVector = hamtVector.set(index, value);
+        return new List<T>(this._size, RepresentationType.HAMT_VECTOR, newHamtVector);
+      }
       default:
         return this;
     }
@@ -383,7 +411,20 @@ export class List<T> implements IList<T> {
       case RepresentationType.VECTOR: {
         const vector = this._data as PersistentVector<T>;
         const newVector = vector.insert(index, value);
+
+        // Check if we need to transition to a different representation
+        if (newSize >= LARGE_COLLECTION_THRESHOLD) {
+          // Transition to HAMT vector representation
+          const hamtVector = HAMTPersistentVector.from(newVector.toArray());
+          return new List<T>(newSize, RepresentationType.HAMT_VECTOR, hamtVector);
+        }
+
         return new List<T>(newSize, RepresentationType.VECTOR, newVector);
+      }
+      case RepresentationType.HAMT_VECTOR: {
+        const hamtVector = this._data as HAMTPersistentVector<T>;
+        const newHamtVector = hamtVector.insert(index, value);
+        return new List<T>(newSize, RepresentationType.HAMT_VECTOR, newHamtVector);
       }
       default: {
         // For array representation or any other case, check for transition
@@ -463,6 +504,19 @@ export class List<T> implements IList<T> {
 
         return new List<T>(newSize, RepresentationType.VECTOR, newVector);
       }
+      case RepresentationType.HAMT_VECTOR: {
+        const hamtVector = this._data as HAMTPersistentVector<T>;
+        const newHamtVector = hamtVector.remove(index);
+
+        // Check if we need to transition to a different representation
+        if (newSize < LARGE_COLLECTION_THRESHOLD) {
+          // Transition to vector representation
+          const vector = PersistentVector.from(newHamtVector.toArray());
+          return new List<T>(newSize, RepresentationType.VECTOR, vector);
+        }
+
+        return new List<T>(newSize, RepresentationType.HAMT_VECTOR, newHamtVector);
+      }
       default: {
         // For array representation or any other case, check for transition
         const [newRepresentation, newData] = this.checkTransition(newSize);
@@ -536,7 +590,20 @@ export class List<T> implements IList<T> {
       case RepresentationType.VECTOR: {
         const vector = this._data as PersistentVector<T>;
         const newVector = vector.append(value);
+
+        // Check if we need to transition to a different representation
+        if (newSize >= LARGE_COLLECTION_THRESHOLD) {
+          // Transition to HAMT vector representation
+          const hamtVector = HAMTPersistentVector.from(newVector.toArray());
+          return new List<T>(newSize, RepresentationType.HAMT_VECTOR, hamtVector);
+        }
+
         return new List<T>(newSize, RepresentationType.VECTOR, newVector);
+      }
+      case RepresentationType.HAMT_VECTOR: {
+        const hamtVector = this._data as HAMTPersistentVector<T>;
+        const newHamtVector = hamtVector.append(value);
+        return new List<T>(newSize, RepresentationType.HAMT_VECTOR, newHamtVector);
       }
       default: {
         // For array representation or any other case, check for transition
@@ -609,7 +676,20 @@ export class List<T> implements IList<T> {
       case RepresentationType.VECTOR: {
         const vector = this._data as PersistentVector<T>;
         const newVector = vector.prepend(value);
+
+        // Check if we need to transition to a different representation
+        if (newSize >= LARGE_COLLECTION_THRESHOLD) {
+          // Transition to HAMT vector representation
+          const hamtVector = HAMTPersistentVector.from(newVector.toArray());
+          return new List<T>(newSize, RepresentationType.HAMT_VECTOR, hamtVector);
+        }
+
         return new List<T>(newSize, RepresentationType.VECTOR, newVector);
+      }
+      case RepresentationType.HAMT_VECTOR: {
+        const hamtVector = this._data as HAMTPersistentVector<T>;
+        const newHamtVector = hamtVector.prepend(value);
+        return new List<T>(newSize, RepresentationType.HAMT_VECTOR, newHamtVector);
       }
       default: {
         // For array representation or any other case, check for transition
@@ -979,6 +1059,9 @@ export class List<T> implements IList<T> {
         case RepresentationType.VECTOR:
           // For vector representation, use the vector's toArray method
           return (this._data as PersistentVector<T>).toArray();
+        case RepresentationType.HAMT_VECTOR:
+          // For HAMT vector representation, use the HAMT vector's toArray method
+          return (this._data as HAMTPersistentVector<T>).toArray();
         default:
           // Fallback for any other representation
           if (Array.isArray(this._data)) {
@@ -1429,9 +1512,13 @@ export class List<T> implements IList<T> {
         // Transition to chunked representation for medium collections
         newRepresentation = RepresentationType.CHUNKED;
       }
-    } else if (newSize >= MEDIUM_COLLECTION_THRESHOLD && this._representation !== RepresentationType.VECTOR) {
+    } else if (newSize >= MEDIUM_COLLECTION_THRESHOLD && newSize < LARGE_COLLECTION_THRESHOLD &&
+               this._representation !== RepresentationType.VECTOR) {
       // Transition to vector representation for large collections
       newRepresentation = RepresentationType.VECTOR;
+    } else if (newSize >= LARGE_COLLECTION_THRESHOLD && this._representation !== RepresentationType.HAMT_VECTOR) {
+      // Transition to HAMT vector representation for very large collections
+      newRepresentation = RepresentationType.HAMT_VECTOR;
     }
 
     // If no transition is needed, return the current representation and data
@@ -1466,6 +1553,10 @@ export class List<T> implements IList<T> {
       case RepresentationType.VECTOR:
         result = [RepresentationType.VECTOR, PersistentVector.from(dataArray)];
         dataStructureType = DataStructureType.PERSISTENT_VECTOR;
+        break;
+      case RepresentationType.HAMT_VECTOR:
+        result = [RepresentationType.HAMT_VECTOR, HAMTPersistentVector.from(dataArray)];
+        dataStructureType = DataStructureType.PERSISTENT_VECTOR; // Using same data structure type for now
         break;
       default:
         result = [this._representation, this._data];
