@@ -79,7 +79,7 @@ This document outlines the implementation plan for the enhanced List data struct
   - [x] Add operation chaining with maintained laziness
   - [x] Optimize memory usage by avoiding intermediate collections
   - [x] Implement result caching to avoid redundant computations
-- [ ] Add WebAssembly acceleration for critical operations
+- [ ] Add WebAssembly acceleration for critical operations (Deferred to @reduct/wasm package)
 - [x] Implement adaptive chunk sizing ✅
 - [x] Add compression for sparse data ✅
 - [ ] Implement advanced structural sharing techniques
@@ -219,12 +219,12 @@ Based on the latest benchmark results:
      - [x] Create LazyList wrapper that maintains laziness across operation chains
      - [x] Optimize memory usage by avoiding intermediate collections
      - [x] Add specialized handling for different collection sizes
-   - Implement WebAssembly acceleration for critical operations
+   - Implement WebAssembly acceleration for critical operations (Deferred to @reduct/wasm package)
+     - Note: This item is deferred until the core of the @reduct/wasm package is ready
      - Identify performance-critical operations for WebAssembly acceleration
-     - Create WebAssembly implementations of core algorithms
-     - Implement seamless fallback to JavaScript for unsupported environments
-     - Add runtime detection of WebAssembly support
-     - Optimize WebAssembly memory management for data structures
+     - Integrate with the @reduct/wasm package for core algorithms
+     - Implement adapter layer for seamless integration
+     - Add telemetry to measure real-world performance gains
      - Create benchmarks to measure WebAssembly performance improvements
    - Add specialized batch operations for common patterns
      - Implement specialized versions of common operation chains
