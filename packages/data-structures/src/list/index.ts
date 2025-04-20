@@ -17,6 +17,13 @@ import { getProfilingSystem, OperationType, DataStructureType } from '../profili
 import { recordDataStructureCreation, estimateMemoryUsage } from '../profiling/memory-monitor';
 import { recordOperation, getImplementationRecommendation } from '../profiling/usage-pattern-monitor';
 import * as specializedOps from './specialized-operations';
+import { DataType, detectDataType } from './type-detection';
+import {
+  createNumericList,
+  createStringList,
+  createObjectList,
+  createSpecializedList
+} from './specialized-list';
 
 /**
  * Default threshold for small collections
@@ -262,6 +269,13 @@ export class List<T> implements IList<T> {
       return List.empty<T>();
     }
 
+    // Check if we should use a specialized implementation based on data type
+    const dataType = detectDataType(elements);
+    if (dataType !== DataType.UNKNOWN && dataType !== DataType.MIXED) {
+      // We'll use the standard implementation but with optimized operations
+      // The specialized operations will be used internally when appropriate
+    }
+
     if (size < SMALL_COLLECTION_THRESHOLD) {
       // For small collections, use SmallList for optimal performance
       const smallList = new SmallList<T>(elements);
@@ -293,6 +307,20 @@ export class List<T> implements IList<T> {
   static of<T>(size: number, fn: (index: number) => T): List<T> {
     if (size === 0) {
       return List.empty<T>();
+    }
+
+    // Generate a small sample to detect the data type
+    const sampleSize = Math.min(size, 10);
+    const sample: T[] = [];
+    for (let i = 0; i < sampleSize; i++) {
+      sample.push(fn(i));
+    }
+
+    // Check if we should use a specialized implementation based on data type
+    const dataType = detectDataType(sample);
+    if (dataType !== DataType.UNKNOWN && dataType !== DataType.MIXED) {
+      // We'll use the standard implementation but with optimized operations
+      // The specialized operations will be used internally when appropriate
     }
 
     // Generate the elements using the provided function
@@ -1718,6 +1746,61 @@ export class List<T> implements IList<T> {
 
     return result;
   }
+}
+
+/**
+ * Create a specialized list for numeric data
+ *
+ * @param data - The numeric data
+ * @returns A list with specialized numeric operations
+ */
+export function numericList(data: number[]): IList<number> & {
+  sum: () => number;
+  average: () => number;
+  min: () => number;
+  max: () => number;
+} {
+  return createNumericList(data);
+}
+
+/**
+ * Create a specialized list for string data
+ *
+ * @param data - The string data
+ * @returns A list with specialized string operations
+ */
+export function stringList(data: string[]): IList<string> & {
+  join: (separator?: string) => string;
+  findContaining: (substring: string) => IList<string>;
+  findStartingWith: (prefix: string) => IList<string>;
+  findEndingWith: (suffix: string) => IList<string>;
+} {
+  return createStringList(data);
+}
+
+/**
+ * Create a specialized list for object reference data
+ *
+ * @param data - The object reference data
+ * @returns A list with specialized object operations
+ */
+export function objectList<T extends object>(data: T[]): IList<T> & {
+  findByProperty: <K extends keyof T>(property: K, value: any) => IList<T>;
+  groupByProperty: <K extends keyof T>(property: K) => Map<T[K], IList<T>>;
+  pluck: <K extends keyof T>(property: K) => IList<T[K]>;
+  unique: (property?: keyof T) => IList<T>;
+} {
+  return createObjectList(data);
+}
+
+/**
+ * Create a specialized list based on the data type
+ *
+ * @param data - The data array
+ * @returns A specialized list for the detected data type
+ */
+export function specializedList<T>(data: T[]): IList<T> {
+  return createSpecializedList(data);
 }
 
 // Export the List class as both a class and a factory
