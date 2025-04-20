@@ -26,11 +26,8 @@ export { CompactList } from './optimized/compact-list';
 export { NumericList } from './optimized/numeric-list';
 export { StringList } from './optimized/string-list';
 
-// Export the legacy implementations for backward compatibility
-export { SmallList, TransientSmallList } from './small-list';
-export { ChunkedList, TransientChunkedList } from './chunked-list';
-export { PersistentVector, TransientPersistentVector } from './persistent-vector';
-export { HAMTPersistentVector } from './hamt-persistent-vector';
+// Legacy implementations have been archived
+// They are no longer exported to encourage use of the enhanced implementations
 
 // Set default export to the enhanced List implementation
 import { List } from './enhanced';
