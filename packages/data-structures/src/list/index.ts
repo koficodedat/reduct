@@ -17,6 +17,7 @@ import { getProfilingSystem, OperationType, DataStructureType } from '../profili
 import { recordDataStructureCreation, estimateMemoryUsage } from '../profiling/memory-monitor';
 import { recordOperation, getImplementationRecommendation } from '../profiling/usage-pattern-monitor';
 import * as specializedOps from './specialized-operations';
+import * as fusedOps from './operation-fusion';
 import { DataType, detectDataType } from './type-detection';
 import {
   createNumericList,
@@ -24,6 +25,8 @@ import {
   createObjectList,
   createSpecializedList
 } from './specialized-list';
+import { getPooledArray, releasePooledArray } from '../memory/pool';
+import { memoize, getOrComputeCachedResult } from '../cache/result-cache';
 
 /**
  * Default threshold for small collections
@@ -1318,29 +1321,8 @@ export class List<T> implements IList<T> {
     }
 
     try {
-      // Get the data array safely
-      const dataArray = this.toArray();
-
-      // For very small collections, use separate native operations
-      if (this._size < NATIVE_RETURN_THRESHOLD) {
-        return dataArray
-          .map(mapFn)
-          .filter(filterFn)
-          .reduce((acc: V, val: U, idx: number) => reduceFn(acc, val, idx), initial);
-      }
-
-      // For larger collections, use a single-pass implementation for better performance
-      let result = initial;
-      let filteredIndex = 0;
-
-      for (let i = 0; i < dataArray.length; i++) {
-        const mappedValue = mapFn(dataArray[i], i);
-        if (filterFn(mappedValue, i)) {
-          result = reduceFn(result, mappedValue, filteredIndex++);
-        }
-      }
-
-      return result;
+      // Use the operation fusion implementation for better performance
+      return fusedOps.mapFilterReduce(this, mapFn, filterFn, reduceFn, initial);
     } catch (error) {
       console.error(`Error in mapFilterReduce: ${error}`);
       return initial;
@@ -1359,30 +1341,16 @@ export class List<T> implements IList<T> {
     reduceFn: (acc: V, value: U, index: number) => V,
     initial: V
   ): V {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.SPECIALIZED, this._size);
+
     if (this.isEmpty) {
       return initial;
     }
 
     try {
-      // Get the data array safely
-      const dataArray = this.toArray();
-
-      // For very small collections, use separate native operations
-      if (this._size < NATIVE_RETURN_THRESHOLD) {
-        return dataArray
-          .map(mapFn)
-          .reduce((acc: V, val: U, idx: number) => reduceFn(acc, val, idx), initial);
-      }
-
-      // For larger collections, use a single-pass implementation for better performance
-      let result = initial;
-
-      for (let i = 0; i < dataArray.length; i++) {
-        const mappedValue = mapFn(dataArray[i], i);
-        result = reduceFn(result, mappedValue, i);
-      }
-
-      return result;
+      // Use the operation fusion implementation for better performance
+      return fusedOps.mapReduce(this, mapFn, reduceFn, initial);
     } catch (error) {
       console.error(`Error in mapReduce: ${error}`);
       return initial;
@@ -1399,22 +1367,16 @@ export class List<T> implements IList<T> {
     filterFn: (value: T, index: number) => boolean,
     mapFn: (value: T, index: number) => U
   ): List<U> {
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.SPECIALIZED, this._size);
+
     if (this.isEmpty) {
       return List.empty<U>();
     }
 
     try {
-      // Get the data array safely
-      const dataArray = this.toArray();
-      const result: U[] = [];
-
-      for (let i = 0; i < dataArray.length; i++) {
-        if (filterFn(dataArray[i], i)) {
-          result.push(mapFn(dataArray[i], i));
-        }
-      }
-
-      return List.from(result);
+      // Use the operation fusion implementation for better performance
+      return fusedOps.filterMap(this, filterFn, mapFn) as List<U>;
     } catch (error) {
       console.error(`Error in filterMap: ${error}`);
       return List.empty<U>();
@@ -1541,7 +1503,16 @@ export class List<T> implements IList<T> {
     start?: number,
     end?: number
   ): IList<U> {
-    return specializedOps.mapSlice(this, mapFn, start, end);
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.SPECIALIZED, this._size);
+
+    try {
+      // Use the operation fusion implementation for better performance
+      return fusedOps.mapSlice(this, mapFn, start, end);
+    } catch (error) {
+      console.error(`Error in mapSlice: ${error}`);
+      return specializedOps.mapSlice(this, mapFn, start, end);
+    }
   }
 
   /**
@@ -1556,7 +1527,16 @@ export class List<T> implements IList<T> {
     end: number | undefined,
     mapFn: (value: T, index: number) => U
   ): IList<U> {
-    return specializedOps.sliceMap(this, start, end, mapFn);
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.SPECIALIZED, this._size);
+
+    try {
+      // Use the operation fusion implementation for better performance
+      return fusedOps.sliceMap(this, start, end, mapFn);
+    } catch (error) {
+      console.error(`Error in sliceMap: ${error}`);
+      return specializedOps.sliceMap(this, start, end, mapFn);
+    }
   }
 
   /**
@@ -1571,7 +1551,16 @@ export class List<T> implements IList<T> {
     start?: number,
     end?: number
   ): IList<T> {
-    return specializedOps.filterSlice(this, filterFn, start, end);
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.SPECIALIZED, this._size);
+
+    try {
+      // Use the operation fusion implementation for better performance
+      return fusedOps.filterSlice(this, filterFn, start, end);
+    } catch (error) {
+      console.error(`Error in filterSlice: ${error}`);
+      return specializedOps.filterSlice(this, filterFn, start, end);
+    }
   }
 
   /**
@@ -1586,7 +1575,16 @@ export class List<T> implements IList<T> {
     end: number | undefined,
     filterFn: (value: T, index: number) => boolean
   ): IList<T> {
-    return specializedOps.sliceFilter(this, start, end, filterFn);
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.SPECIALIZED, this._size);
+
+    try {
+      // Use the operation fusion implementation for better performance
+      return fusedOps.sliceFilter(this, start, end, filterFn);
+    } catch (error) {
+      console.error(`Error in sliceFilter: ${error}`);
+      return specializedOps.sliceFilter(this, start, end, filterFn);
+    }
   }
 
   /**
@@ -1601,7 +1599,16 @@ export class List<T> implements IList<T> {
     reduceFn: (acc: V, value: T, index: number) => V,
     initial: V
   ): V {
-    return specializedOps.filterReduce(this, filterFn, reduceFn, initial);
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.SPECIALIZED, this._size);
+
+    try {
+      // Use the operation fusion implementation for better performance
+      return fusedOps.filterReduce(this, filterFn, reduceFn, initial);
+    } catch (error) {
+      console.error(`Error in filterReduce: ${error}`);
+      return specializedOps.filterReduce(this, filterFn, reduceFn, initial);
+    }
   }
 
   /**
@@ -1614,7 +1621,16 @@ export class List<T> implements IList<T> {
     other: IList<T>,
     mapFn: (value: T, index: number) => U
   ): IList<U> {
-    return specializedOps.concatMap(this, other, mapFn);
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.SPECIALIZED, this._size);
+
+    try {
+      // Use the operation fusion implementation for better performance
+      return fusedOps.concatMap(this, other, mapFn);
+    } catch (error) {
+      console.error(`Error in concatMap: ${error}`);
+      return specializedOps.concatMap(this, other, mapFn);
+    }
   }
 
   /**
@@ -1627,7 +1643,18 @@ export class List<T> implements IList<T> {
     other: IList<T>,
     mapFn: (value: T, index: number) => U
   ): IList<U> {
-    return specializedOps.mapConcat(this, other, mapFn);
+    // Record the operation for usage pattern monitoring
+    recordOperation(OperationType.SPECIALIZED, this._size);
+
+    try {
+      // Use the operation fusion implementation for better performance
+      // First map this list, then concat with other list
+      const mappedList = this.map(mapFn);
+      return mappedList.concat(other as unknown as IList<U>);
+    } catch (error) {
+      console.error(`Error in mapConcat: ${error}`);
+      return specializedOps.mapConcat(this, other, mapFn);
+    }
   }
 
 
