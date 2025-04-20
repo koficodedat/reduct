@@ -16,8 +16,14 @@ export { HAMTPersistentVector } from './list/hamt-persistent-vector';
 
 // Export specialized list implementations
 export {
-  numericList,
-  stringList,
-  objectList,
-  specializedList
-} from './list';
+  createNumericList as numericList,
+  createStringList as stringList,
+  createObjectList as objectList,
+  createTypedOptimizedList as specializedList
+} from './list/optimized/factory';
+
+// Export optimized list implementations
+export { CompactList } from './list/optimized/compact-list';
+export { NumericList } from './list/optimized/numeric-list';
+export { StringList } from './list/optimized/string-list';
+export { NumericOperations, StringOperations } from './list/enhanced';

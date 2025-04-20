@@ -1,6 +1,6 @@
 /**
  * Hash Array Mapped Trie (HAMT) node implementation
- * 
+ *
  * This provides more efficient structural sharing by using
  * bit-mapped indexing to create sparse arrays.
  */
@@ -8,7 +8,8 @@
 // Bit manipulation constants
 const BITS_PER_LEVEL = 5;
 const BRANCH_SIZE = 1 << BITS_PER_LEVEL; // 32
-const MASK = BRANCH_SIZE - 1; // 0x1F
+// Mask for extracting the position within a level
+export const MASK = BRANCH_SIZE - 1; // 0x1F
 
 /**
  * HAMT Node interface
@@ -16,10 +17,10 @@ const MASK = BRANCH_SIZE - 1; // 0x1F
 export interface HAMTNode<T> {
   // Bitmap indicating which slots are filled
   readonly bitmap: number;
-  
+
   // Array of child nodes or values (sparse)
   readonly children: ReadonlyArray<T | HAMTNode<T>>;
-  
+
   // Total size of the subtree
   readonly size: number;
 }
@@ -85,7 +86,7 @@ export function getChild<T>(node: HAMTNode<T>, position: number): T | HAMTNode<T
   if (!hasPosition(node.bitmap, position)) {
     return undefined;
   }
-  
+
   const index = getIndex(node.bitmap, position);
   return node.children[index];
 }
@@ -101,10 +102,10 @@ export function setChild<T>(
 ): HAMTNode<T> {
   const bitmap = setBit(node.bitmap, position);
   const index = getIndex(bitmap, position);
-  
+
   // Create a new children array with the child inserted
   const children = [...node.children];
-  
+
   if (hasPosition(node.bitmap, position)) {
     // Replace existing child
     children[index] = child;
@@ -127,13 +128,13 @@ export function removeChild<T>(
   if (!hasPosition(node.bitmap, position)) {
     return node;
   }
-  
+
   const index = getIndex(node.bitmap, position);
   const bitmap = clearBit(node.bitmap, position);
-  
+
   // Create a new children array with the child removed
   const children = [...node.children];
   children.splice(index, 1);
-  
+
   return createNode(bitmap, children, node.size - childSize);
 }

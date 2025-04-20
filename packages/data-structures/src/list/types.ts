@@ -215,7 +215,7 @@ export interface IList<T> {
    * @param initial - The initial value for reduction
    * @returns The reduced value
    */
-  mapFilterReduce<U, V>(
+  mapFilterReduce?<U, V>(
     mapFn: (value: T, index: number) => U,
     filterFn: (value: U, index: number) => boolean,
     reduceFn: (acc: V, value: U, index: number) => V,
@@ -230,7 +230,7 @@ export interface IList<T> {
    * @param initial - The initial value for reduction
    * @returns The reduced value
    */
-  mapReduce<U, V>(
+  mapReduce?<U, V>(
     mapFn: (value: T, index: number) => U,
     reduceFn: (acc: V, value: U, index: number) => V,
     initial: V
@@ -243,7 +243,7 @@ export interface IList<T> {
    * @param mapFn - The mapping function
    * @returns A new list with filtered and mapped elements
    */
-  filterMap<U>(
+  filterMap?<U>(
     filterFn: (value: T, index: number) => boolean,
     mapFn: (value: T, index: number) => U
   ): IList<U>;
@@ -255,7 +255,7 @@ export interface IList<T> {
    * @param filterFn - The filter predicate
    * @returns A new list with mapped and filtered elements
    */
-  mapFilter<U>(
+  mapFilter?<U>(
     mapFn: (value: T, index: number) => U,
     filterFn: (value: U, index: number) => boolean
   ): IList<U>;
@@ -268,7 +268,7 @@ export interface IList<T> {
    * @param end - The end index (exclusive)
    * @returns A new list with mapped and sliced elements
    */
-  mapSlice<U>(
+  mapSlice?<U>(
     mapFn: (value: T, index: number) => U,
     start?: number,
     end?: number
@@ -282,7 +282,7 @@ export interface IList<T> {
    * @param mapFn - The mapping function
    * @returns A new list with sliced and mapped elements
    */
-  sliceMap<U>(
+  sliceMap?<U>(
     start: number,
     end: number | undefined,
     mapFn: (value: T, index: number) => U
@@ -296,7 +296,7 @@ export interface IList<T> {
    * @param end - The end index (exclusive)
    * @returns A new list with filtered and sliced elements
    */
-  filterSlice(
+  filterSlice?(
     filterFn: (value: T, index: number) => boolean,
     start?: number,
     end?: number
@@ -310,7 +310,7 @@ export interface IList<T> {
    * @param filterFn - The filter predicate
    * @returns A new list with sliced and filtered elements
    */
-  sliceFilter(
+  sliceFilter?(
     start: number,
     end: number | undefined,
     filterFn: (value: T, index: number) => boolean
@@ -324,7 +324,7 @@ export interface IList<T> {
    * @param initial - The initial value for reduction
    * @returns The reduced value
    */
-  filterReduce<V>(
+  filterReduce?<V>(
     filterFn: (value: T, index: number) => boolean,
     reduceFn: (acc: V, value: T, index: number) => V,
     initial: V
@@ -337,7 +337,7 @@ export interface IList<T> {
    * @param mapFn - The mapping function
    * @returns A new list with concatenated and mapped elements
    */
-  concatMap<U>(
+  concatMap?<U>(
     other: IList<T>,
     mapFn: (value: T, index: number) => U
   ): IList<U>;
@@ -349,7 +349,7 @@ export interface IList<T> {
    * @param mapFn - The mapping function
    * @returns A new list with mapped and concatenated elements
    */
-  mapConcat<U>(
+  mapConcat?<U>(
     other: IList<T>,
     mapFn: (value: T, index: number) => U
   ): IList<U>;
