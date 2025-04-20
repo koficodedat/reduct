@@ -9,6 +9,7 @@ Immutable data structures for the Reduct library.
 - Persistent Stack
 - Lazy evaluation
 - Structural sharing for performance
+- WebAssembly acceleration for numeric operations
 
 ## Installation
 
@@ -41,6 +42,33 @@ const map = ImmutableMap.from([
 ]);
 const newMap = map.set('d', 4);
 console.log(newMap.get('d').get()); // 4
+```
+
+## WebAssembly Acceleration
+
+The library automatically uses WebAssembly acceleration for numeric operations when available:
+
+```typescript
+import { List, isWebAssemblySupported } from '@reduct/data-structures';
+
+// Check if WebAssembly is supported
+console.log(`WebAssembly supported: ${isWebAssemblySupported()}`);
+
+// Create a list of numbers
+const list = List.from([1, 2, 3, 4, 5]);
+
+// Operations will automatically use WebAssembly when available
+const doubled = list.map(x => x * 2);
+const sum = list.reduce((acc, x) => acc + x, 0);
+
+// Specialized numeric operations
+const numericOps = list.asNumeric();
+if (numericOps) {
+  const sum = numericOps.sum();
+  const average = numericOps.average();
+  const median = numericOps.median?.();
+  const stdDev = numericOps.standardDeviation?.();
+}
 ```
 
 ## Documentation

@@ -20,9 +20,11 @@ macro_rules! console_log {
 
 // Import modules
 mod data_structures;
+mod algorithms;
 
 // Export modules
 pub use data_structures::*;
+pub use algorithms::*;
 
 #[wasm_bindgen]
 pub fn init_panic_hook() {

@@ -6,7 +6,7 @@
  */
 
 import { IList, TransientList } from './types';
-import { createOptimizedList } from './optimized/factory';
+import { createOptimizedList, createNumericList, createPersistentVector } from './optimized/factory';
 import { isNumericArray, isStringArray } from './type-detection';
 import { NumericList } from './optimized/numeric-list';
 import { StringList } from './optimized/string-list';
@@ -35,7 +35,12 @@ export class List<T> implements IList<T> {
   static from<T>(data: T[]): List<T> {
     // Use specialized implementations based on data type
     if (isNumericArray(data)) {
-      return new List<T>(new NumericList(data as unknown as number[]) as unknown as IList<T>);
+      // For large numeric arrays, use persistent vector
+      if (data.length > 1000) {
+        return new List<T>(createPersistentVector(data) as IList<T>);
+      }
+      // For smaller numeric arrays, use the factory function which will use WebAssembly if available
+      return new List<T>(createNumericList(data as unknown as number[]) as unknown as IList<T>);
     }
 
     if (isStringArray(data)) {
@@ -83,7 +88,8 @@ export class List<T> implements IList<T> {
       data[i] = start + i * step;
     }
 
-    return new List<number>(new NumericList(data));
+    // Use the factory function which will use WebAssembly if available
+    return new List<number>(createNumericList(data));
   }
 
   /**
@@ -619,7 +625,9 @@ export class List<T> implements IList<T> {
    * @returns True if this is a numeric list
    */
   isNumericList(): boolean {
-    return this._impl instanceof NumericList;
+    return this._impl instanceof NumericList ||
+           (this._impl.constructor && this._impl.constructor.name === 'WasmNumericList') ||
+           (this._impl.constructor && this._impl.constructor.name === 'WasmHAMTPersistentVector');
   }
 
   /**
@@ -638,13 +646,33 @@ export class List<T> implements IList<T> {
    */
   asNumeric(): NumericOperations | undefined {
     if (this.isNumericList()) {
-      const numericList = this._impl as unknown as NumericList;
-      return {
+      const numericList = this._impl as any;
+      const ops: NumericOperations = {
         sum: () => numericList.sum(),
         average: () => numericList.average(),
         min: () => numericList.min(),
         max: () => numericList.max()
       };
+
+      // Add statistical operations if available
+      if (typeof numericList.median === 'function') {
+        ops.median = () => numericList.median();
+      }
+
+      if (typeof numericList.standardDeviation === 'function') {
+        ops.standardDeviation = () => numericList.standardDeviation();
+      }
+
+      if (typeof numericList.percentile === 'function') {
+        ops.percentile = (percentile: number) => numericList.percentile(percentile);
+      }
+
+      if (typeof numericList.sort === 'function') {
+        ops.sort = (compareFn?: (a: number, b: number) => number) =>
+          new List<number>(numericList.sort(compareFn));
+      }
+
+      return ops;
     }
     return undefined;
   }
@@ -675,6 +703,10 @@ export interface NumericOperations {
   average(): number;
   min(): number;
   max(): number;
+  median?(): number;
+  standardDeviation?(): number;
+  percentile?(percentile: number): number;
+  sort?(compareFn?: (a: number, b: number) => number): IList<number>;
 }
 
 /**

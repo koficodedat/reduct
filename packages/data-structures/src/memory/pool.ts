@@ -1,13 +1,13 @@
 /**
  * Memory pooling for frequently allocated structures
- * 
+ *
  * This module provides memory pooling to reduce garbage collection pressure
  * by reusing objects instead of creating new ones.
  */
 
 /**
  * A generic object pool
- * 
+ *
  * @template T The type of objects in the pool
  */
 export class ObjectPool<T> {
@@ -20,7 +20,7 @@ export class ObjectPool<T> {
 
   /**
    * Create a new object pool
-   * 
+   *
    * @param factory - A function that creates new objects
    * @param reset - A function that resets objects to their initial state
    * @param initialSize - The initial size of the pool
@@ -44,7 +44,7 @@ export class ObjectPool<T> {
 
   /**
    * Get an object from the pool
-   * 
+   *
    * @returns An object from the pool
    */
   get(): T {
@@ -59,7 +59,7 @@ export class ObjectPool<T> {
 
   /**
    * Return an object to the pool
-   * 
+   *
    * @param obj - The object to return to the pool
    */
   release(obj: T): void {
@@ -71,7 +71,7 @@ export class ObjectPool<T> {
 
   /**
    * Get the hit rate of the pool
-   * 
+   *
    * @returns The hit rate as a number between 0 and 1
    */
   getHitRate(): number {
@@ -81,7 +81,7 @@ export class ObjectPool<T> {
 
   /**
    * Get the current size of the pool
-   * 
+   *
    * @returns The current size of the pool
    */
   getSize(): number {
@@ -99,7 +99,7 @@ export class ObjectPool<T> {
 
   /**
    * Resize the pool
-   * 
+   *
    * @param newMaxSize - The new maximum size of the pool
    */
   resize(newMaxSize: number): void {
@@ -112,7 +112,7 @@ export class ObjectPool<T> {
 
 /**
  * A pool of arrays
- * 
+ *
  * @template T The type of elements in the arrays
  */
 export class ArrayPool<T> {
@@ -122,7 +122,7 @@ export class ArrayPool<T> {
 
   /**
    * Create a new array pool
-   * 
+   *
    * @param maxPoolSize - The maximum size of each pool
    * @param maxArraySize - The maximum size of arrays to pool
    */
@@ -133,7 +133,7 @@ export class ArrayPool<T> {
 
   /**
    * Get an array from the pool
-   * 
+   *
    * @param size - The size of the array
    * @returns An array from the pool
    */
@@ -162,7 +162,7 @@ export class ArrayPool<T> {
 
   /**
    * Return an array to the pool
-   * 
+   *
    * @param arr - The array to return to the pool
    */
   release(arr: T[]): void {
@@ -195,13 +195,12 @@ export class ArrayPool<T> {
 
   /**
    * Get statistics about the pool
-   * 
+   *
    * @returns Statistics about the pool
    */
   getStats(): { size: number; hitRate: number; poolCount: number } {
     let totalSize = 0;
     let totalHits = 0;
-    let totalMisses = 0;
 
     for (const pool of this.pools.values()) {
       totalSize += pool.getSize();
@@ -226,17 +225,17 @@ export const arrayPool = new ArrayPool();
 
 /**
  * Get an array from the pool
- * 
+ *
  * @param size - The size of the array
  * @returns An array from the pool
  */
 export function getPooledArray<T>(size: number): T[] {
-  return arrayPool.get(size);
+  return arrayPool.get(size) as unknown as T[];
 }
 
 /**
  * Return an array to the pool
- * 
+ *
  * @param arr - The array to return to the pool
  */
 export function releasePooledArray<T>(arr: T[]): void {
@@ -245,7 +244,7 @@ export function releasePooledArray<T>(arr: T[]): void {
 
 /**
  * A pool of objects
- * 
+ *
  * @template T The type of objects in the pool
  */
 export class TypedObjectPool<T> {
@@ -253,7 +252,7 @@ export class TypedObjectPool<T> {
 
   /**
    * Create a new typed object pool
-   * 
+   *
    * @param factory - A function that creates new objects
    * @param reset - A function that resets objects to their initial state
    * @param initialSize - The initial size of the pool
@@ -270,7 +269,7 @@ export class TypedObjectPool<T> {
 
   /**
    * Get an object from the pool
-   * 
+   *
    * @returns An object from the pool
    */
   get(): T {
@@ -279,7 +278,7 @@ export class TypedObjectPool<T> {
 
   /**
    * Return an object to the pool
-   * 
+   *
    * @param obj - The object to return to the pool
    */
   release(obj: T): void {
@@ -288,7 +287,7 @@ export class TypedObjectPool<T> {
 
   /**
    * Get the hit rate of the pool
-   * 
+   *
    * @returns The hit rate as a number between 0 and 1
    */
   getHitRate(): number {
@@ -297,7 +296,7 @@ export class TypedObjectPool<T> {
 
   /**
    * Get the current size of the pool
-   * 
+   *
    * @returns The current size of the pool
    */
   getSize(): number {
@@ -327,7 +326,7 @@ export class TypedArrayPool {
 
   /**
    * Get an Int8Array from the pool
-   * 
+   *
    * @param size - The size of the array
    * @returns An Int8Array from the pool
    */
@@ -338,7 +337,7 @@ export class TypedArrayPool {
 
   /**
    * Return an Int8Array to the pool
-   * 
+   *
    * @param arr - The array to return to the pool
    */
   releaseInt8Array(arr: Int8Array): void {
@@ -347,7 +346,7 @@ export class TypedArrayPool {
 
   /**
    * Get an Int16Array from the pool
-   * 
+   *
    * @param size - The size of the array
    * @returns An Int16Array from the pool
    */
@@ -358,7 +357,7 @@ export class TypedArrayPool {
 
   /**
    * Return an Int16Array to the pool
-   * 
+   *
    * @param arr - The array to return to the pool
    */
   releaseInt16Array(arr: Int16Array): void {
@@ -367,7 +366,7 @@ export class TypedArrayPool {
 
   /**
    * Get an Int32Array from the pool
-   * 
+   *
    * @param size - The size of the array
    * @returns An Int32Array from the pool
    */
@@ -378,7 +377,7 @@ export class TypedArrayPool {
 
   /**
    * Return an Int32Array to the pool
-   * 
+   *
    * @param arr - The array to return to the pool
    */
   releaseInt32Array(arr: Int32Array): void {
@@ -387,7 +386,7 @@ export class TypedArrayPool {
 
   /**
    * Get a Uint8Array from the pool
-   * 
+   *
    * @param size - The size of the array
    * @returns A Uint8Array from the pool
    */
@@ -398,7 +397,7 @@ export class TypedArrayPool {
 
   /**
    * Return a Uint8Array to the pool
-   * 
+   *
    * @param arr - The array to return to the pool
    */
   releaseUint8Array(arr: Uint8Array): void {
@@ -407,7 +406,7 @@ export class TypedArrayPool {
 
   /**
    * Get a Uint16Array from the pool
-   * 
+   *
    * @param size - The size of the array
    * @returns A Uint16Array from the pool
    */
@@ -418,7 +417,7 @@ export class TypedArrayPool {
 
   /**
    * Return a Uint16Array to the pool
-   * 
+   *
    * @param arr - The array to return to the pool
    */
   releaseUint16Array(arr: Uint16Array): void {
@@ -427,7 +426,7 @@ export class TypedArrayPool {
 
   /**
    * Get a Uint32Array from the pool
-   * 
+   *
    * @param size - The size of the array
    * @returns A Uint32Array from the pool
    */
@@ -438,7 +437,7 @@ export class TypedArrayPool {
 
   /**
    * Return a Uint32Array to the pool
-   * 
+   *
    * @param arr - The array to return to the pool
    */
   releaseUint32Array(arr: Uint32Array): void {
@@ -447,7 +446,7 @@ export class TypedArrayPool {
 
   /**
    * Get a Float32Array from the pool
-   * 
+   *
    * @param size - The size of the array
    * @returns A Float32Array from the pool
    */
@@ -458,7 +457,7 @@ export class TypedArrayPool {
 
   /**
    * Return a Float32Array to the pool
-   * 
+   *
    * @param arr - The array to return to the pool
    */
   releaseFloat32Array(arr: Float32Array): void {
@@ -467,7 +466,7 @@ export class TypedArrayPool {
 
   /**
    * Get a Float64Array from the pool
-   * 
+   *
    * @param size - The size of the array
    * @returns A Float64Array from the pool
    */
@@ -478,7 +477,7 @@ export class TypedArrayPool {
 
   /**
    * Return a Float64Array to the pool
-   * 
+   *
    * @param arr - The array to return to the pool
    */
   releaseFloat64Array(arr: Float64Array): void {
@@ -507,7 +506,7 @@ export const typedArrayPool = new TypedArrayPool();
 
 /**
  * Get a typed array from the pool
- * 
+ *
  * @param type - The type of typed array
  * @param size - The size of the array
  * @returns A typed array from the pool
@@ -540,7 +539,7 @@ export function getPooledTypedArray(
 
 /**
  * Return a typed array to the pool
- * 
+ *
  * @param arr - The array to return to the pool
  */
 export function releasePooledTypedArray(

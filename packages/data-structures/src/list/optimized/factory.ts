@@ -10,7 +10,12 @@ import { CompactList } from './compact-list';
 import { NumericList } from './numeric-list';
 import { StringList } from './string-list';
 import { ObjectList } from './object-list';
+import { WasmNumericList } from './wasm-numeric-list';
 import { detectDataType, DataType, isObjectArray } from '../type-detection';
+import { HAMTPersistentVector } from '../hamt-persistent-vector';
+import { WasmHAMTPersistentVector } from '../wasm-hamt-persistent-vector';
+// Import from our mock implementation
+import { isWebAssemblySupported } from '../../utils/mock-wasm';
 
 // Size threshold based on benchmark results
 const SMALL_LIST_THRESHOLD = 100;
@@ -46,6 +51,14 @@ export function createTypedOptimizedList<T>(data: T[]): IList<T> {
   // Use specialized implementations based on data type
   switch (dataType) {
     case DataType.NUMERIC:
+      // Use WebAssembly-accelerated NumericList if WebAssembly is supported
+      try {
+        if (isWebAssemblySupported()) {
+          return new WasmNumericList(data as unknown as number[]) as unknown as IList<T>;
+        }
+      } catch (error) {
+        console.warn('Error creating WebAssembly-accelerated NumericList:', error);
+      }
       return new NumericList(data as unknown as number[]) as unknown as IList<T>;
     case DataType.STRING:
       return new StringList(data as unknown as string[]) as unknown as IList<T>;
@@ -66,7 +79,44 @@ export function createTypedOptimizedList<T>(data: T[]): IList<T> {
  * @returns An optimized list for numeric operations
  */
 export function createNumericList(data: number[]): IList<number> {
+  // Use WebAssembly-accelerated NumericList if WebAssembly is supported
+  try {
+    if (isWebAssemblySupported()) {
+      // For large lists, use WasmHAMTPersistentVector
+      if (data.length > 1000) {
+        return new WasmHAMTPersistentVector(data);
+      }
+      // For smaller lists, use WasmNumericList
+      return new WasmNumericList(data);
+    }
+  } catch (error) {
+    console.warn('Error creating WebAssembly-accelerated NumericList:', error);
+  }
+
+  // Fall back to regular NumericList
   return new NumericList(data);
+}
+
+/**
+ * Create a persistent vector optimized for large collections
+ *
+ * @param data - The input data
+ * @returns An optimized persistent vector
+ */
+export function createPersistentVector<T>(data: T[]): IList<T> {
+  // For numeric data, use WebAssembly-accelerated HAMTPersistentVector if WebAssembly is supported
+  if (detectDataType(data) === DataType.NUMERIC) {
+    try {
+      if (isWebAssemblySupported()) {
+        return new WasmHAMTPersistentVector(data as unknown as number[]) as unknown as IList<T>;
+      }
+    } catch (error) {
+      console.warn('Error creating WebAssembly-accelerated HAMTPersistentVector:', error);
+    }
+  }
+
+  // Fall back to regular HAMTPersistentVector
+  return HAMTPersistentVector.from(data);
 }
 
 /**

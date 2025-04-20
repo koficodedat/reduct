@@ -33,6 +33,17 @@ export interface WasmModule {
   numeric_average_f64(input: any): number;
   numeric_min_f64(input: any): number;
   numeric_max_f64(input: any): number;
+
+  // Statistical operations
+  numeric_median_f64(input: any): number;
+  numeric_std_dev_f64(input: any): number;
+  numeric_correlation_f64(x: any, y: any): number;
+  numeric_percentile_f64(input: any, percentile: number): number;
+
+  // Sorting algorithms
+  specialized_sort_f64(input: any): any;
+  radix_sort_u32(input: any): any;
+  counting_sort_u8(input: any): any;
 }
 
 /**

@@ -3,7 +3,7 @@ use js_sys::{Array, Float64Array, Function};
 use bumpalo::Bump;
 
 #[cfg(feature = "simd")]
-use packed_simd_2::f64x4;
+use wide::{f64x4, CmpLt};
 
 /// Map operation for numeric arrays with optimized implementation
 ///
@@ -36,7 +36,6 @@ pub fn numeric_map_f64(input: &JsValue, map_fn: &Function) -> Result<JsValue, Js
             values[i] = input_array.get_index((batch_start + i) as u32);
         }
 
-        // Process the batch
         #[cfg(feature = "simd")]
         {
             // Use SIMD for processing when available
@@ -44,9 +43,6 @@ pub fn numeric_map_f64(input: &JsValue, map_fn: &Function) -> Result<JsValue, Js
 
             // Process in chunks of 4 elements
             for i in (0..simd_length).step_by(4) {
-                // Load 4 elements at once
-                let v = f64x4::from_slice_unaligned(&values[i..i+4]);
-
                 // We still need to call the JavaScript function for each element
                 // since we can't execute JavaScript in SIMD
                 for j in 0..4 {
@@ -222,7 +218,7 @@ pub fn numeric_sort_f64(input: &JsValue, compare_fn: Option<Function>) -> Result
         let js_array = Array::new_with_length(length as u32);
 
         // Copy data in chunks to reduce overhead
-        const CHUNK_SIZE: usize = 1024;
+        const CHUNK_SIZE: usize = 4096;
         for chunk_start in (0..length).step_by(CHUNK_SIZE) {
             let chunk_end = std::cmp::min(chunk_start + CHUNK_SIZE, length);
 
@@ -251,38 +247,64 @@ pub fn numeric_sort_f64(input: &JsValue, compare_fn: Option<Function>) -> Result
         Ok(result_array.into())
     } else {
         // For standard numeric sort, use Rust's sort which is very fast
-        // Allocate memory for sorting
-        let bump = Bump::new();
-        let mut values = bump.alloc_slice_fill_copy(length, 0.0);
+        // Use a specialized algorithm for different array sizes
+        if length < 10000 {
+            // For small arrays, use a simple approach with less overhead
+            let mut values = Vec::with_capacity(length);
 
-        // Copy input data in chunks to reduce overhead
-        const CHUNK_SIZE: usize = 1024;
-        for chunk_start in (0..length).step_by(CHUNK_SIZE) {
-            let chunk_end = std::cmp::min(chunk_start + CHUNK_SIZE, length);
-
-            // Copy this chunk
-            for i in chunk_start..chunk_end {
-                values[i] = input_array.get_index(i as u32);
+            // Copy all data at once for small arrays
+            for i in 0..length {
+                values.push(input_array.get_index(i as u32));
             }
-        }
 
-        // Use Rust's sort which is very efficient for numeric data
-        values.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+            // Use Rust's sort which is very efficient for numeric data
+            values.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
 
-        // Create a new typed array for the results
-        let result_array = Float64Array::new_with_length(length as u32);
+            // Create a new typed array for the results
+            let result_array = Float64Array::new_with_length(length as u32);
 
-        // Copy results back in chunks
-        for chunk_start in (0..length).step_by(CHUNK_SIZE) {
-            let chunk_end = std::cmp::min(chunk_start + CHUNK_SIZE, length);
-
-            // Copy this chunk
-            for i in chunk_start..chunk_end {
+            // Copy results back all at once
+            for i in 0..length {
                 result_array.set_index(i as u32, values[i]);
             }
-        }
 
-        Ok(result_array.into())
+            Ok(result_array.into())
+        } else {
+            // For large arrays, use a more sophisticated approach with batching
+            // Allocate memory for sorting
+            let bump = Bump::new();
+            let mut values = bump.alloc_slice_fill_copy(length, 0.0);
+
+            // Copy input data in chunks to reduce overhead
+            const CHUNK_SIZE: usize = 4096;
+            for chunk_start in (0..length).step_by(CHUNK_SIZE) {
+                let chunk_end = std::cmp::min(chunk_start + CHUNK_SIZE, length);
+
+                // Copy this chunk
+                for i in chunk_start..chunk_end {
+                    values[i] = input_array.get_index(i as u32);
+                }
+            }
+
+            // Use Rust's unstable sort which is faster for floating point numbers
+            // This is safe because we're sorting f64 values which have a total ordering
+            values.sort_unstable_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+
+            // Create a new typed array for the results
+            let result_array = Float64Array::new_with_length(length as u32);
+
+            // Copy results back in chunks
+            for chunk_start in (0..length).step_by(CHUNK_SIZE) {
+                let chunk_end = std::cmp::min(chunk_start + CHUNK_SIZE, length);
+
+                // Copy this chunk
+                for i in chunk_start..chunk_end {
+                    result_array.set_index(i as u32, values[i]);
+                }
+            }
+
+            Ok(result_array.into())
+        }
     }
 }
 
@@ -404,16 +426,16 @@ pub fn numeric_sum_f64(input: &JsValue) -> f64 {
 
             // Calculate sum for this batch using SIMD
             let simd_length = batch_size - (batch_size % 4);
-            let mut sum_vec = f64x4::splat(0.0);
+            let mut batch_sum = 0.0;
 
             // Process in chunks of 4 elements
             for i in (0..simd_length).step_by(4) {
-                let v = f64x4::from_slice_unaligned(&values[i..i+4]);
-                sum_vec += v;
-            }
+                // Load 4 elements at once
+                let v = f64x4::from([values[i], values[i+1], values[i+2], values[i+3]]);
 
-            // Sum the SIMD vector
-            let mut batch_sum = sum_vec.sum();
+                // Sum the vector and add to batch sum
+                batch_sum += v.reduce_add();
+            }
 
             // Add remaining elements
             for i in simd_length..batch_size {
