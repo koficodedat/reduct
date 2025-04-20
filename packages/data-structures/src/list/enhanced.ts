@@ -272,6 +272,104 @@ export class List<T> implements IList<T> {
   }
 
   /**
+   * Optimized implementation for map and slice operations in a single pass
+   *
+   * @param mapFn - The mapping function
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @returns A new list with mapped and sliced elements
+   */
+  mapSlice<U>(
+    mapFn: (value: T, index: number) => U,
+    start: number = 0,
+    end: number = this.size
+  ): IList<U> {
+    // Normalize indices
+    start = start < 0 ? Math.max(0, this.size + start) : Math.min(this.size, start);
+    end = end < 0 ? Math.max(0, this.size + end) : Math.min(this.size, end);
+
+    if (start >= end) {
+      return List.empty<U>();
+    }
+
+    const result: U[] = [];
+
+    for (let i = start; i < end; i++) {
+      const value = this.get(i);
+      if (value !== undefined) {
+        result.push(mapFn(value, i));
+      }
+    }
+
+    return List.from(result);
+  }
+
+  /**
+   * Optimized implementation for slice and map operations in a single pass
+   *
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @param mapFn - The mapping function
+   * @returns A new list with sliced and mapped elements
+   */
+  sliceMap<U>(
+    start: number,
+    end: number | undefined,
+    mapFn: (value: T, index: number) => U
+  ): IList<U> {
+    return this.mapSlice(mapFn, start, end);
+  }
+
+  /**
+   * Optimized implementation for filter and slice operations in a single pass
+   *
+   * @param filterFn - The filter predicate
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @returns A new list with filtered and sliced elements
+   */
+  filterSlice(
+    filterFn: (value: T, index: number) => boolean,
+    start: number = 0,
+    end: number = this.size
+  ): IList<T> {
+    // Normalize indices
+    start = start < 0 ? Math.max(0, this.size + start) : Math.min(this.size, start);
+    end = end < 0 ? Math.max(0, this.size + end) : Math.min(this.size, end);
+
+    if (start >= end) {
+      return List.empty<T>();
+    }
+
+    const result: T[] = [];
+
+    for (let i = start; i < end; i++) {
+      const value = this.get(i);
+      if (value !== undefined && filterFn(value, i)) {
+        result.push(value);
+      }
+    }
+
+    return List.from(result);
+  }
+
+  /**
+   * Optimized implementation for slice and filter operations in a single pass
+   *
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @param filterFn - The filter predicate
+   * @returns A new list with sliced and filtered elements
+   */
+  sliceFilter(
+    start: number,
+    end: number | undefined,
+    filterFn: (value: T, index: number) => boolean
+  ): IList<T> {
+    return this.filterSlice(filterFn, start, end);
+  }
+
+  /**
    * Optimized implementation for map followed by filter
    *
    * @param mapFn - The mapping function
@@ -331,8 +429,18 @@ export class List<T> implements IList<T> {
       return (this._impl as any).mapReduce(mapFn, reduceFn, initial);
     }
 
-    // Fallback implementation
-    return this.map(mapFn).reduce(reduceFn, initial);
+    // Optimized implementation
+    let result = initial;
+
+    for (let i = 0; i < this.size; i++) {
+      const value = this.get(i);
+      if (value !== undefined) {
+        const mappedValue = mapFn(value, i);
+        result = reduceFn(result, mappedValue, i);
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -353,8 +461,18 @@ export class List<T> implements IList<T> {
       return (this._impl as any).filterReduce(filterFn, reduceFn, initial);
     }
 
-    // Fallback implementation
-    return this.filter(filterFn).reduce(reduceFn, initial);
+    // Optimized implementation
+    let result = initial;
+    let resultIndex = 0;
+
+    for (let i = 0; i < this.size; i++) {
+      const value = this.get(i);
+      if (value !== undefined && filterFn(value, i)) {
+        result = reduceFn(result, value, resultIndex++);
+      }
+    }
+
+    return result;
   }
 
   /**
@@ -377,8 +495,68 @@ export class List<T> implements IList<T> {
       return (this._impl as any).mapFilterReduce(mapFn, filterFn, reduceFn, initial);
     }
 
-    // Fallback implementation
-    return this.map(mapFn).filter(filterFn).reduce(reduceFn, initial);
+    // Optimized implementation
+    let result = initial;
+    let resultIndex = 0;
+
+    for (let i = 0; i < this.size; i++) {
+      const value = this.get(i);
+      if (value !== undefined) {
+        const mappedValue = mapFn(value, i);
+        if (filterFn(mappedValue, i)) {
+          result = reduceFn(result, mappedValue, resultIndex++);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Optimized implementation for concat and map operations in a single pass
+   *
+   * @param other - The list to concatenate
+   * @param mapFn - The mapping function
+   * @returns A new list with concatenated and mapped elements
+   */
+  concatMap<U>(
+    other: IList<T>,
+    mapFn: (value: T, index: number) => U
+  ): IList<U> {
+    const result: U[] = [];
+    let index = 0;
+
+    // Map this list
+    for (let i = 0; i < this.size; i++) {
+      const value = this.get(i);
+      if (value !== undefined) {
+        result.push(mapFn(value, index++));
+      }
+    }
+
+    // Map other list
+    for (let i = 0; i < other.size; i++) {
+      const value = other.get(i);
+      if (value !== undefined) {
+        result.push(mapFn(value, index++));
+      }
+    }
+
+    return List.from(result);
+  }
+
+  /**
+   * Optimized implementation for map and concat operations in a single pass
+   *
+   * @param other - The list to concatenate
+   * @param mapFn - The mapping function
+   * @returns A new list with mapped and concatenated elements
+   */
+  mapConcat<U>(
+    other: IList<T>,
+    mapFn: (value: T, index: number) => U
+  ): IList<U> {
+    return this.concatMap(other, mapFn);
   }
 
   /**
@@ -393,12 +571,16 @@ export class List<T> implements IList<T> {
       return new List<T>((this._impl as any).batchUpdate(updates));
     }
 
-    // Fallback implementation
-    let result: IList<T> = this;
+    // Fallback implementation - create a new array with all updates applied at once
+    const newData = this.toArray();
+
     for (const [index, value] of updates) {
-      result = result.set(index, value);
+      if (index >= 0 && index < this.size) {
+        newData[index] = value;
+      }
     }
-    return result;
+
+    return List.from(newData);
   }
 
   /**

@@ -92,3 +92,21 @@ export function isStringArray(data: any[]): boolean {
 export function isObjectReferenceArray(data: any[]): boolean {
   return detectDataType(data) === DataType.OBJECT_REFERENCE;
 }
+
+/**
+ * Check if an array contains only object values (not null)
+ *
+ * @param data - The array to check
+ * @returns Whether the array contains only object values
+ */
+export function isObjectArray(data: any[]): boolean {
+  if (data.length === 0) return false;
+
+  for (let i = 0; i < Math.min(data.length, 100); i++) {
+    if (typeof data[i] !== 'object' || data[i] === null) {
+      return false;
+    }
+  }
+
+  return true;
+}

@@ -9,11 +9,11 @@ import { IList } from '../types';
 import { CompactList } from './compact-list';
 import { NumericList } from './numeric-list';
 import { StringList } from './string-list';
-import { detectDataType, DataType } from '../type-detection';
+import { ObjectList } from './object-list';
+import { detectDataType, DataType, isObjectArray } from '../type-detection';
 
-// Size thresholds based on benchmark results
+// Size threshold based on benchmark results
 const SMALL_LIST_THRESHOLD = 100;
-const MEDIUM_LIST_THRESHOLD = 10000;
 
 /**
  * Create an optimized list based on the input data
@@ -29,14 +29,8 @@ export function createOptimizedList<T>(data: T[]): IList<T> {
     return new CompactList<T>(data);
   }
 
-  // For medium-sized lists, use CompactList
-  if (size <= MEDIUM_LIST_THRESHOLD) {
-    return new CompactList<T>(data);
-  }
-
-  // For large lists, use CompactList for now
-  // In the future, we'll add more specialized implementations
-  return new CompactList<T>(data);
+  // For medium-sized and large lists, use specialized implementations based on data type
+  return createTypedOptimizedList(data);
 }
 
 /**
@@ -55,6 +49,11 @@ export function createTypedOptimizedList<T>(data: T[]): IList<T> {
       return new NumericList(data as unknown as number[]) as unknown as IList<T>;
     case DataType.STRING:
       return new StringList(data as unknown as string[]) as unknown as IList<T>;
+    case DataType.OBJECT_REFERENCE:
+      if (isObjectArray(data)) {
+        return new ObjectList(data as unknown as object[]) as unknown as IList<T>;
+      }
+      return new CompactList<T>(data);
     default:
       return new CompactList<T>(data);
   }
@@ -87,5 +86,5 @@ export function createStringList(data: string[]): IList<string> {
  * @returns An optimized list for object operations
  */
 export function createObjectList<T extends object>(data: T[]): IList<T> {
-  return new CompactList<T>(data);
+  return new ObjectList<T>(data);
 }

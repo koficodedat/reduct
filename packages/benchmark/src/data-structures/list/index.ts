@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import { List } from '@reduct/data-structures';
+import { List, IList } from '@reduct/data-structures';
 import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../../types';
 import { benchmark, generateRandomArray } from '../../utils';
 
@@ -78,7 +78,7 @@ export function runListBenchmarks(
   results.push(
     benchmark(
       () => {
-        let result = smallList;
+        let result: IList<number> = smallList;
         for (let i = 0; i < 100; i++) {
           result = result.append(i);
         }
@@ -94,7 +94,7 @@ export function runListBenchmarks(
   results.push(
     benchmark(
       () => {
-        let result = smallList;
+        let result: IList<number> = smallList;
         for (let i = 0; i < 100; i++) {
           result = result.prepend(i);
         }
