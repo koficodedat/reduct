@@ -1,0 +1,36 @@
+{
+  "name": "@reduct/wasm",
+  "version": "0.1.0",
+  "description": "WebAssembly acceleration for Reduct",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "build:wasm": "echo 'WebAssembly build script placeholder'",
+    "build:all": "yarn build:wasm && yarn build",
+    "test": "vitest run tests/",
+    "test:watch": "vitest tests/",
+    "lint": "eslint src --ext .ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@reduct/core": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "eslint": "^8.0.0",
+    "rimraf": "^5.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
+}
