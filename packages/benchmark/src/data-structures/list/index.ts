@@ -203,3 +203,11 @@ export function measureListScalability(
     results,
   };
 }
+
+// Export enhanced list benchmarks
+export {
+  runEnhancedListBenchmarks,
+  measureEnhancedListScalability,
+  compareStandardVsFusedOperations,
+  compareStandardVsSpecializedLists
+} from './enhanced';

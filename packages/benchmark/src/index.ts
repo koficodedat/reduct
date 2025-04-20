@@ -30,7 +30,14 @@ export {
 export * from './adapters';
 
 // Explicit re-exports for examples compatibility
-export { runListBenchmarks, measureListScalability } from './data-structures/list';
+export {
+  runListBenchmarks,
+  measureListScalability,
+  runEnhancedListBenchmarks,
+  measureEnhancedListScalability,
+  compareStandardVsFusedOperations,
+  compareStandardVsSpecializedLists
+} from './data-structures/list';
 export { runMapBenchmarks, measureMapScalability } from './data-structures/map';
 export { runStackBenchmarks, measureStackScalability } from './data-structures/stack';
 export { runSortingBenchmarks, runSortingBenchmarkSuite, measureSortingScalability } from './algorithms/sorting';

@@ -17,6 +17,7 @@ import { createAnalyzeCommand } from './commands/analyze';
 import { createTrendCommand } from './commands/trend';
 import { createCICommand } from './commands/ci';
 import { registerBenchmarkCommand } from './commands/benchmark';
+import { registerEnhancedListCommand } from './commands/enhanced-list';
 import { ComparisonBuilder, runComplexComparison, formatComplexComparisonResult } from '../comparison';
 import { exportToFormat } from '../visualization/exporters';
 import * as fs from 'fs';
@@ -97,6 +98,9 @@ export function createCLI(): Command {
 
   // Register benchmark command
   registerBenchmarkCommand(program);
+
+  // Register enhanced list command
+  registerEnhancedListCommand(program);
 
   // Register complex compare command
   program

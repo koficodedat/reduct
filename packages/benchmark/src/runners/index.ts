@@ -7,7 +7,14 @@
  */
 
 // Re-export from data structures
-export { runListBenchmarks, measureListScalability } from '../data-structures/list';
+export {
+  runListBenchmarks,
+  measureListScalability,
+  runEnhancedListBenchmarks,
+  measureEnhancedListScalability,
+  compareStandardVsFusedOperations,
+  compareStandardVsSpecializedLists
+} from '../data-structures/list';
 export { runMapBenchmarks, measureMapScalability } from '../data-structures/map';
 export { runStackBenchmarks, measureStackScalability } from '../data-structures/stack';
 

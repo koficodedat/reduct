@@ -60,6 +60,9 @@ npx reduct-benchmark complex-compare sequence -o get,map,filter -s 10000
 # Measure scalability
 npx reduct-benchmark scalability list get -s 5 -m 100000
 
+# Run enhanced list benchmarks
+npx reduct-benchmark enhanced-list --type fusion --size 10000
+
 # Export results to different formats
 npx reduct-benchmark export html -i benchmark-results.json -o results.html
 ```
@@ -314,3 +317,4 @@ For detailed adapter documentation, see [ADAPTERS.md](./docs/ADAPTERS.md).
 - [Adapters Documentation](./docs/ADAPTERS.md)
 - [Analysis Tools](./docs/ANALYSIS.md)
 - [Examples](./docs/EXAMPLES.md)
+- [Enhanced List Benchmarks](./docs/ENHANCED-LIST.md)
