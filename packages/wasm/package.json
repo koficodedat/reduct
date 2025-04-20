@@ -12,7 +12,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "check:wasm-pack": "node scripts/check-wasm-pack.js",
-    "build:wasm": "yarn check:wasm-pack && cd wasm && wasm-pack build --target bundler --out-dir ../dist/wasm",
+    "build:wasm": "yarn check:wasm-pack && cd rust && wasm-pack build --target bundler --out-dir ../dist/wasm",
     "build:all": "yarn build:wasm && yarn build",
     "test": "vitest run tests/",
     "test:watch": "vitest tests/",

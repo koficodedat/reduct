@@ -3,4 +3,5 @@
  */
 
 export * from './accelerator';
-export * from './data-structures/list';
+export * from './wasm-accelerator';
+export * from './data-structures';

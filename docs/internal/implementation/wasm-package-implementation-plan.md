@@ -162,6 +162,7 @@ This document outlines the plan for creating a dedicated WebAssembly (WASM) pack
 │   │   ├── memory.ts   # Memory management utilities
 │   │   ├── feature-detection.ts # WebAssembly feature detection
 │   │   ├── error-handling.ts # Error handling and reporting
+│   │   ├── wasm-module.ts # WebAssembly module loader and initialization
 │   │   └── index.ts    # Core exports
 │   ├── accelerators/   # Accelerator implementations
 │   │   ├── accelerator.ts # Base accelerator interfaces and classes
@@ -178,12 +179,17 @@ This document outlines the plan for creating a dedicated WebAssembly (WASM) pack
 │   │   ├── telemetry.ts # Telemetry utilities
 │   │   └── index.ts    # Utility exports
 │   └── index.ts        # Main package exports
-├── wasm/               # WebAssembly source files
+├── rust/               # Rust source files for WebAssembly
 │   ├── Cargo.toml      # Rust package configuration
-│   ├── data-structures/ # WebAssembly implementations for data structures
-│   │   ├── list.rs     # List operations in Rust
-│   │   └── ...
-│   └── README.md       # WebAssembly documentation
+│   ├── src/            # Rust source code
+│   │   ├── lib.rs      # Main Rust library file
+│   │   └── data_structures/ # Data structure implementations
+│   │       ├── mod.rs    # Module definition
+│   │       ├── list.rs   # List operations in Rust
+│   │       └── ...
+│   └── README.md       # Rust documentation
+├── scripts/            # Build and utility scripts
+│   └── check-wasm-pack.js # Script to check if wasm-pack is installed
 ├── tests/              # Tests for WebAssembly implementations
 │   ├── unit/           # Unit tests
 │   │   ├── feature-detection.test.ts

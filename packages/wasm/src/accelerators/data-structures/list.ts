@@ -5,6 +5,9 @@ import { BaseAccelerator, PerformanceProfile, AcceleratorOptions } from '../acce
 import { safeWasmOperation } from '../../core/error-handling';
 import { WebAssemblyFeature } from '../../core/feature-detection';
 
+// Export the list accelerator
+export * from './list-accelerator';
+
 /**
  * Input for the map operation
  */

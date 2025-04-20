@@ -1,12 +1,9 @@
 /**
  * Example demonstrating WebAssembly acceleration for list operations
  */
-import { 
-  getAccelerator, 
-  isWebAssemblySupported, 
-  benchmark, 
-  formatBenchmarkResult 
-} from '../src';
+import { isWebAssemblySupported } from '../src/core/feature-detection';
+import { ListAccelerator } from '../src/accelerators/data-structures/list-accelerator';
+import { NumericArrayAccelerator } from '../src/accelerators/data-structures/numeric';
 
 console.log('WebAssembly Acceleration Example');
 console.log('===============================');
@@ -20,89 +17,144 @@ const size = 1000000;
 const data = Array.from({ length: size }, (_, i) => i);
 console.log(`Array size: ${data.length}`);
 
+// Create accelerators
+const listAccelerator = new ListAccelerator();
+const numericAccelerator = new NumericArrayAccelerator();
+
 // Example 1: Map operation with WebAssembly acceleration
 console.log('\nExample 1: Map operation with WebAssembly acceleration');
 console.log('----------------------------------------------------');
 
-// Get the accelerator for the map operation
-const mapAccelerator = getAccelerator<number[], number[]>(
-  'data-structures',
-  'list',
-  'map'
-);
-
 // Check if the accelerator is available
-console.log(`Map accelerator available: ${mapAccelerator.isAvailable()}`);
-console.log(`Estimated speedup: ${mapAccelerator.getPerformanceProfile().estimatedSpeedup}x`);
+console.log(`List accelerator available: ${listAccelerator.isAvailable()}`);
+console.log(`Estimated speedup: ${listAccelerator.getPerformanceProfile().estimatedSpeedup}x`);
 
 // Define the mapping function
 const mapFn = (x: number) => x * 2;
 
-// Benchmark JavaScript vs WebAssembly
-const mapBenchmark = benchmark(
-  (input: number[]) => input.map(mapFn),
-  mapAccelerator,
-  { data, fn: mapFn },
-  { iterations: 5, warmupIterations: 2 }
-);
+// Measure JavaScript performance
+console.time('JavaScript Map');
+const jsMapResult = data.map(mapFn);
+console.timeEnd('JavaScript Map');
 
-console.log(formatBenchmarkResult(mapBenchmark));
+// Measure WebAssembly performance
+console.time('WebAssembly List Map');
+const wasmListMapResult = listAccelerator.map(data, mapFn);
+console.timeEnd('WebAssembly List Map');
+
+// Measure WebAssembly numeric performance
+console.time('WebAssembly Numeric Map');
+const wasmNumericMapResult = numericAccelerator.map(data, mapFn);
+console.timeEnd('WebAssembly Numeric Map');
+
+// Verify results
+console.log(`JavaScript Map result length: ${jsMapResult.length}`);
+console.log(`WebAssembly List Map result length: ${wasmListMapResult.length}`);
+console.log(`WebAssembly Numeric Map result length: ${wasmNumericMapResult.length}`);
 
 // Example 2: Filter operation with WebAssembly acceleration
 console.log('\nExample 2: Filter operation with WebAssembly acceleration');
 console.log('------------------------------------------------------');
 
-// Get the accelerator for the filter operation
-const filterAccelerator = getAccelerator<number[], number[]>(
-  'data-structures',
-  'list',
-  'filter'
-);
-
-// Check if the accelerator is available
-console.log(`Filter accelerator available: ${filterAccelerator.isAvailable()}`);
-console.log(`Estimated speedup: ${filterAccelerator.getPerformanceProfile().estimatedSpeedup}x`);
-
 // Define the filter function
 const filterFn = (x: number) => x % 2 === 0;
 
-// Benchmark JavaScript vs WebAssembly
-const filterBenchmark = benchmark(
-  (input: number[]) => input.filter(filterFn),
-  filterAccelerator,
-  { data, fn: filterFn },
-  { iterations: 5, warmupIterations: 2 }
-);
+// Measure JavaScript performance
+console.time('JavaScript Filter');
+const jsFilterResult = data.filter(filterFn);
+console.timeEnd('JavaScript Filter');
 
-console.log(formatBenchmarkResult(filterBenchmark));
+// Measure WebAssembly performance
+console.time('WebAssembly List Filter');
+const wasmListFilterResult = listAccelerator.filter(data, filterFn);
+console.timeEnd('WebAssembly List Filter');
+
+// Measure WebAssembly numeric performance
+console.time('WebAssembly Numeric Filter');
+const wasmNumericFilterResult = numericAccelerator.filter(data, filterFn);
+console.timeEnd('WebAssembly Numeric Filter');
+
+// Verify results
+console.log(`JavaScript Filter result length: ${jsFilterResult.length}`);
+console.log(`WebAssembly List Filter result length: ${wasmListFilterResult.length}`);
+console.log(`WebAssembly Numeric Filter result length: ${wasmNumericFilterResult.length}`);
 
 // Example 3: Reduce operation with WebAssembly acceleration
 console.log('\nExample 3: Reduce operation with WebAssembly acceleration');
 console.log('------------------------------------------------------');
 
-// Get the accelerator for the reduce operation
-const reduceAccelerator = getAccelerator<number[], number>(
-  'data-structures',
-  'list',
-  'reduce'
-);
-
-// Check if the accelerator is available
-console.log(`Reduce accelerator available: ${reduceAccelerator.isAvailable()}`);
-console.log(`Estimated speedup: ${reduceAccelerator.getPerformanceProfile().estimatedSpeedup}x`);
-
 // Define the reduce function
 const reduceFn = (acc: number, x: number) => acc + x;
 
-// Benchmark JavaScript vs WebAssembly
-const reduceBenchmark = benchmark(
-  (input: number[]) => input.reduce(reduceFn, 0),
-  reduceAccelerator,
-  { data, fn: reduceFn, initial: 0 },
-  { iterations: 5, warmupIterations: 2 }
-);
+// Measure JavaScript performance
+console.time('JavaScript Reduce');
+const jsReduceResult = data.reduce(reduceFn, 0);
+console.timeEnd('JavaScript Reduce');
 
-console.log(formatBenchmarkResult(reduceBenchmark));
+// Measure WebAssembly performance
+console.time('WebAssembly List Reduce');
+const wasmListReduceResult = listAccelerator.reduce(data, reduceFn, 0);
+console.timeEnd('WebAssembly List Reduce');
+
+// Measure WebAssembly numeric sum performance
+console.time('WebAssembly Numeric Sum');
+const wasmNumericSumResult = numericAccelerator.sum(data);
+console.timeEnd('WebAssembly Numeric Sum');
+
+// Verify results
+console.log(`JavaScript Reduce result: ${jsReduceResult}`);
+console.log(`WebAssembly List Reduce result: ${wasmListReduceResult}`);
+console.log(`WebAssembly Numeric Sum result: ${wasmNumericSumResult}`);
+
+// Example 4: Sort operation with WebAssembly acceleration
+console.log('\nExample 4: Sort operation with WebAssembly acceleration');
+console.log('------------------------------------------------------');
+
+// Create a reversed array for sorting
+const reversedData = [...data].reverse();
+
+// Measure JavaScript performance
+console.time('JavaScript Sort');
+const jsSortResult = [...reversedData].sort((a, b) => a - b);
+console.timeEnd('JavaScript Sort');
+
+// Measure WebAssembly performance
+console.time('WebAssembly List Sort');
+const wasmListSortResult = listAccelerator.sort([...reversedData], (a, b) => a - b);
+console.timeEnd('WebAssembly List Sort');
+
+// Measure WebAssembly numeric performance
+console.time('WebAssembly Numeric Sort');
+const wasmNumericSortResult = numericAccelerator.sort([...reversedData]);
+console.timeEnd('WebAssembly Numeric Sort');
+
+// Verify results
+console.log(`JavaScript Sort first 5 elements: ${jsSortResult.slice(0, 5)}`);
+console.log(`WebAssembly List Sort first 5 elements: ${wasmListSortResult.slice(0, 5)}`);
+console.log(`WebAssembly Numeric Sort first 5 elements: ${wasmNumericSortResult.slice(0, 5)}`);
+
+// Example 5: Map-Filter operation with WebAssembly acceleration
+console.log('\nExample 5: Map-Filter operation with WebAssembly acceleration');
+console.log('----------------------------------------------------------');
+
+// Measure JavaScript performance
+console.time('JavaScript Map-Filter');
+const jsMapFilterResult = data.map(mapFn).filter(filterFn);
+console.timeEnd('JavaScript Map-Filter');
+
+// Measure WebAssembly performance
+console.time('WebAssembly List Map-Filter');
+const wasmListMapFilterResult = listAccelerator.mapFilter(data, mapFn, filterFn);
+console.timeEnd('WebAssembly List Map-Filter');
+
+// Measure WebAssembly numeric performance
+console.time('WebAssembly Numeric Map-Filter');
+const wasmNumericMapFilterResult = numericAccelerator.mapFilter(data, mapFn, filterFn);
+console.timeEnd('WebAssembly Numeric Map-Filter');
+
+// Verify results
+console.log(`JavaScript Map-Filter result length: ${jsMapFilterResult.length}`);
+console.log(`WebAssembly List Map-Filter result length: ${wasmListMapFilterResult.length}`);
+console.log(`WebAssembly Numeric Map-Filter result length: ${wasmNumericMapFilterResult.length}`);
 
 console.log('\nWebAssembly acceleration example completed.');
-console.log('Note: This is a placeholder implementation. Actual WebAssembly acceleration will be implemented in future versions.');

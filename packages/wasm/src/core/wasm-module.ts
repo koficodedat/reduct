@@ -22,6 +22,17 @@ export interface WasmModule {
   vector_map_reduce(input: any, mapFn: Function, reduceFn: Function, initial: any): any;
   vector_filter_reduce(input: any, filterFn: Function, reduceFn: Function, initial: any): any;
   vector_map_filter_reduce(input: any, mapFn: Function, filterFn: Function, reduceFn: Function, initial: any): any;
+
+  // Numeric operations
+  numeric_map_f64(input: any, mapFn: Function): any;
+  numeric_filter_f64(input: any, filterFn: Function): any;
+  numeric_reduce_f64(input: any, reduceFn: Function, initial: any): any;
+  numeric_sort_f64(input: any, compareFn?: Function): any;
+  numeric_map_filter_f64(input: any, mapFn: Function, filterFn: Function): any;
+  numeric_sum_f64(input: any): number;
+  numeric_average_f64(input: any): number;
+  numeric_min_f64(input: any): number;
+  numeric_max_f64(input: any): number;
 }
 
 /**

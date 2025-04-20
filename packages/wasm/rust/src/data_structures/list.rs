@@ -1,5 +1,5 @@
 use wasm_bindgen::prelude::*;
-use js_sys::{Array, Function, Reflect};
+use js_sys::{Array, Function};
 
 // Helper function to log errors
 fn log_error(msg: &str) {

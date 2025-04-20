@@ -12,6 +12,7 @@ crate-type = ["cdylib", "rlib"]
 [features]
 default = ["console_error_panic_hook"]
 wee_alloc = ["dep:wee_alloc"]
+simd = ["packed_simd_2"]
 
 [dependencies]
 wasm-bindgen = "0.2.84"
@@ -28,6 +29,15 @@ console_error_panic_hook = { version = "0.1.7", optional = true }
 # compared to the default allocator's ~10K. It is slower than the default
 # allocator, however.
 wee_alloc = { version = "0.4.5", optional = true }
+
+# SIMD support for WebAssembly
+packed_simd_2 = { version = "0.3.8", optional = true }
+
+# Parallel iterator support
+rayon = "1.8.0"
+
+# Memory management utilities
+bumpalo = { version = "3.14.0", features = ["collections"] }
 
 [dev-dependencies]
 wasm-bindgen-test = "0.3.34"
