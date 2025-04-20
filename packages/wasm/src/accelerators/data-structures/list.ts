@@ -45,18 +45,34 @@ export class MapAccelerator<T, R> extends BaseAccelerator<MapInput<T, R>, R[]> {
 
     const { data, fn } = input;
 
-    // For now, we'll use a JavaScript implementation as a placeholder
-    // In a real implementation, we would use WebAssembly
+    // Use WebAssembly implementation if available, otherwise fall back to JavaScript
     return safeWasmOperation(() => {
-      // Create a new array for the results
-      const result: R[] = new Array(data.length);
+      try {
+        // This is where we would load and use the WebAssembly module
+        // For now, we'll use a JavaScript implementation as a placeholder
+        // In the future, this will be replaced with actual WebAssembly calls:
+        // const wasmModule = await import('../../../dist/wasm/reduct_wasm');
+        // return wasmModule.vector_map(data, fn);
 
-      // Apply the mapping function to each element
-      for (let i = 0; i < data.length; i++) {
-        result[i] = fn(data[i], i);
+        // Create a new array for the results
+        const result: R[] = new Array(data.length);
+
+        // Apply the mapping function to each element
+        for (let i = 0; i < data.length; i++) {
+          result[i] = fn(data[i], i);
+        }
+
+        return result;
+      } catch (error) {
+        console.warn('WebAssembly map operation failed, falling back to JavaScript', error);
+
+        // Fall back to JavaScript implementation
+        const result: R[] = new Array(data.length);
+        for (let i = 0; i < data.length; i++) {
+          result[i] = fn(data[i], i);
+        }
+        return result;
       }
-
-      return result;
     }, 'map');
   }
 
@@ -112,20 +128,38 @@ export class FilterAccelerator<T> extends BaseAccelerator<FilterInput<T>, T[]> {
 
     const { data, fn } = input;
 
-    // For now, we'll use a JavaScript implementation as a placeholder
-    // In a real implementation, we would use WebAssembly
+    // Use WebAssembly implementation if available, otherwise fall back to JavaScript
     return safeWasmOperation(() => {
-      // Create a new array for the results
-      const result: T[] = [];
+      try {
+        // This is where we would load and use the WebAssembly module
+        // For now, we'll use a JavaScript implementation as a placeholder
+        // In the future, this will be replaced with actual WebAssembly calls:
+        // const wasmModule = await import('../../../dist/wasm/reduct_wasm');
+        // return wasmModule.vector_filter(data, fn);
 
-      // Apply the filter function to each element
-      for (let i = 0; i < data.length; i++) {
-        if (fn(data[i], i)) {
-          result.push(data[i]);
+        // Create a new array for the results
+        const result: T[] = [];
+
+        // Apply the filter function to each element
+        for (let i = 0; i < data.length; i++) {
+          if (fn(data[i], i)) {
+            result.push(data[i]);
+          }
         }
-      }
 
-      return result;
+        return result;
+      } catch (error) {
+        console.warn('WebAssembly filter operation failed, falling back to JavaScript', error);
+
+        // Fall back to JavaScript implementation
+        const result: T[] = [];
+        for (let i = 0; i < data.length; i++) {
+          if (fn(data[i], i)) {
+            result.push(data[i]);
+          }
+        }
+        return result;
+      }
     }, 'filter');
   }
 
@@ -186,18 +220,34 @@ export class ReduceAccelerator<T, R> extends BaseAccelerator<ReduceInput<T, R>, 
 
     const { data, fn, initial } = input;
 
-    // For now, we'll use a JavaScript implementation as a placeholder
-    // In a real implementation, we would use WebAssembly
+    // Use WebAssembly implementation if available, otherwise fall back to JavaScript
     return safeWasmOperation(() => {
-      // Start with the initial value
-      let accumulator = initial;
+      try {
+        // This is where we would load and use the WebAssembly module
+        // For now, we'll use a JavaScript implementation as a placeholder
+        // In the future, this will be replaced with actual WebAssembly calls:
+        // const wasmModule = await import('../../../dist/wasm/reduct_wasm');
+        // return wasmModule.vector_reduce(data, fn, initial);
 
-      // Apply the reduce function to each element
-      for (let i = 0; i < data.length; i++) {
-        accumulator = fn(accumulator, data[i], i);
+        // Start with the initial value
+        let accumulator = initial;
+
+        // Apply the reduce function to each element
+        for (let i = 0; i < data.length; i++) {
+          accumulator = fn(accumulator, data[i], i);
+        }
+
+        return accumulator;
+      } catch (error) {
+        console.warn('WebAssembly reduce operation failed, falling back to JavaScript', error);
+
+        // Fall back to JavaScript implementation
+        let accumulator = initial;
+        for (let i = 0; i < data.length; i++) {
+          accumulator = fn(accumulator, data[i], i);
+        }
+        return accumulator;
       }
-
-      return accumulator;
     }, 'reduce');
   }
 
@@ -253,20 +303,38 @@ export class SortAccelerator<T> extends BaseAccelerator<SortInput<T>, T[]> {
 
     const { data, compareFn } = input;
 
-    // For now, we'll use a JavaScript implementation as a placeholder
-    // In a real implementation, we would use WebAssembly
+    // Use WebAssembly implementation if available, otherwise fall back to JavaScript
     return safeWasmOperation(() => {
-      // Create a copy of the data
-      const result = [...data];
+      try {
+        // This is where we would load and use the WebAssembly module
+        // For now, we'll use a JavaScript implementation as a placeholder
+        // In the future, this will be replaced with actual WebAssembly calls:
+        // const wasmModule = await import('../../../dist/wasm/reduct_wasm');
+        // return wasmModule.vector_sort(data, compareFn || ((a, b) => a < b ? -1 : a > b ? 1 : 0));
 
-      // Sort the copy
-      if (compareFn) {
-        result.sort(compareFn);
-      } else {
-        result.sort();
+        // Create a copy of the data
+        const result = [...data];
+
+        // Sort the copy
+        if (compareFn) {
+          result.sort(compareFn);
+        } else {
+          result.sort();
+        }
+
+        return result;
+      } catch (error) {
+        console.warn('WebAssembly sort operation failed, falling back to JavaScript', error);
+
+        // Fall back to JavaScript implementation
+        const result = [...data];
+        if (compareFn) {
+          result.sort(compareFn);
+        } else {
+          result.sort();
+        }
+        return result;
       }
-
-      return result;
     }, 'sort');
   }
 

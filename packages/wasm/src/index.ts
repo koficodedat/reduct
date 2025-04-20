@@ -14,6 +14,8 @@ export {
   copyFromWasmMemory,
   getTypedArrayView,
   WasmMemoryPool,
+  WasmModule,
+  WasmModuleLoader,
 } from './core';
 
 // Export accelerator interfaces and types

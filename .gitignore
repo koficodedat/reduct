@@ -9,6 +9,18 @@ build/
 lib/
 coverage/
 
+# WebAssembly and Rust files
+*.wasm
+*.wasm.map
+*.wasm.d.ts
+packages/wasm/dist/wasm/
+packages/wasm/target/
+packages/wasm/wasm/target/
+**/.wasm-pack/
+**/.cargo/
+**/Cargo.lock
+**/pkg/
+
 # Benchmark reports
 packages/benchmark/reports/*
 !packages/benchmark/reports/.gitkeep
