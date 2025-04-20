@@ -6,12 +6,11 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsup src/data-structure-examples/list-example.ts src/core-examples/benchmark-example.ts --format cjs,esm --dts",
     "clean": "rimraf dist",
-    "start": "ts-node src/index.ts",
-    "start:algorithm": "ts-node src/algorithm-examples/index.ts",
-    "start:core": "ts-node src/core-examples/index.ts",
-    "start:data-structure": "ts-node src/data-structure-examples/index.ts"
+    "start": "ts-node src/data-structure-examples/list-example.ts",
+    "start:core": "ts-node src/core-examples/benchmark-example.ts",
+    "start:data-structure": "ts-node src/data-structure-examples/list-example.ts"
   },
   "dependencies": {
     "@reduct/core": "^0.1.0",
@@ -22,6 +21,7 @@
     "@types/node": "^18.0.0",
     "rimraf": "^5.0.0",
     "ts-node": "^10.9.2",
+    "tsup": "^8.0.0",
     "typescript": "^5.0.0"
   },
   "license": "MIT"
