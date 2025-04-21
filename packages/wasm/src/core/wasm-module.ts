@@ -112,6 +112,29 @@ export interface WasmModule {
   huffman_compress(text: string): any;
   huffman_decompress(bytes: any): string;
 
+  // Unicode operations
+  unicode_normalize(text: string, form: number): string;
+  unicode_to_uppercase(text: string): string;
+  unicode_to_lowercase(text: string): string;
+  unicode_is_uppercase(c: string): boolean;
+  unicode_is_lowercase(c: string): boolean;
+  unicode_is_alphabetic(c: string): boolean;
+  unicode_is_numeric(c: string): boolean;
+  unicode_is_alphanumeric(c: string): boolean;
+  unicode_is_whitespace(c: string): boolean;
+  unicode_is_control(c: string): boolean;
+  unicode_code_point(c: string): number;
+  unicode_grapheme_clusters(text: string): any;
+  unicode_grapheme_cluster_count(text: string): number;
+  unicode_words(text: string): any;
+  unicode_word_count(text: string): number;
+  unicode_char_info(c: string): any;
+  unicode_case_fold(text: string): string;
+  unicode_case_fold_compare(a: string, b: string): boolean;
+  unicode_trim(text: string): string;
+  unicode_trim_start(text: string): string;
+  unicode_trim_end(text: string): string;
+
   // Sorting algorithms
   specialized_sort_f64(input: any): any;
   radix_sort_u32(input: any): any;

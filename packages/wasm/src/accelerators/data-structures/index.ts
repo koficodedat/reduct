@@ -12,3 +12,4 @@ export * from './string-ops';
 export * from './regex-ops';
 export * from './nlp-ops';
 export * from './compression';
+export * from './unicode-ops';

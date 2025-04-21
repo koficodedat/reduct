@@ -203,9 +203,33 @@ This document outlines the plan for creating a dedicated WebAssembly (WASM) pack
 
 ### API Design
 
-The WebAssembly package will provide a consistent API for other Reduct packages to consume:
+The WebAssembly package will provide a consistent API for other Reduct packages to consume, with enhanced support for tiered optimization:
 
 ```typescript
+// Accelerator tiers for optimization strategy
+export enum AcceleratorTier {
+  // Always use WebAssembly (significant performance benefit)
+  HIGH_VALUE = 'high-value',
+
+  // Use WebAssembly conditionally (based on input characteristics)
+  CONDITIONAL = 'conditional',
+
+  // Prefer JavaScript (WebAssembly overhead outweighs benefits)
+  JS_PREFERRED = 'js-preferred'
+}
+
+// Tiering strategy for determining when to use WebAssembly
+export interface TieringStrategy<T> {
+  // Function that determines if input qualifies for HIGH_VALUE tier
+  [AcceleratorTier.HIGH_VALUE]?: (input: T) => boolean;
+
+  // Function that determines if input qualifies for CONDITIONAL tier
+  [AcceleratorTier.CONDITIONAL]?: (input: T) => boolean;
+
+  // Function that determines if input qualifies for JS_PREFERRED tier
+  [AcceleratorTier.JS_PREFERRED]?: (input: T) => boolean;
+}
+
 // Core API
 export interface Accelerator<T, R> {
   // Execute the accelerated operation
@@ -216,6 +240,48 @@ export interface Accelerator<T, R> {
 
   // Get performance characteristics of the accelerator
   getPerformanceProfile(): PerformanceProfile;
+
+  // Determine the appropriate tier for the given input
+  determineTier(input: T): AcceleratorTier;
+
+  // Get performance statistics for this accelerator
+  getPerformanceStats(): AcceleratorPerformanceStats;
+}
+
+// Performance statistics for an accelerator
+export interface AcceleratorPerformanceStats {
+  // Number of times each tier was used
+  tierUsage: Record<AcceleratorTier, number>;
+
+  // Average execution time for each tier
+  averageExecutionTime: Record<AcceleratorTier, number>;
+
+  // Input size distribution for each tier
+  inputSizeDistribution: Record<AcceleratorTier, number[]>;
+}
+
+// Extended options for accelerator creation
+export interface AcceleratorOptions {
+  // Element type for specialized implementations
+  elementType?: string;
+
+  // Required WebAssembly features
+  requiredFeatures?: WebAssemblyFeature[];
+
+  // Tiering strategy for this accelerator
+  tiering?: TieringStrategy<any>;
+
+  // Default thresholds for common operations
+  thresholds?: {
+    // Minimum array size for using WebAssembly
+    minArraySize?: number;
+
+    // Minimum string length for using WebAssembly
+    minStringLength?: number;
+
+    // Minimum matrix size for using WebAssembly
+    minMatrixSize?: number;
+  };
 }
 
 // Get an accelerator for a specific operation
@@ -241,20 +307,29 @@ export function isWebAssemblySupported(): boolean;
 // Check if specific WebAssembly features are supported
 export function isFeatureSupported(feature: WebAssemblyFeature): boolean;
 
-// Benchmarking utilities
+// Benchmarking utilities with tiering support
 export function benchmark<T, R>(
   jsImplementation: (input: T) => R,
   wasmImplementation: Accelerator<T, R>,
   input: T,
   options?: BenchmarkOptions
 ): BenchmarkResult;
+
+// Find optimal threshold for switching between JS and WASM
+export function findOptimalThreshold<T, R>(
+  jsImplementation: (input: T) => R,
+  wasmImplementation: Accelerator<T, R>,
+  generateInput: (size: number) => T,
+  sizeRange: [number, number],
+  steps: number
+): number;
 ```
 
-### Integration Example
+### Integration Example with Tiered Optimization
 
 ```typescript
 // In @reduct/data-structures
-import { getAccelerator } from '@reduct/wasm';
+import { getAccelerator, AcceleratorTier } from '@reduct/wasm';
 
 export class List<T> {
   // ...
@@ -265,20 +340,41 @@ export class List<T> {
       'data-structures',
       'list',
       'map',
-      { elementType: typeof this.get(0) }
+      {
+        elementType: typeof this.get(0),
+        // Define tiering strategy
+        tiering: {
+          // Tier 1: Always use WebAssembly for numeric arrays over 100,000 elements
+          [AcceleratorTier.HIGH_VALUE]: (input) => {
+            return typeof input[0] === 'number' && input.length >= 100000;
+          },
+          // Tier 2: Use WebAssembly for arrays over 20,000 elements
+          [AcceleratorTier.CONDITIONAL]: (input) => {
+            return input.length >= 20000;
+          },
+          // Tier 3: Use JavaScript for everything else
+          [AcceleratorTier.JS_PREFERRED]: () => true
+        }
+      }
     );
 
-    // If the accelerator is available and suitable for the current data,
-    // use it; otherwise, fall back to the JavaScript implementation
-    if (accelerator.isAvailable() && this.size > 1000) {
+    // The accelerator will automatically select the appropriate implementation
+    // based on the tiering strategy and input characteristics
+    if (accelerator.isAvailable()) {
+      const data = this.toArray();
+      const tier = accelerator.determineTier(data);
+
+      // We can also log performance data for analysis
+      console.debug(`Using ${tier} implementation for map operation on ${data.length} elements`);
+
       const result = accelerator.execute({
-        data: this.toArray(),
+        data: data,
         fn: fn
       });
       return List.from(result);
     }
 
-    // Fall back to JavaScript implementation
+    // Fall back to JavaScript implementation if WebAssembly is not available
     // ...
   }
 
@@ -311,6 +407,85 @@ Not all environments support WebAssembly or specific WebAssembly features:
 1. **Feature Detection**: Detect WebAssembly support at runtime
 2. **Graceful Fallbacks**: Provide JavaScript implementations for all operations
 3. **Progressive Enhancement**: Use WebAssembly when available, but don't require it
+
+## Tiered Optimization Strategy
+
+Based on our benchmarking results, we've observed that WebAssembly doesn't always outperform native JavaScript, especially for simpler operations or smaller data sets. To maximize the benefit of our WebAssembly investment, we're adopting a tiered optimization strategy.
+
+### Tier 1: High-Value WebAssembly Targets
+
+These operations consistently show significant performance improvements with WebAssembly and should be our primary focus:
+
+1. **Computationally Intensive Operations**
+   - Matrix multiplication and linear algebra (3-10x speedup potential)
+   - Signal processing algorithms (FFT, convolutions)
+   - Complex statistical calculations (covariance matrices, PCA)
+   - Neural network forward/backward propagation
+
+2. **Large Data Processing**
+   - Operations on arrays with 100,000+ elements
+   - Batch processing of multiple datasets
+   - Complex sorting algorithms on large collections
+
+3. **Specialized Algorithms**
+   - Compression/decompression (Huffman, LZ77)
+   - Cryptographic operations
+   - Path finding and graph traversal
+   - Image processing algorithms
+
+### Tier 2: Conditional WebAssembly Targets
+
+These operations show WebAssembly benefits only under specific conditions and should use automatic switching based on input characteristics:
+
+1. **Size-Dependent Operations**
+   - Sorting (WebAssembly for n > 10,000)
+   - Filtering (WebAssembly for n > 50,000)
+   - Map/reduce operations (WebAssembly for n > 20,000)
+
+2. **Complexity-Dependent Operations**
+   - String operations (WebAssembly for complex patterns or long strings)
+   - Regular expressions (WebAssembly for complex patterns)
+   - Tree traversals (WebAssembly for deep trees)
+
+3. **Frequency-Dependent Operations**
+   - Operations called in tight loops
+   - Operations that can be batched
+   - Operations that can be parallelized
+
+### Tier 3: JavaScript-Preferred Operations
+
+These operations typically perform better in JavaScript and should only use WebAssembly in exceptional cases:
+
+1. **Simple Operations**
+   - Basic arithmetic
+   - Property access and simple transformations
+   - Small array operations (length < 1,000)
+
+2. **DOM-Related Operations**
+   - Operations that interact with the DOM
+   - Operations that require frequent serialization/deserialization
+
+3. **String Manipulation**
+   - Simple string concatenation
+   - Basic regular expressions
+   - String formatting
+
+### Implementation Guidelines
+
+1. **Automatic Tiering**
+   - Implement runtime switching based on input size and characteristics
+   - Use performance counters to track actual gains
+   - Adjust thresholds based on real-world performance data
+
+2. **Hybrid Approaches**
+   - Use WebAssembly for the compute-intensive parts of an algorithm
+   - Use JavaScript for setup, teardown, and simple operations
+   - Minimize boundary crossings between JS and WASM
+
+3. **Continuous Benchmarking**
+   - Regularly benchmark against JavaScript implementations
+   - Track performance across different browsers and devices
+   - Update tiering strategy based on benchmark results
 
 ## Benchmarking and Profiling
 
@@ -391,36 +566,41 @@ We have successfully implemented the foundation of the WebAssembly package and i
 - Added support for text analysis and document similarity
 - Implemented text compression operations (Gzip, Deflate, Zlib, RLE, Huffman)
 - Added support for efficient data storage and transmission
+- Implemented Unicode operations (normalization, case folding, character properties)
+- Added support for internationalization and text processing
 
 ### Next Steps
 
-1. **Expand WebAssembly Modules**
-   - Implement additional specialized time series operations (forecasting, seasonal decomposition)
-   - Optimize SIMD-accelerated versions of time series operations
-   - Implement parallel processing for large data sets
+1. **Implement Tiered Optimization Framework**
+   - Create automatic switching mechanism based on input characteristics
+   - Implement performance counters to track actual gains
+   - Develop adaptive thresholds based on runtime profiling
 
-2. **Expand Machine Learning Capabilities**
-   - Implement convolutional neural network operations (convolution, pooling)
-   - Add support for classification algorithms (decision trees, random forests)
-   - Implement optimization algorithms (Adam, RMSProp, momentum)
+2. **Focus on Tier 1 High-Value Targets**
+   - Implement matrix operations and linear algebra accelerators
+   - Develop signal processing algorithms (FFT, convolutions)
+   - Create accelerators for neural network operations (focus on large networks)
+   - Optimize large-scale data processing operations (100,000+ elements)
 
-3. **Expand Text Processing**
-   - Implement Unicode normalization and case folding
-   - Add support for advanced NLP features (stemming, lemmatization)
-   - Implement text indexing and search algorithms
+3. **Enhance Tier 2 Conditional Targets**
+   - Implement size-based switching for sorting, filtering, and map/reduce
+   - Create complexity-based switching for string and regex operations
+   - Develop frequency detection for operations in tight loops
 
-4. **Expand Benchmarking**
-   - Create comprehensive benchmarks for WebAssembly vs. JavaScript
-   - Benchmark across different data sizes to find optimal thresholds
-   - Integrate with the benchmark package
+4. **Optimize Existing Implementations**
+   - Refactor existing accelerators to use the tiered approach
+   - Add size thresholds to current implementations
+   - Implement hybrid JS/WASM approaches for complex algorithms
 
-5. **Add Advanced Features**
-   - Implement SIMD acceleration
-   - Add threading support (when available)
-   - Create specialized numeric operations for scientific computing
+5. **Expand Benchmarking and Analysis**
+   - Create comprehensive benchmarks across different input sizes
+   - Develop visualization tools for performance crossover points
+   - Implement continuous benchmarking across browsers and devices
 
 ## Conclusion
 
-The dedicated WebAssembly package will provide significant performance benefits for the Reduct library, particularly for computationally intensive operations. By creating a separate package with a consistent API, we can accelerate operations across the entire Reduct ecosystem while maintaining the flexibility and developer experience of JavaScript.
+The dedicated WebAssembly package will provide significant performance benefits for the Reduct library, but our benchmarking has shown that these benefits are most pronounced for specific types of operations and data sizes. By adopting a tiered optimization strategy, we can focus our WebAssembly efforts where they provide the most value while using native JavaScript where it performs better.
 
-We have made significant progress in implementing the foundation of the WebAssembly package, and the next steps will focus on implementing actual WebAssembly modules and integrating them with the rest of the Reduct ecosystem.
+We have made significant progress in implementing the foundation of the WebAssembly package and creating accelerators for various operations. Our next steps will focus on implementing the tiered optimization framework and focusing on high-value targets where WebAssembly consistently outperforms JavaScript.
+
+This strategic approach ensures that our investment in WebAssembly technology provides maximum benefit to Reduct users while maintaining the flexibility, developer experience, and performance characteristics that make JavaScript attractive. Rather than treating WebAssembly as a universal solution, we're using it as a targeted optimization tool for specific computational challenges.

@@ -10,6 +10,7 @@ pub mod string_ops;
 pub mod regex_ops;
 pub mod nlp_ops;
 pub mod compression;
+pub mod unicode_ops;
 
 // Export submodules
 pub use list::*;
@@ -23,3 +24,4 @@ pub use string_ops::*;
 pub use regex_ops::*;
 pub use nlp_ops::*;
 pub use compression::*;
+pub use unicode_ops::*;
