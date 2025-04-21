@@ -100,22 +100,47 @@ export class NumericAccelerator extends WasmAccelerator<any, any> {
   }
 
   min(array: number[]): number {
-    return array.length === 0 ? Infinity : Math.min(...array);
+    if (array.length === 0) return Infinity;
+    // Use a loop instead of Math.min(...array) to avoid stack overflow for large arrays
+    let min = array[0];
+    for (let i = 1; i < array.length; i++) {
+      if (array[i] < min) min = array[i];
+    }
+    return min;
   }
 
   max(array: number[]): number {
-    return array.length === 0 ? -Infinity : Math.max(...array);
+    if (array.length === 0) return -Infinity;
+    // Use a loop instead of Math.max(...array) to avoid stack overflow for large arrays
+    let max = array[0];
+    for (let i = 1; i < array.length; i++) {
+      if (array[i] > max) max = array[i];
+    }
+    return max;
   }
 
   sort<T>(array: T[], compareFn?: (a: T, b: T) => number): T[] {
-    return [...array].sort(compareFn);
+    // Create a copy to avoid modifying the original array
+    const copy = [...array];
+
+    // If it's a numeric array and no custom comparator is provided, use our efficient sort
+    if (typeof array[0] === 'number' && !compareFn) {
+      return this._efficientSort(copy as unknown as number[]) as unknown as T[];
+    }
+
+    // Otherwise, use the native sort
+    return copy.sort(compareFn);
   }
 
   median(array: number[]): number {
     if (array.length === 0) return NaN;
     if (array.length === 1) return array[0];
 
-    const sorted = [...array].sort((a, b) => a - b);
+    // Create a copy to avoid modifying the original array
+    const copy = array.slice();
+
+    // Use a more efficient sorting algorithm for large arrays
+    const sorted = this._efficientSort(copy);
     const mid = Math.floor(sorted.length / 2);
 
     if (sorted.length % 2 === 0) {
@@ -129,8 +154,21 @@ export class NumericAccelerator extends WasmAccelerator<any, any> {
     if (array.length === 0) return NaN;
     if (array.length === 1) return 0;
 
-    const mean = array.reduce((a, b) => a + b, 0) / array.length;
-    const variance = array.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / array.length;
+    // Calculate mean in a single pass
+    let sum = 0;
+    for (let i = 0; i < array.length; i++) {
+      sum += array[i];
+    }
+    const mean = sum / array.length;
+
+    // Calculate variance in a single pass
+    let variance = 0;
+    for (let i = 0; i < array.length; i++) {
+      const diff = array[i] - mean;
+      variance += diff * diff;
+    }
+    variance /= array.length;
+
     return Math.sqrt(variance);
   }
 
@@ -139,7 +177,12 @@ export class NumericAccelerator extends WasmAccelerator<any, any> {
     if (array.length === 1) return array[0];
 
     const p = Math.max(0, Math.min(100, percentile));
-    const sorted = [...array].sort((a, b) => a - b);
+
+    // Create a copy to avoid modifying the original array
+    const copy = array.slice();
+
+    // Use a more efficient sorting algorithm for large arrays
+    const sorted = this._efficientSort(copy);
     const index = (p / 100) * (sorted.length - 1);
     const lower = Math.floor(index);
     const upper = Math.ceil(index);
@@ -150,6 +193,92 @@ export class NumericAccelerator extends WasmAccelerator<any, any> {
     }
 
     return sorted[lower] * (1 - weight) + sorted[upper] * weight;
+  }
+
+  /**
+   * Efficient sorting algorithm for large arrays
+   * Uses native sort for small arrays and a more efficient algorithm for large arrays
+   */
+  private _efficientSort(array: number[]): number[] {
+    // For small arrays, use native sort
+    if (array.length < 10000) {
+      return array.sort((a, b) => a - b);
+    }
+
+    // For large arrays, use a more efficient algorithm
+    // This is a non-recursive implementation to avoid stack overflow
+    return this._iterativeSort(array);
+  }
+
+  /**
+   * Non-recursive sorting implementation for large arrays
+   */
+  private _iterativeSort(array: number[]): number[] {
+    // Use a simple merge sort implementation that doesn't use recursion
+    const n = array.length;
+
+    // Start with small subarrays and merge them
+    for (let size = 1; size < n; size *= 2) {
+      // Merge subarrays of size 'size'
+      for (let leftStart = 0; leftStart < n; leftStart += 2 * size) {
+        // Find endpoints of two subarrays to merge
+        const mid = Math.min(leftStart + size - 1, n - 1);
+        const rightEnd = Math.min(leftStart + 2 * size - 1, n - 1);
+
+        // Merge the two subarrays
+        this._merge(array, leftStart, mid, rightEnd);
+      }
+    }
+
+    return array;
+  }
+
+  /**
+   * Merge two sorted subarrays
+   */
+  private _merge(array: number[], left: number, mid: number, right: number): void {
+    // Calculate sizes of two subarrays to be merged
+    const n1 = mid - left + 1;
+    const n2 = right - mid;
+
+    // Create temporary arrays
+    const leftArray = new Array(n1);
+    const rightArray = new Array(n2);
+
+    // Copy data to temporary arrays
+    for (let i = 0; i < n1; i++) {
+      leftArray[i] = array[left + i];
+    }
+    for (let j = 0; j < n2; j++) {
+      rightArray[j] = array[mid + 1 + j];
+    }
+
+    // Merge the temporary arrays back into the original array
+    let i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+      if (leftArray[i] <= rightArray[j]) {
+        array[k] = leftArray[i];
+        i++;
+      } else {
+        array[k] = rightArray[j];
+        j++;
+      }
+      k++;
+    }
+
+    // Copy remaining elements of leftArray, if any
+    while (i < n1) {
+      array[k] = leftArray[i];
+      i++;
+      k++;
+    }
+
+    // Copy remaining elements of rightArray, if any
+    while (j < n2) {
+      array[k] = rightArray[j];
+      j++;
+      k++;
+    }
   }
 
   execute(input: any): any {

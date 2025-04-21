@@ -2,8 +2,24 @@
 pub mod list;
 pub mod numeric;
 pub mod numeric_stats;
+pub mod numeric_stats_extended;
+pub mod time_series;
+pub mod machine_learning;
+pub mod neural_network;
+pub mod string_ops;
+pub mod regex_ops;
+pub mod nlp_ops;
+pub mod compression;
 
 // Export submodules
 pub use list::*;
 pub use numeric::*;
 pub use numeric_stats::*;
+pub use numeric_stats_extended::*;
+pub use time_series::*;
+pub use machine_learning::*;
+pub use neural_network::*;
+pub use string_ops::*;
+pub use regex_ops::*;
+pub use nlp_ops::*;
+pub use compression::*;
