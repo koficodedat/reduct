@@ -1,0 +1,66 @@
+name: Performance Regression Bisection
+
+on:
+  workflow_dispatch:
+    inputs:
+      good_commit:
+        description: 'Good commit (known to be without regression)'
+        required: false
+        type: string
+      bad_commit:
+        description: 'Bad commit (known to have regression)'
+        required: false
+        type: string
+      max_iterations:
+        description: 'Maximum number of iterations'
+        required: false
+        default: '20'
+        type: string
+
+jobs:
+  bisect:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build packages
+      run: npm run build
+    
+    - name: Run bisection
+      run: |
+        cd packages/benchmark
+        npm run benchmark:bisection -- \
+          --good-commit "${{ inputs.good_commit }}" \
+          --bad-commit "${{ inputs.bad_commit }}" \
+          --max-iterations "${{ inputs.max_iterations }}" \
+          --benchmark-command "npm run benchmark:tiered -- --numeric-operations map --list-operations map --iterations 3 --steps 3" \
+          --regression-detection-command "npm run benchmark:regression -- --output packages/benchmark/regression-report.json --fail-on-regression"
+    
+    - name: Upload bisection results
+      uses: actions/upload-artifact@v4
+      with:
+        name: bisection-results
+        path: |
+          packages/benchmark/bisection-results.json
+          packages/benchmark/bisection-results.md
+        if-no-files-found: warn
+    
+    - name: Create issue with bisection results
+      if: success()
+      uses: peter-evans/create-issue-from-file@v4
+      with:
+        title: Performance Regression Bisection Results
+        content-filepath: packages/benchmark/bisection-results.md
+        labels: performance, regression, bisection

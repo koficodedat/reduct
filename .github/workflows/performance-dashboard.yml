@@ -1,0 +1,44 @@
+name: Performance Dashboard Generation
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Run every Sunday at midnight
+  workflow_dispatch:
+
+jobs:
+  generate-dashboard:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build packages
+      run: npm run build
+    
+    - name: Run benchmarks
+      run: |
+        cd packages/benchmark
+        npm run benchmark:tiered -- --numeric-operations map,filter,reduce --list-operations map,filter,reduce --iterations 5 --steps 5
+    
+    - name: Generate dashboard
+      run: |
+        cd packages/benchmark
+        npm run benchmark:dashboard
+    
+    - name: Deploy dashboard to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: packages/benchmark/dashboard
+        branch: gh-pages
+        target-folder: dashboard

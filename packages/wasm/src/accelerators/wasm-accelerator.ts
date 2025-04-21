@@ -1,7 +1,7 @@
 /**
  * Base class for WebAssembly accelerators
  */
-import { BaseAccelerator, PerformanceProfile, AcceleratorOptions } from './accelerator';
+import { BaseAccelerator, PerformanceProfile, AcceleratorOptions, AcceleratorTier } from './accelerator';
 import { WasmModule } from '../core/wasm-module';
 import { WasmModuleLoader } from '../core/wasm-module-loader';
 
@@ -72,11 +72,38 @@ export abstract class WasmAccelerator extends BaseAccelerator<any, any> {
   }
 
   /**
-   * Execute the accelerated operation
+   * Execute the operation using the appropriate implementation for the given tier
+   * @param input The input for the operation
+   * @param tier The tier to use
+   * @returns The result of the operation
+   */
+  protected executeWithTier(input: any, tier: AcceleratorTier): any {
+    // Default implementation for WebAssembly accelerators
+    // HIGH_VALUE and CONDITIONAL tiers use WebAssembly
+    // JS_PREFERRED tier uses JavaScript fallback
+
+    if (tier === AcceleratorTier.JS_PREFERRED) {
+      // Use JavaScript fallback for JS_PREFERRED tier
+      return this.executeJs(input);
+    }
+
+    // Use WebAssembly for HIGH_VALUE and CONDITIONAL tiers
+    return this.executeWasm(input);
+  }
+
+  /**
+   * Execute the operation using WebAssembly
    * @param input The input for the operation
    * @returns The result of the operation
    */
-  public abstract execute(input: any): any;
+  protected abstract executeWasm(input: any): any;
+
+  /**
+   * Execute the operation using JavaScript
+   * @param input The input for the operation
+   * @returns The result of the operation
+   */
+  protected abstract executeJs(input: any): any;
 
   /**
    * Get the performance profile of the accelerator

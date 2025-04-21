@@ -26,6 +26,10 @@ export {
   BaseAccelerator,
   JavaScriptFallbackAccelerator,
   AcceleratorRegistry,
+  AcceleratorTier,
+  AcceleratorPerformanceStats,
+  TieringStrategy,
+  TieredSortAccelerator,
 } from './accelerators';
 
 // Export list accelerators
@@ -57,6 +61,8 @@ export {
   ProfileEntry,
   WasmTelemetry,
   TelemetryEvent,
+  findOptimalThreshold,
+  visualizeThreshold,
 } from './utils';
 
 // Export error types

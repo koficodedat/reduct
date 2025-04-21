@@ -9,7 +9,6 @@
 import { IList, TransientList } from './types';
 import { HAMTPersistentVector } from './hamt-persistent-vector';
 import { NumericAccelerator, isWebAssemblySupported } from '../utils/mock-wasm';
-
 // Create a singleton accelerator instance
 const accelerator = new NumericAccelerator();
 
@@ -246,8 +245,8 @@ export class WasmHAMTPersistentVector implements IList<number> {
   ): V {
     // Use WebAssembly acceleration if available and all result types are numeric
     if (
-      this._acceleratorAvailable && 
-      typeof mapFn(0, 0) === 'number' && 
+      this._acceleratorAvailable &&
+      typeof mapFn(0, 0) === 'number' &&
       typeof initial === 'number'
     ) {
       try {
@@ -280,8 +279,8 @@ export class WasmHAMTPersistentVector implements IList<number> {
   ): V {
     // Use WebAssembly acceleration if available and all result types are numeric
     if (
-      this._acceleratorAvailable && 
-      typeof mapFn(0, 0) === 'number' && 
+      this._acceleratorAvailable &&
+      typeof mapFn(0, 0) === 'number' &&
       typeof initial === 'number'
     ) {
       try {
@@ -317,7 +316,7 @@ export class WasmHAMTPersistentVector implements IList<number> {
         const data = this._impl.toArray();
         const filtered = accelerator.filter(data, filterFn);
         const result = accelerator.map(
-          filtered, 
+          filtered,
           mapFn as (value: number, index: number) => number
         );
         return new WasmHAMTPersistentVector(result) as unknown as IList<U>;
@@ -344,8 +343,8 @@ export class WasmHAMTPersistentVector implements IList<number> {
         // Use WebAssembly for mapFilter
         const data = this._impl.toArray();
         const result = accelerator.mapFilter(
-          data, 
-          mapFn as (value: number, index: number) => number, 
+          data,
+          mapFn as (value: number, index: number) => number,
           filterFn as (value: number, index: number) => boolean
         );
         return new WasmHAMTPersistentVector(result) as unknown as IList<U>;

@@ -2,7 +2,7 @@
  * WebAssembly accelerator for list operations
  */
 import { WasmAccelerator } from '../wasm-accelerator';
-import { PerformanceProfile, AcceleratorOptions } from '../accelerator';
+import { PerformanceProfile, AcceleratorOptions, AcceleratorTier } from '../accelerator';
 import { WebAssemblyFeature } from '../../core/feature-detection';
 
 /**
@@ -17,6 +17,23 @@ export class ListAccelerator extends WasmAccelerator {
     super('data-structures', 'list', 'operations', {
       ...options,
       requiredFeatures: [WebAssemblyFeature.BASIC],
+      // Default tiering strategy for list operations
+      tiering: {
+        // Tier 1: Always use WebAssembly for arrays over 100,000 elements
+        [AcceleratorTier.HIGH_VALUE]: (array: any[]) => {
+          return Array.isArray(array) && array.length >= 100000;
+        },
+        // Tier 2: Use WebAssembly for arrays over 10,000 elements
+        [AcceleratorTier.CONDITIONAL]: (array: any[]) => {
+          return Array.isArray(array) && array.length >= 10000;
+        },
+        // Tier 3: Use JavaScript for everything else
+        [AcceleratorTier.JS_PREFERRED]: () => true,
+      },
+      // Default thresholds for list operations
+      thresholds: {
+        minArraySize: 10000,
+      },
     });
   }
 
@@ -28,10 +45,29 @@ export class ListAccelerator extends WasmAccelerator {
    * @returns The mapped array
    */
   public map<T, R>(array: T[], mapFn: (value: T, index: number) => R): R[] {
+    // Determine the appropriate tier for the input
+    const tier = this.determineTier(array);
+
+    // Execute the operation using the appropriate implementation
+    if (tier === AcceleratorTier.JS_PREFERRED) {
+      return this.mapJs(array, mapFn);
+    } else {
+      return this.mapWasm(array, mapFn);
+    }
+  }
+
+  /**
+   * Map operation using WebAssembly
+   *
+   * @param array The input array
+   * @param mapFn The mapping function
+   * @returns The mapped array
+   */
+  private mapWasm<T, R>(array: T[], mapFn: (value: T, index: number) => R): R[] {
     // Check if the module is loaded
     const module = this.getModule();
     if (!module) {
-      return array.map(mapFn);
+      return this.mapJs(array, mapFn);
     }
 
     try {
@@ -42,8 +78,19 @@ export class ListAccelerator extends WasmAccelerator {
     } catch (error) {
       // Fall back to native implementation
       console.warn('WebAssembly acceleration failed, falling back to native implementation:', error);
-      return array.map(mapFn);
+      return this.mapJs(array, mapFn);
     }
+  }
+
+  /**
+   * Map operation using JavaScript
+   *
+   * @param array The input array
+   * @param mapFn The mapping function
+   * @returns The mapped array
+   */
+  private mapJs<T, R>(array: T[], mapFn: (value: T, index: number) => R): R[] {
+    return array.map(mapFn);
   }
 
   /**
@@ -54,10 +101,29 @@ export class ListAccelerator extends WasmAccelerator {
    * @returns The filtered array
    */
   public filter<T>(array: T[], filterFn: (value: T, index: number) => boolean): T[] {
+    // Determine the appropriate tier for the input
+    const tier = this.determineTier(array);
+
+    // Execute the operation using the appropriate implementation
+    if (tier === AcceleratorTier.JS_PREFERRED) {
+      return this.filterJs(array, filterFn);
+    } else {
+      return this.filterWasm(array, filterFn);
+    }
+  }
+
+  /**
+   * Filter operation using WebAssembly
+   *
+   * @param array The input array
+   * @param filterFn The filter function
+   * @returns The filtered array
+   */
+  private filterWasm<T>(array: T[], filterFn: (value: T, index: number) => boolean): T[] {
     // Check if the module is loaded
     const module = this.getModule();
     if (!module) {
-      return array.filter(filterFn);
+      return this.filterJs(array, filterFn);
     }
 
     try {
@@ -68,8 +134,19 @@ export class ListAccelerator extends WasmAccelerator {
     } catch (error) {
       // Fall back to native implementation
       console.warn('WebAssembly acceleration failed, falling back to native implementation:', error);
-      return array.filter(filterFn);
+      return this.filterJs(array, filterFn);
     }
+  }
+
+  /**
+   * Filter operation using JavaScript
+   *
+   * @param array The input array
+   * @param filterFn The filter function
+   * @returns The filtered array
+   */
+  private filterJs<T>(array: T[], filterFn: (value: T, index: number) => boolean): T[] {
+    return array.filter(filterFn);
   }
 
   /**
@@ -81,10 +158,30 @@ export class ListAccelerator extends WasmAccelerator {
    * @returns The reduced value
    */
   public reduce<T, R>(array: T[], reduceFn: (accumulator: R, value: T, index: number) => R, initialValue: R): R {
+    // Determine the appropriate tier for the input
+    const tier = this.determineTier(array);
+
+    // Execute the operation using the appropriate implementation
+    if (tier === AcceleratorTier.JS_PREFERRED) {
+      return this.reduceJs(array, reduceFn, initialValue);
+    } else {
+      return this.reduceWasm(array, reduceFn, initialValue);
+    }
+  }
+
+  /**
+   * Reduce operation using WebAssembly
+   *
+   * @param array The input array
+   * @param reduceFn The reduce function
+   * @param initialValue The initial value
+   * @returns The reduced value
+   */
+  private reduceWasm<T, R>(array: T[], reduceFn: (accumulator: R, value: T, index: number) => R, initialValue: R): R {
     // Check if the module is loaded
     const module = this.getModule();
     if (!module) {
-      return array.reduce(reduceFn, initialValue);
+      return this.reduceJs(array, reduceFn, initialValue);
     }
 
     try {
@@ -95,8 +192,20 @@ export class ListAccelerator extends WasmAccelerator {
     } catch (error) {
       // Fall back to native implementation
       console.warn('WebAssembly acceleration failed, falling back to native implementation:', error);
-      return array.reduce(reduceFn, initialValue);
+      return this.reduceJs(array, reduceFn, initialValue);
     }
+  }
+
+  /**
+   * Reduce operation using JavaScript
+   *
+   * @param array The input array
+   * @param reduceFn The reduce function
+   * @param initialValue The initial value
+   * @returns The reduced value
+   */
+  private reduceJs<T, R>(array: T[], reduceFn: (accumulator: R, value: T, index: number) => R, initialValue: R): R {
+    return array.reduce(reduceFn, initialValue);
   }
 
   /**
@@ -107,10 +216,29 @@ export class ListAccelerator extends WasmAccelerator {
    * @returns The sorted array
    */
   public sort<T>(array: T[], compareFn?: (a: T, b: T) => number): T[] {
+    // Determine the appropriate tier for the input
+    const tier = this.determineTier(array);
+
+    // Execute the operation using the appropriate implementation
+    if (tier === AcceleratorTier.JS_PREFERRED) {
+      return this.sortJs(array, compareFn);
+    } else {
+      return this.sortWasm(array, compareFn);
+    }
+  }
+
+  /**
+   * Sort operation using WebAssembly
+   *
+   * @param array The input array
+   * @param compareFn The compare function
+   * @returns The sorted array
+   */
+  private sortWasm<T>(array: T[], compareFn?: (a: T, b: T) => number): T[] {
     // Check if the module is loaded
     const module = this.getModule();
     if (!module) {
-      return [...array].sort(compareFn);
+      return this.sortJs(array, compareFn);
     }
 
     try {
@@ -121,8 +249,19 @@ export class ListAccelerator extends WasmAccelerator {
     } catch (error) {
       // Fall back to native implementation
       console.warn('WebAssembly acceleration failed, falling back to native implementation:', error);
-      return [...array].sort(compareFn);
+      return this.sortJs(array, compareFn);
     }
+  }
+
+  /**
+   * Sort operation using JavaScript
+   *
+   * @param array The input array
+   * @param compareFn The compare function
+   * @returns The sorted array
+   */
+  private sortJs<T>(array: T[], compareFn?: (a: T, b: T) => number): T[] {
+    return [...array].sort(compareFn);
   }
 
   /**
@@ -134,10 +273,30 @@ export class ListAccelerator extends WasmAccelerator {
    * @returns The mapped and filtered array
    */
   public mapFilter<T, R>(array: T[], mapFn: (value: T, index: number) => R, filterFn: (value: R, index: number) => boolean): R[] {
+    // Determine the appropriate tier for the input
+    const tier = this.determineTier(array);
+
+    // Execute the operation using the appropriate implementation
+    if (tier === AcceleratorTier.JS_PREFERRED) {
+      return this.mapFilterJs(array, mapFn, filterFn);
+    } else {
+      return this.mapFilterWasm(array, mapFn, filterFn);
+    }
+  }
+
+  /**
+   * Map-filter operation using WebAssembly
+   *
+   * @param array The input array
+   * @param mapFn The mapping function
+   * @param filterFn The filter function
+   * @returns The mapped and filtered array
+   */
+  private mapFilterWasm<T, R>(array: T[], mapFn: (value: T, index: number) => R, filterFn: (value: R, index: number) => boolean): R[] {
     // Check if the module is loaded
     const module = this.getModule();
     if (!module) {
-      return array.map(mapFn).filter(filterFn);
+      return this.mapFilterJs(array, mapFn, filterFn);
     }
 
     try {
@@ -148,8 +307,20 @@ export class ListAccelerator extends WasmAccelerator {
     } catch (error) {
       // Fall back to native implementation
       console.warn('WebAssembly acceleration failed, falling back to native implementation:', error);
-      return array.map(mapFn).filter(filterFn);
+      return this.mapFilterJs(array, mapFn, filterFn);
     }
+  }
+
+  /**
+   * Map-filter operation using JavaScript
+   *
+   * @param array The input array
+   * @param mapFn The mapping function
+   * @param filterFn The filter function
+   * @returns The mapped and filtered array
+   */
+  private mapFilterJs<T, R>(array: T[], mapFn: (value: T, index: number) => R, filterFn: (value: R, index: number) => boolean): R[] {
+    return array.map(mapFn).filter(filterFn);
   }
 
   /**
@@ -167,10 +338,36 @@ export class ListAccelerator extends WasmAccelerator {
     reduceFn: (accumulator: U, value: R, index: number) => U,
     initialValue: U
   ): U {
+    // Determine the appropriate tier for the input
+    const tier = this.determineTier(array);
+
+    // Execute the operation using the appropriate implementation
+    if (tier === AcceleratorTier.JS_PREFERRED) {
+      return this.mapReduceJs(array, mapFn, reduceFn, initialValue);
+    } else {
+      return this.mapReduceWasm(array, mapFn, reduceFn, initialValue);
+    }
+  }
+
+  /**
+   * Map-reduce operation using WebAssembly
+   *
+   * @param array The input array
+   * @param mapFn The mapping function
+   * @param reduceFn The reduce function
+   * @param initialValue The initial value
+   * @returns The reduced value
+   */
+  private mapReduceWasm<T, R, U>(
+    array: T[],
+    mapFn: (value: T, index: number) => R,
+    reduceFn: (accumulator: U, value: R, index: number) => U,
+    initialValue: U
+  ): U {
     // Check if the module is loaded
     const module = this.getModule();
     if (!module) {
-      return array.map(mapFn).reduce(reduceFn, initialValue);
+      return this.mapReduceJs(array, mapFn, reduceFn, initialValue);
     }
 
     try {
@@ -181,8 +378,26 @@ export class ListAccelerator extends WasmAccelerator {
     } catch (error) {
       // Fall back to native implementation
       console.warn('WebAssembly acceleration failed, falling back to native implementation:', error);
-      return array.map(mapFn).reduce(reduceFn, initialValue);
+      return this.mapReduceJs(array, mapFn, reduceFn, initialValue);
     }
+  }
+
+  /**
+   * Map-reduce operation using JavaScript
+   *
+   * @param array The input array
+   * @param mapFn The mapping function
+   * @param reduceFn The reduce function
+   * @param initialValue The initial value
+   * @returns The reduced value
+   */
+  private mapReduceJs<T, R, U>(
+    array: T[],
+    mapFn: (value: T, index: number) => R,
+    reduceFn: (accumulator: U, value: R, index: number) => U,
+    initialValue: U
+  ): U {
+    return array.map(mapFn).reduce(reduceFn, initialValue);
   }
 
   /**
@@ -200,10 +415,36 @@ export class ListAccelerator extends WasmAccelerator {
     reduceFn: (accumulator: R, value: T, index: number) => R,
     initialValue: R
   ): R {
+    // Determine the appropriate tier for the input
+    const tier = this.determineTier(array);
+
+    // Execute the operation using the appropriate implementation
+    if (tier === AcceleratorTier.JS_PREFERRED) {
+      return this.filterReduceJs(array, filterFn, reduceFn, initialValue);
+    } else {
+      return this.filterReduceWasm(array, filterFn, reduceFn, initialValue);
+    }
+  }
+
+  /**
+   * Filter-reduce operation using WebAssembly
+   *
+   * @param array The input array
+   * @param filterFn The filter function
+   * @param reduceFn The reduce function
+   * @param initialValue The initial value
+   * @returns The reduced value
+   */
+  private filterReduceWasm<T, R>(
+    array: T[],
+    filterFn: (value: T, index: number) => boolean,
+    reduceFn: (accumulator: R, value: T, index: number) => R,
+    initialValue: R
+  ): R {
     // Check if the module is loaded
     const module = this.getModule();
     if (!module) {
-      return array.filter(filterFn).reduce(reduceFn, initialValue);
+      return this.filterReduceJs(array, filterFn, reduceFn, initialValue);
     }
 
     try {
@@ -214,8 +455,26 @@ export class ListAccelerator extends WasmAccelerator {
     } catch (error) {
       // Fall back to native implementation
       console.warn('WebAssembly acceleration failed, falling back to native implementation:', error);
-      return array.filter(filterFn).reduce(reduceFn, initialValue);
+      return this.filterReduceJs(array, filterFn, reduceFn, initialValue);
     }
+  }
+
+  /**
+   * Filter-reduce operation using JavaScript
+   *
+   * @param array The input array
+   * @param filterFn The filter function
+   * @param reduceFn The reduce function
+   * @param initialValue The initial value
+   * @returns The reduced value
+   */
+  private filterReduceJs<T, R>(
+    array: T[],
+    filterFn: (value: T, index: number) => boolean,
+    reduceFn: (accumulator: R, value: T, index: number) => R,
+    initialValue: R
+  ): R {
+    return array.filter(filterFn).reduce(reduceFn, initialValue);
   }
 
   /**
@@ -235,10 +494,38 @@ export class ListAccelerator extends WasmAccelerator {
     reduceFn: (accumulator: U, value: R, index: number) => U,
     initialValue: U
   ): U {
+    // Determine the appropriate tier for the input
+    const tier = this.determineTier(array);
+
+    // Execute the operation using the appropriate implementation
+    if (tier === AcceleratorTier.JS_PREFERRED) {
+      return this.mapFilterReduceJs(array, mapFn, filterFn, reduceFn, initialValue);
+    } else {
+      return this.mapFilterReduceWasm(array, mapFn, filterFn, reduceFn, initialValue);
+    }
+  }
+
+  /**
+   * Map-filter-reduce operation using WebAssembly
+   *
+   * @param array The input array
+   * @param mapFn The mapping function
+   * @param filterFn The filter function
+   * @param reduceFn The reduce function
+   * @param initialValue The initial value
+   * @returns The reduced value
+   */
+  private mapFilterReduceWasm<T, R, U>(
+    array: T[],
+    mapFn: (value: T, index: number) => R,
+    filterFn: (value: R, index: number) => boolean,
+    reduceFn: (accumulator: U, value: R, index: number) => U,
+    initialValue: U
+  ): U {
     // Check if the module is loaded
     const module = this.getModule();
     if (!module) {
-      return array.map(mapFn).filter(filterFn).reduce(reduceFn, initialValue);
+      return this.mapFilterReduceJs(array, mapFn, filterFn, reduceFn, initialValue);
     }
 
     try {
@@ -249,8 +536,28 @@ export class ListAccelerator extends WasmAccelerator {
     } catch (error) {
       // Fall back to native implementation
       console.warn('WebAssembly acceleration failed, falling back to native implementation:', error);
-      return array.map(mapFn).filter(filterFn).reduce(reduceFn, initialValue);
+      return this.mapFilterReduceJs(array, mapFn, filterFn, reduceFn, initialValue);
     }
+  }
+
+  /**
+   * Map-filter-reduce operation using JavaScript
+   *
+   * @param array The input array
+   * @param mapFn The mapping function
+   * @param filterFn The filter function
+   * @param reduceFn The reduce function
+   * @param initialValue The initial value
+   * @returns The reduced value
+   */
+  private mapFilterReduceJs<T, R, U>(
+    array: T[],
+    mapFn: (value: T, index: number) => R,
+    filterFn: (value: R, index: number) => boolean,
+    reduceFn: (accumulator: U, value: R, index: number) => U,
+    initialValue: U
+  ): U {
+    return array.map(mapFn).filter(filterFn).reduce(reduceFn, initialValue);
   }
 
   /**
@@ -259,6 +566,24 @@ export class ListAccelerator extends WasmAccelerator {
    * @returns The result of the operation
    */
   public execute(_input: any): any {
+    throw new Error('Method not implemented. Use specific operation methods instead.');
+  }
+
+  /**
+   * Execute the operation using WebAssembly
+   * @param _input The input for the operation
+   * @returns The result of the operation
+   */
+  protected executeWasm(_input: any): any {
+    throw new Error('Method not implemented. Use specific operation methods instead.');
+  }
+
+  /**
+   * Execute the operation using JavaScript
+   * @param _input The input for the operation
+   * @returns The result of the operation
+   */
+  protected executeJs(_input: any): any {
     throw new Error('Method not implemented. Use specific operation methods instead.');
   }
 

@@ -11,6 +11,9 @@ pub mod regex_ops;
 pub mod nlp_ops;
 pub mod compression;
 pub mod unicode_ops;
+pub mod matrix;
+pub mod signal;
+pub mod hamt_vector;
 
 // Export submodules
 pub use list::*;
@@ -25,3 +28,6 @@ pub use regex_ops::*;
 pub use nlp_ops::*;
 pub use compression::*;
 pub use unicode_ops::*;
+pub use matrix::*;
+pub use signal::*;
+pub use hamt_vector::*;

@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reduct Performance Dashboard</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1, h2, h3, h4 {
+      color: #0066cc;
+    }
+    .dashboard-header {
+      margin-bottom: 30px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 20px;
+    }
+    .dashboard-timestamp {
+      color: #666;
+      font-size: 0.9em;
+    }
+    .operation-section {
+      margin-bottom: 40px;
+    }
+    .size-section {
+      margin-bottom: 30px;
+    }
+    .chart-container {
+      width: 100%;
+      height: 400px;
+      margin-bottom: 20px;
+    }
+    .tier-legend {
+      display: flex;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .tier-legend-item {
+      display: flex;
+      align-items: center;
+      margin-right: 20px;
+      margin-bottom: 10px;
+    }
+    .tier-legend-color {
+      width: 20px;
+      height: 20px;
+      margin-right: 5px;
+      border-radius: 3px;
+    }
+    .tier-high-value {
+      background-color: #4285F4;
+    }
+    .tier-conditional {
+      background-color: #EA4335;
+    }
+    .tier-js-preferred {
+      background-color: #FBBC05;
+    }
+    .tier-native {
+      background-color: #34A853;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #f5f5f5;
+    }
+    tr:hover {
+      background-color: #f9f9f9;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="dashboard-header">
+    <h1>Reduct Performance Dashboard</h1>
+    <p>Performance dashboard for the Reduct library</p>
+    <p class="dashboard-timestamp">Generated: 2025-04-21T17:15:03.393Z</p>
+  </div>
+
+  <div class="tier-legend">
+    <div class="tier-legend-item">
+      <div class="tier-legend-color tier-high-value"></div>
+      <span>High Value</span>
+    </div>
+    <div class="tier-legend-item">
+      <div class="tier-legend-color tier-conditional"></div>
+      <span>Conditional</span>
+    </div>
+    <div class="tier-legend-item">
+      <div class="tier-legend-color tier-js-preferred"></div>
+      <span>JS Preferred</span>
+    </div>
+    <div class="tier-legend-item">
+      <div class="tier-legend-color tier-native"></div>
+      <span>Native</span>
+    </div>
+  </div>
+
+  <div id="dashboard-content">
+    <div class="operation-section">
+      <h2>high Operation</h2>
+      <div class="size-section">
+        <h3>Input Size: 1000</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-high-1000"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>value</td>
+              <td>0.017</td>
+              <td>0.016</td>
+              <td>0.017</td>
+              <td>0.001</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="size-section">
+        <h3>Input Size: 5623</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-high-5623"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>value</td>
+              <td>0.056</td>
+              <td>0.049</td>
+              <td>0.070</td>
+              <td>0.010</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="size-section">
+        <h3>Input Size: 31623</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-high-31623"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>value</td>
+              <td>0.697</td>
+              <td>0.361</td>
+              <td>1.359</td>
+              <td>0.468</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="size-section">
+        <h3>Input Size: 177828</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-high-177828"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>value</td>
+              <td>4.351</td>
+              <td>1.832</td>
+              <td>7.378</td>
+              <td>2.292</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="size-section">
+        <h3>Input Size: 1000000</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-high-1000000"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>value</td>
+              <td>32.535</td>
+              <td>32.189</td>
+              <td>32.854</td>
+              <td>0.272</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="operation-section">
+      <h2>map Operation</h2>
+      <div class="size-section">
+        <h3>Input Size: 1000</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-map-1000"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>conditional</td>
+              <td>0.012</td>
+              <td>0.012</td>
+              <td>0.013</td>
+              <td>0.001</td>
+            </tr>
+            <tr>
+              <td>native</td>
+              <td>0.016</td>
+              <td>0.016</td>
+              <td>0.017</td>
+              <td>0.000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="size-section">
+        <h3>Input Size: 5623</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-map-5623"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>conditional</td>
+              <td>0.065</td>
+              <td>0.061</td>
+              <td>0.067</td>
+              <td>0.003</td>
+            </tr>
+            <tr>
+              <td>native</td>
+              <td>0.059</td>
+              <td>0.052</td>
+              <td>0.065</td>
+              <td>0.005</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="size-section">
+        <h3>Input Size: 31623</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-map-31623"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>conditional</td>
+              <td>1.076</td>
+              <td>0.330</td>
+              <td>1.735</td>
+              <td>0.577</td>
+            </tr>
+            <tr>
+              <td>native</td>
+              <td>2.436</td>
+              <td>1.477</td>
+              <td>4.243</td>
+              <td>1.278</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="size-section">
+        <h3>Input Size: 177828</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-map-177828"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>conditional</td>
+              <td>2.616</td>
+              <td>1.716</td>
+              <td>4.367</td>
+              <td>1.239</td>
+            </tr>
+            <tr>
+              <td>native</td>
+              <td>2.556</td>
+              <td>1.752</td>
+              <td>4.062</td>
+              <td>1.066</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="size-section">
+        <h3>Input Size: 1000000</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-map-1000000"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>conditional</td>
+              <td>33.101</td>
+              <td>31.544</td>
+              <td>34.254</td>
+              <td>1.143</td>
+            </tr>
+            <tr>
+              <td>native</td>
+              <td>31.367</td>
+              <td>31.057</td>
+              <td>31.567</td>
+              <td>0.223</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="operation-section">
+      <h2>js Operation</h2>
+      <div class="size-section">
+        <h3>Input Size: 1000</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-js-1000"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>preferred</td>
+              <td>0.019</td>
+              <td>0.012</td>
+              <td>0.028</td>
+              <td>0.006</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="size-section">
+        <h3>Input Size: 5623</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-js-5623"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>preferred</td>
+              <td>0.050</td>
+              <td>0.049</td>
+              <td>0.052</td>
+              <td>0.001</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="size-section">
+        <h3>Input Size: 31623</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-js-31623"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>preferred</td>
+              <td>1.282</td>
+              <td>1.067</td>
+              <td>1.438</td>
+              <td>0.157</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="size-section">
+        <h3>Input Size: 177828</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-js-177828"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>preferred</td>
+              <td>2.660</td>
+              <td>1.832</td>
+              <td>4.271</td>
+              <td>1.140</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="size-section">
+        <h3>Input Size: 1000000</h3>
+
+        <div class="chart-container">
+          <canvas id="chart-js-1000000"></canvas>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Tier</th>
+              <th>Latest Mean (ms)</th>
+              <th>Min (ms)</th>
+              <th>Max (ms)</th>
+              <th>Std Dev (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>preferred</td>
+              <td>31.570</td>
+              <td>31.090</td>
+              <td>32.019</td>
+              <td>0.380</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize charts
+    document.addEventListener('DOMContentLoaded', function() {
+      new Chart(document.getElementById('chart-high-1000'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"value","data":[0.017],"borderColor":"#000000","backgroundColor":"#00000033","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'high Operation - Input Size 1000'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-high-5623'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"value","data":[0.056],"borderColor":"#000000","backgroundColor":"#00000033","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'high Operation - Input Size 5623'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-high-31623'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"value","data":[0.697],"borderColor":"#000000","backgroundColor":"#00000033","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'high Operation - Input Size 31623'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-high-177828'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"value","data":[4.351],"borderColor":"#000000","backgroundColor":"#00000033","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'high Operation - Input Size 177828'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-high-1000000'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"value","data":[32.535],"borderColor":"#000000","backgroundColor":"#00000033","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'high Operation - Input Size 1000000'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-map-1000'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"conditional","data":[0.012],"borderColor":"#EA4335","backgroundColor":"#EA433533","tension":0.1},{"label":"native","data":[0.016],"borderColor":"#34A853","backgroundColor":"#34A85333","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'map Operation - Input Size 1000'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-map-5623'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"conditional","data":[0.065],"borderColor":"#EA4335","backgroundColor":"#EA433533","tension":0.1},{"label":"native","data":[0.059],"borderColor":"#34A853","backgroundColor":"#34A85333","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'map Operation - Input Size 5623'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-map-31623'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"conditional","data":[1.076],"borderColor":"#EA4335","backgroundColor":"#EA433533","tension":0.1},{"label":"native","data":[2.436],"borderColor":"#34A853","backgroundColor":"#34A85333","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'map Operation - Input Size 31623'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-map-177828'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"conditional","data":[2.616],"borderColor":"#EA4335","backgroundColor":"#EA433533","tension":0.1},{"label":"native","data":[2.556],"borderColor":"#34A853","backgroundColor":"#34A85333","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'map Operation - Input Size 177828'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-map-1000000'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"conditional","data":[33.101],"borderColor":"#EA4335","backgroundColor":"#EA433533","tension":0.1},{"label":"native","data":[31.367],"borderColor":"#34A853","backgroundColor":"#34A85333","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'map Operation - Input Size 1000000'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-js-1000'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"preferred","data":[0.019],"borderColor":"#000000","backgroundColor":"#00000033","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'js Operation - Input Size 1000'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-js-5623'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"preferred","data":[0.05],"borderColor":"#000000","backgroundColor":"#00000033","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'js Operation - Input Size 5623'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-js-31623'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"preferred","data":[1.282],"borderColor":"#000000","backgroundColor":"#00000033","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'js Operation - Input Size 31623'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-js-177828'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"preferred","data":[2.66],"borderColor":"#000000","backgroundColor":"#00000033","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'js Operation - Input Size 177828'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+      new Chart(document.getElementById('chart-js-1000000'), {
+        type: 'line',
+        data: {
+          labels: ["map-2025-04-21T16-05-37.523Z"],
+          datasets: [{"label":"preferred","data":[31.57],"borderColor":"#000000","backgroundColor":"#00000033","tension":0.1}]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            title: {
+              display: true,
+              text: 'js Operation - Input Size 1000000'
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Timestamp'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Mean Time (ms)'
+              },
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

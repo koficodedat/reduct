@@ -1,0 +1,34 @@
+{
+  "firstBadCommit": {
+    "hash": "1234567890abcdef1234567890abcdef12345678",
+    "author": "John Doe",
+    "date": "2025-04-21T17:51:56.131Z",
+    "message": "Fix performance issue"
+  },
+  "iterations": 5,
+  "testedCommits": [
+    {
+      "hash": "1234567890abcdef1234567890abcdef12345678",
+      "isGood": false
+    },
+    {
+      "hash": "2345678901abcdef2345678901abcdef23456789",
+      "isGood": true
+    },
+    {
+      "hash": "3456789012abcdef3456789012abcdef34567890",
+      "isGood": true
+    },
+    {
+      "hash": "4567890123abcdef4567890123abcdef45678901",
+      "isGood": false
+    },
+    {
+      "hash": "5678901234abcdef5678901234abcdef56789012",
+      "isGood": true
+    }
+  ],
+  "startTime": "2025-04-21T17:46:56.132Z",
+  "endTime": "2025-04-21T17:51:56.132Z",
+  "duration": 300000
+}

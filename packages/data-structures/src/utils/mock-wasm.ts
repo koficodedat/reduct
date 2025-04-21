@@ -6,6 +6,90 @@ export function isWebAssemblySupported(): boolean {
   return true;
 }
 
+// Mock implementation of adaptive threshold manager
+export const adaptiveThresholdManager = {
+  config: {
+    minInputSize: 1000,
+    maxInputSize: 100000,
+    minSpeedupRatio: 1.1,
+    maxSamples: 100,
+    adaptiveThresholds: true,
+    learningRate: 0.1,
+  } as ThresholdConfig,
+
+  setPerformanceProfile(domain: string, type: string, operation: string, profile: any): void {
+    // Mock implementation
+  },
+
+  recordSample(domain: string, type: string, operation: string, sample: {
+    inputSize: number;
+    jsTime: number;
+    wasmTime: number;
+    timestamp: number;
+  }): void {
+    // Mock implementation
+  },
+
+  shouldUseWasm(domain: string, type: string, operation: string, inputSize: number): boolean {
+    // Mock implementation - use WebAssembly for inputs larger than minInputSize
+    return inputSize >= this.config.minInputSize;
+  },
+
+  getThreshold(domain: string, type: string, operation: string): number {
+    // Mock implementation
+    return this.config.minInputSize;
+  },
+
+  getSamples(domain: string, type: string, operation: string): Array<{
+    inputSize: number;
+    jsTime: number;
+    wasmTime: number;
+    timestamp: number;
+  }> {
+    // Mock implementation
+    return [];
+  }
+};
+
+// Mock implementation of performance counter
+export const performanceCounter = {
+  recordMeasurement(
+    domain: string,
+    type: string,
+    operation: string,
+    jsTime: number,
+    wasmTime: number,
+    inputSize: number,
+    usedWasm: boolean,
+    fallback: boolean
+  ): void {
+    // Mock implementation
+  },
+
+  getMetrics(domain: string, type: string, operation: string): {
+    totalExecutions: number;
+    wasmExecutions: number;
+    jsExecutions: number;
+    avgJsTime: number;
+    avgWasmTime: number;
+    avgSpeedup: number;
+    maxSpeedup: number;
+    totalTimeSaved: number;
+  } {
+    // Mock implementation
+    return {
+      totalExecutions: 0,
+      wasmExecutions: 0,
+      jsExecutions: 0,
+      avgJsTime: 0,
+      avgWasmTime: 0,
+      avgSpeedup: 1.0,
+      maxSpeedup: 1.0,
+      totalTimeSaved: 0
+    };
+  }
+};
+
 export interface PerformanceProfile {
   estimatedSpeedup: number;
   effectiveInputSize: number;
@@ -15,6 +99,22 @@ export interface AcceleratorOptions {
   requiredFeatures?: string[];
   elementType?: string;
   useSIMD?: boolean;
+  thresholds?: {
+    minArraySize?: number;
+    minStringLength?: number;
+    minMatrixSize?: number;
+    adaptive?: boolean;
+    adaptiveConfig?: Partial<ThresholdConfig>;
+  };
+}
+
+export interface ThresholdConfig {
+  minInputSize: number;
+  maxInputSize: number;
+  minSpeedupRatio: number;
+  maxSamples: number;
+  adaptiveThresholds: boolean;
+  learningRate: number;
 }
 
 export enum WebAssemblyFeature {

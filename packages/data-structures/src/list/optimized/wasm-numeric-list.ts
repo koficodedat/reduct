@@ -11,6 +11,7 @@ import { getPooledArray, releasePooledArray } from '../../memory/pool';
 import { NumericList } from './numeric-list';
 import { NumericAccelerator } from '../../utils/mock-wasm';
 import { isWebAssemblySupported } from '../../utils/mock-wasm';
+import { InputCharacteristicsAnalyzer, InputDataType, InputSizeCategory } from '../../utils/input-characteristics';
 
 // Create a singleton accelerator instance
 const accelerator = new NumericAccelerator();
@@ -202,11 +203,30 @@ export class WasmNumericList implements IList<number> {
    * @returns A new list with the mapped elements
    */
   map<U>(fn: (value: number, index: number) => U): IList<U> {
-    // Use WebAssembly acceleration for numeric results if available
-    if (this._acceleratorAvailable && typeof fn(this._data[0], 0) === 'number') {
+    // Analyze input characteristics
+    const characteristics = InputCharacteristicsAnalyzer.analyzeArray(this._data);
+
+    // Check if the result is numeric
+    const isNumericResult = this._data.length > 0 && typeof fn(this._data[0], 0) === 'number';
+
+    // Determine if we should use WebAssembly
+    const shouldUseWasm = this._acceleratorAvailable &&
+      isNumericResult &&
+      characteristics.size >= 1000 &&
+      characteristics.dataType === InputDataType.NUMBER &&
+      characteristics.isHomogeneous &&
+      !characteristics.hasSpecialValues;
+
+    if (shouldUseWasm) {
       try {
         // Use WebAssembly for numeric map
+        const startTime = performance.now();
         const result = accelerator.map(this._data, fn as (value: number, index: number) => number);
+        const endTime = performance.now();
+
+        // Log performance metrics
+        console.debug(`WebAssembly map operation completed in ${(endTime - startTime).toFixed(3)}ms for ${this._data.length} elements`);
+
         return new WasmNumericList(result) as unknown as IList<U>;
       } catch (error) {
         // Fall back to JavaScript implementation
@@ -226,11 +246,26 @@ export class WasmNumericList implements IList<number> {
    * @returns A new list with the filtered elements
    */
   filter(fn: (value: number, index: number) => boolean): IList<number> {
-    // Use WebAssembly acceleration if available
-    if (this._acceleratorAvailable) {
+    // Analyze input characteristics
+    const characteristics = InputCharacteristicsAnalyzer.analyzeArray(this._data);
+
+    // Determine if we should use WebAssembly
+    const shouldUseWasm = this._acceleratorAvailable &&
+      characteristics.size >= 1000 &&
+      characteristics.dataType === InputDataType.NUMBER &&
+      characteristics.isHomogeneous &&
+      !characteristics.hasSpecialValues;
+
+    if (shouldUseWasm) {
       try {
         // Use WebAssembly for filter
+        const startTime = performance.now();
         const result = accelerator.filter(this._data, fn);
+        const endTime = performance.now();
+
+        // Log performance metrics
+        console.debug(`WebAssembly filter operation completed in ${(endTime - startTime).toFixed(3)}ms for ${this._data.length} elements`);
+
         return new WasmNumericList(result);
       } catch (error) {
         // Fall back to JavaScript implementation
@@ -239,7 +274,7 @@ export class WasmNumericList implements IList<number> {
       }
     }
 
-    // If WebAssembly is not available, use the fallback
+    // If WebAssembly is not available or not suitable, use the fallback
     return this._fallbackList.filter(fn);
   }
 
@@ -251,15 +286,35 @@ export class WasmNumericList implements IList<number> {
    * @returns The reduced value
    */
   reduce<U>(fn: (accumulator: U, value: number, index: number) => U, initial: U): U {
-    // Use WebAssembly acceleration if available and the result is numeric
-    if (this._acceleratorAvailable && typeof initial === 'number' && this._size > 0) {
+    // Analyze input characteristics
+    const characteristics = InputCharacteristicsAnalyzer.analyzeArray(this._data);
+
+    // Check if the result is numeric
+    const isNumericResult = typeof initial === 'number';
+
+    // Determine if we should use WebAssembly
+    const shouldUseWasm = this._acceleratorAvailable &&
+      isNumericResult &&
+      characteristics.size >= 1000 &&
+      characteristics.dataType === InputDataType.NUMBER &&
+      characteristics.isHomogeneous &&
+      !characteristics.hasSpecialValues;
+
+    if (shouldUseWasm) {
       try {
         // Use WebAssembly for reduce
-        return accelerator.reduce(
+        const startTime = performance.now();
+        const result = accelerator.reduce(
           this._data,
           fn as unknown as (accumulator: number, value: number, index: number) => number,
           initial as unknown as number
-        ) as unknown as U;
+        );
+        const endTime = performance.now();
+
+        // Log performance metrics
+        console.debug(`WebAssembly reduce operation completed in ${(endTime - startTime).toFixed(3)}ms for ${this._data.length} elements`);
+
+        return result as unknown as U;
       } catch (error) {
         // Fall back to JavaScript implementation
         console.warn('WebAssembly acceleration failed, falling back to native implementation:', error);
@@ -267,7 +322,7 @@ export class WasmNumericList implements IList<number> {
       }
     }
 
-    // If WebAssembly is not available or the result is not numeric, use the fallback
+    // If WebAssembly is not available or not suitable, use the fallback
     return this._fallbackList.reduce(fn, initial);
   }
 

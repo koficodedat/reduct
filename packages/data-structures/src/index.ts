@@ -28,6 +28,14 @@ export { NumericOperations, StringOperations } from './list/enhanced';
 // Export persistent vector implementations
 export { HAMTPersistentVector } from './list/hamt-persistent-vector';
 export { WasmHAMTPersistentVector } from './list/wasm-hamt-persistent-vector';
+export { EnhancedHAMTPersistentVector } from './list/enhanced-hamt-persistent-vector';
+export { WasmEnhancedHAMTPersistentVector } from './list/wasm-enhanced-hamt-persistent-vector';
+
+// Export Matrix implementation
+export * from './matrix';
+
+// Export Signal Processing implementation
+export * from './signal';
 
 // Export WebAssembly utilities
 export { isWebAssemblySupported } from './utils/mock-wasm';

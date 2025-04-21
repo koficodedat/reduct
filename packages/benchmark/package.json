@@ -14,7 +14,13 @@
     "dist"
   ],
   "bin": {
-    "reduct-benchmark": "./dist/cli/bin.js"
+    "reduct-benchmark": "./dist/cli/bin.js",
+    "reduct-tiered-benchmark": "./dist/cli/tiered-optimization.js",
+    "reduct-regression-detection": "./dist/cli/regression-detection.js",
+    "reduct-dashboard": "./dist/cli/dashboard.js",
+    "reduct-notification": "./dist/cli/notification.js",
+    "reduct-notification-dashboard": "./dist/cli/notification-dashboard.js",
+    "reduct-bisection": "./dist/cli/bisection.js"
   },
   "exports": {
     ".": {
@@ -52,22 +58,33 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/runners/index.ts src/visualization/index.ts src/cli/index.ts src/cli/bin.ts src/bin/run-comprehensive-benchmark.ts src/custom/size-variation-benchmark.ts src/custom/data-type-benchmark.ts src/custom/operation-pattern-benchmark.ts src/custom/immutability-benchmark.ts --format cjs,esm --dts",
+    "build": "tsup src/index.ts src/runners/index.ts src/visualization/index.ts src/cli/index.ts src/cli/bin.ts src/cli/tiered-optimization.ts src/cli/regression-detection.ts src/cli/dashboard.ts src/cli/notification.ts src/cli/notification-dashboard.ts src/cli/bisection.ts src/bin/run-comprehensive-benchmark.ts src/custom/size-variation-benchmark.ts src/custom/data-type-benchmark.ts src/custom/operation-pattern-benchmark.ts src/custom/immutability-benchmark.ts src/suites/tiered-optimization/index.ts src/utils/regression-detection.ts src/utils/dashboard.ts src/utils/notification.ts src/utils/notification-templates.ts src/utils/notification-filters.ts src/utils/notification-history.ts src/utils/notification-dashboard.ts src/utils/bisection.ts src/utils/index.ts --format cjs,esm --dts",
     "test": "vitest run tests/",
     "test:watch": "vitest tests/",
     "lint": "eslint src --ext .ts",
     "clean": "rimraf dist",
     "benchmark": "node dist/cli/bin.js",
-    "benchmark:comprehensive": "node dist/bin/run-comprehensive-benchmark.js"
+    "benchmark:comprehensive": "node dist/bin/run-comprehensive-benchmark.js",
+    "benchmark:tiered": "node dist/cli/tiered-optimization.js",
+    "benchmark:regression": "node dist/cli/regression-detection.js",
+    "benchmark:dashboard": "node dist/cli/dashboard.js",
+    "benchmark:notification": "node dist/cli/notification.js",
+    "benchmark:notification-dashboard": "node dist/cli/notification-dashboard.js",
+    "benchmark:bisection": "node dist/cli/bisection.js"
   },
   "dependencies": {
     "@reduct/algorithms": "^0.1.0",
     "@reduct/core": "^0.1.0",
     "@reduct/data-structures": "^0.1.0",
-    "commander": "^13.1.0"
+    "@reduct/wasm": "^0.1.0",
+    "axios": "^1.6.7",
+    "commander": "^13.1.0",
+    "glob": "^10.3.10",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
+    "@types/yargs": "^17.0.33",
     "eslint": "^8.0.0",
     "rimraf": "^5.0.0",
     "tsup": "^8.0.0",
