@@ -3,7 +3,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { WasmNumericList } from '../../../../src/list/optimized/wasm-numeric-list';
-import { InputCharacteristicsAnalyzer } from '../../../../src/utils/input-characteristics';
+import { InputCharacteristicsAnalyzer, InputSizeCategory, InputDataType, InputDensityCategory, InputValueRangeCategory } from '../../../../src/utils/input-characteristics';
 import * as wasmModule from '@reduct/wasm';
 
 // We'll create our mocks inside the vi.mock factory
@@ -46,6 +46,16 @@ vi.mock('../../../../src/utils/input-characteristics', () => {
       OBJECT: 'object',
       ARRAY: 'array',
       MIXED: 'mixed'
+    },
+    InputDensityCategory: {
+      SPARSE: 'sparse',
+      MEDIUM: 'medium',
+      DENSE: 'dense'
+    },
+    InputValueRangeCategory: {
+      NARROW: 'narrow',
+      MEDIUM: 'medium',
+      WIDE: 'wide'
     }
   };
 });
@@ -145,6 +155,23 @@ describe('WasmNumericList', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Reset the mock implementation for InputCharacteristicsAnalyzer
+    vi.mocked(InputCharacteristicsAnalyzer.analyzeArray).mockImplementation((_array: unknown[]) => {
+      return {
+        size: 10000, // Large enough to trigger WebAssembly
+        sizeCategory: InputSizeCategory.LARGE,
+        dataType: InputDataType.NUMBER,
+        isHomogeneous: true,
+        densityCategory: InputDensityCategory.DENSE,
+        valueRangeCategory: InputValueRangeCategory.MEDIUM,
+        isIntegerOnly: true,
+        isSmallIntegerOnly: true,
+        isSorted: false,
+        isReverseSorted: false,
+        hasSpecialValues: false
+      };
+    });
   });
 
   describe('Basic operations', () => {

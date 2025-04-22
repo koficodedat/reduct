@@ -1,6 +1,6 @@
 /**
  * Operation fusion for common patterns
- * 
+ *
  * This module provides optimized implementations for common operation patterns
  * by fusing multiple operations into a single pass.
  */
@@ -11,7 +11,7 @@ import { getPooledArray, releasePooledArray } from '../memory/pool';
 
 /**
  * Fused map and filter operations
- * 
+ *
  * @param list - The source list
  * @param mapFn - The mapping function
  * @param filterFn - The filter predicate
@@ -44,7 +44,7 @@ export function mapFilter<T, R>(
 
 /**
  * Fused filter and map operations
- * 
+ *
  * @param list - The source list
  * @param filterFn - The filter predicate
  * @param mapFn - The mapping function
@@ -74,7 +74,7 @@ export function filterMap<T, R>(
 
 /**
  * Fused map, filter, and reduce operations
- * 
+ *
  * @param list - The source list
  * @param mapFn - The mapping function
  * @param filterFn - The filter predicate
@@ -112,7 +112,7 @@ export function mapFilterReduce<T, R, U>(
 
 /**
  * Fused filter and reduce operations
- * 
+ *
  * @param list - The source list
  * @param filterFn - The filter predicate
  * @param reduceFn - The reducer function
@@ -145,7 +145,7 @@ export function filterReduce<T, U>(
 
 /**
  * Fused map and reduce operations
- * 
+ *
  * @param list - The source list
  * @param mapFn - The mapping function
  * @param reduceFn - The reducer function
@@ -178,7 +178,7 @@ export function mapReduce<T, R, U>(
 
 /**
  * Fused map and slice operations
- * 
+ *
  * @param list - The source list
  * @param mapFn - The mapping function
  * @param start - The start index
@@ -205,24 +205,22 @@ export function mapSlice<T, R>(
   }
 
   const resultSize = end - start;
-  const result = getPooledArray<R>(resultSize);
+  const result: R[] = [];
 
   for (let i = 0; i < resultSize; i++) {
     const sourceIndex = start + i;
     const value = list.get(sourceIndex);
     if (value !== undefined) {
-      result[i] = mapFn(value, sourceIndex);
+      result.push(mapFn(value, sourceIndex));
     }
   }
 
-  const resultList = List.from(result);
-  releasePooledArray(result);
-  return resultList;
+  return List.from(result);
 }
 
 /**
  * Fused slice and map operations
- * 
+ *
  * @param list - The source list
  * @param start - The start index
  * @param end - The end index
@@ -249,24 +247,22 @@ export function sliceMap<T, R>(
   }
 
   const resultSize = end - start;
-  const result = getPooledArray<R>(resultSize);
+  const result: R[] = [];
 
   for (let i = 0; i < resultSize; i++) {
     const sourceIndex = start + i;
     const value = list.get(sourceIndex);
     if (value !== undefined) {
-      result[i] = mapFn(value, i);
+      result.push(mapFn(value, i));
     }
   }
 
-  const resultList = List.from(result);
-  releasePooledArray(result);
-  return resultList;
+  return List.from(result);
 }
 
 /**
  * Fused filter and slice operations
- * 
+ *
  * @param list - The source list
  * @param filterFn - The filter predicate
  * @param start - The start index
@@ -306,7 +302,7 @@ export function filterSlice<T>(
 
 /**
  * Fused slice and filter operations
- * 
+ *
  * @param list - The source list
  * @param start - The start index
  * @param end - The end index
@@ -346,7 +342,7 @@ export function sliceFilter<T>(
 
 /**
  * Fused map and concat operations
- * 
+ *
  * @param list1 - The first list
  * @param list2 - The second list
  * @param mapFn - The mapping function
@@ -363,31 +359,28 @@ export function concatMap<T, R>(
 
   const size1 = list1.size;
   const size2 = list2.size;
-  const totalSize = size1 + size2;
-  const result = getPooledArray<R>(totalSize);
+  const result: R[] = [];
 
   for (let i = 0; i < size1; i++) {
     const value = list1.get(i);
     if (value !== undefined) {
-      result[i] = mapFn(value, i);
+      result.push(mapFn(value, i));
     }
   }
 
   for (let i = 0; i < size2; i++) {
     const value = list2.get(i);
     if (value !== undefined) {
-      result[size1 + i] = mapFn(value, size1 + i);
+      result.push(mapFn(value, size1 + i));
     }
   }
 
-  const resultList = List.from(result);
-  releasePooledArray(result);
-  return resultList;
+  return List.from(result);
 }
 
 /**
  * Fused map and concat operations
- * 
+ *
  * @param list1 - The first list
  * @param mapFn - The mapping function
  * @param list2 - The second list
@@ -428,7 +421,7 @@ export function mapConcat<T, R>(
 
 /**
  * Fused filter and concat operations
- * 
+ *
  * @param list1 - The first list
  * @param list2 - The second list
  * @param filterFn - The filter predicate
@@ -467,7 +460,7 @@ export function concatFilter<T>(
 
 /**
  * Fused filter and concat operations
- * 
+ *
  * @param list1 - The first list
  * @param filterFn - The filter predicate
  * @param list2 - The second list
@@ -506,7 +499,7 @@ export function filterConcat<T>(
 
 /**
  * Fused map, filter, and concat operations
- * 
+ *
  * @param list1 - The first list
  * @param list2 - The second list
  * @param mapFn - The mapping function
@@ -553,7 +546,7 @@ export function concatMapFilter<T, R>(
 
 /**
  * Fused batch update operation
- * 
+ *
  * @param list - The source list
  * @param updates - The updates to apply
  * @returns A new list with the updates applied
@@ -567,11 +560,11 @@ export function batchUpdate<T>(
   }
 
   const size = list.size;
-  const result = getPooledArray<T>(size);
+  const result: T[] = [];
 
   // Copy the original list
   for (let i = 0; i < size; i++) {
-    result[i] = list.get(i)!;
+    result.push(list.get(i)!);
   }
 
   // Apply updates
@@ -581,14 +574,12 @@ export function batchUpdate<T>(
     }
   }
 
-  const resultList = List.from(result);
-  releasePooledArray(result);
-  return resultList;
+  return List.from(result);
 }
 
 /**
  * Fused batch insert operation
- * 
+ *
  * @param list - The source list
  * @param inserts - The inserts to apply
  * @returns A new list with the inserts applied
@@ -601,39 +592,35 @@ export function batchInsert<T>(
     return list;
   }
 
-  // Sort inserts by index (descending) to avoid shifting issues
-  const sortedInserts = [...inserts].sort((a, b) => b[0] - a[0]);
+  // Sort inserts by index (ascending) to handle insertion properly
+  const sortedInserts = [...inserts].sort((a, b) => a[0] - b[0]);
 
   const size = list.size;
-  const newSize = size + inserts.length;
-  const result = getPooledArray<T>(newSize);
+  const result: T[] = [];
 
-  // Copy the original list
-  for (let i = 0; i < size; i++) {
-    result[i] = list.get(i)!;
-  }
+  // Copy the original list with inserts
+  let originalIndex = 0;
+  let insertIndex = 0;
 
-  // Apply inserts
-  for (const [index, value] of sortedInserts) {
-    const normalizedIndex = Math.max(0, Math.min(size, index));
-    
-    // Shift elements to make room for the insert
-    for (let i = newSize - 1; i > normalizedIndex; i--) {
-      result[i] = result[i - 1];
+  while (originalIndex < size || insertIndex < sortedInserts.length) {
+    // Check if we should insert at this position
+    if (insertIndex < sortedInserts.length &&
+        (originalIndex === sortedInserts[insertIndex][0] || originalIndex >= size)) {
+      result.push(sortedInserts[insertIndex][1]);
+      insertIndex++;
+    } else {
+      // Add the original element
+      result.push(list.get(originalIndex)!);
+      originalIndex++;
     }
-    
-    // Insert the new value
-    result[normalizedIndex] = value;
   }
 
-  const resultList = List.from(result);
-  releasePooledArray(result);
-  return resultList;
+  return List.from(result);
 }
 
 /**
  * Fused batch remove operation
- * 
+ *
  * @param list - The source list
  * @param indices - The indices to remove
  * @returns A new list with the elements removed
@@ -651,22 +638,19 @@ export function batchRemove<T>(
 
   const size = list.size;
   const newSize = size - sortedIndices.length;
-  
+
   if (newSize <= 0) {
     return List.empty<T>();
   }
 
-  const result = getPooledArray<T>(newSize);
-  let resultIndex = 0;
+  const result: T[] = [];
 
   // Copy elements that are not removed
   for (let i = 0; i < size; i++) {
     if (!sortedIndices.includes(i)) {
-      result[resultIndex++] = list.get(i)!;
+      result.push(list.get(i)!);
     }
   }
 
-  const resultList = List.from(result);
-  releasePooledArray(result);
-  return resultList;
+  return List.from(result);
 }

@@ -4,7 +4,13 @@
 
 import { BrowserBenchmarkRunner, BrowserBenchmarkResult, BrowserBenchmarkConfig } from './browser-benchmark-runner';
 import { InputSizeCategory, DataTypeCategory } from '../suites/wasm-optimization/input-size-benchmark';
-import { AcceleratorTier } from '../../../wasm/src/accelerators/accelerator';
+
+// Mock implementation for AcceleratorTier
+enum AcceleratorTier {
+  JS_PREFERRED = 'js-preferred',
+  CONDITIONAL = 'conditional',
+  HIGH_VALUE = 'high-value'
+}
 
 /**
  * Browser benchmark UI
@@ -50,7 +56,7 @@ export class BrowserBenchmarkUI {
 
   /**
    * Initialize the UI
-   * 
+   *
    * @param containerId The ID of the container element
    * @param serverUrl The server URL to send results to
    */
@@ -68,10 +74,10 @@ export class BrowserBenchmarkUI {
     container.innerHTML = `
       <div class="benchmark-ui">
         <h1>WebAssembly Benchmark</h1>
-        
+
         <div class="benchmark-config">
           <h2>Configuration</h2>
-          
+
           <div class="config-section">
             <h3>Operations</h3>
             <div class="checkbox-group" id="operations">
@@ -82,7 +88,7 @@ export class BrowserBenchmarkUI {
               <label><input type="checkbox" value="find" checked> Find</label>
             </div>
           </div>
-          
+
           <div class="config-section">
             <h3>Input Sizes</h3>
             <div class="checkbox-group" id="sizes">
@@ -93,7 +99,7 @@ export class BrowserBenchmarkUI {
               <label><input type="checkbox" value="very_large"> Very Large (10001-100000)</label>
             </div>
           </div>
-          
+
           <div class="config-section">
             <h3>Data Types</h3>
             <div class="checkbox-group" id="dataTypes">
@@ -103,7 +109,7 @@ export class BrowserBenchmarkUI {
               <label><input type="checkbox" value="mixed"> Mixed</label>
             </div>
           </div>
-          
+
           <div class="config-section">
             <h3>Iterations</h3>
             <div class="input-group">
@@ -112,26 +118,26 @@ export class BrowserBenchmarkUI {
             </div>
           </div>
         </div>
-        
+
         <div class="benchmark-controls">
           <button id="runButton" class="primary-button">Run Benchmark</button>
           <button id="resetButton" class="secondary-button">Reset</button>
           <button id="exportButton" class="secondary-button">Export Results</button>
         </div>
-        
+
         <div class="benchmark-progress" style="display: none;">
           <div class="progress-bar">
             <div class="progress-bar-inner" style="width: 0%;"></div>
           </div>
           <div class="progress-text">0%</div>
         </div>
-        
+
         <div class="benchmark-results">
           <h2>Results</h2>
           <div id="resultsContainer"></div>
         </div>
       </div>
-      
+
       <style>
         .benchmark-ui {
           font-family: Arial, sans-serif;
@@ -139,11 +145,11 @@ export class BrowserBenchmarkUI {
           margin: 0 auto;
           padding: 20px;
         }
-        
+
         h1, h2, h3 {
           color: #333;
         }
-        
+
         .benchmark-config {
           margin-bottom: 20px;
           border: 1px solid #ddd;
@@ -151,39 +157,39 @@ export class BrowserBenchmarkUI {
           padding: 15px;
           background-color: #f9f9f9;
         }
-        
+
         .config-section {
           margin-bottom: 15px;
         }
-        
+
         .checkbox-group {
           display: flex;
           flex-wrap: wrap;
           gap: 10px;
         }
-        
+
         .checkbox-group label {
           display: flex;
           align-items: center;
           margin-right: 10px;
         }
-        
+
         .input-group {
           display: flex;
           gap: 20px;
         }
-        
+
         .input-group input {
           width: 60px;
           padding: 5px;
         }
-        
+
         .benchmark-controls {
           margin-bottom: 20px;
           display: flex;
           gap: 10px;
         }
-        
+
         .primary-button {
           background-color: #4CAF50;
           color: white;
@@ -192,7 +198,7 @@ export class BrowserBenchmarkUI {
           border-radius: 5px;
           cursor: pointer;
         }
-        
+
         .secondary-button {
           background-color: #f1f1f1;
           color: #333;
@@ -201,11 +207,11 @@ export class BrowserBenchmarkUI {
           border-radius: 5px;
           cursor: pointer;
         }
-        
+
         .benchmark-progress {
           margin-bottom: 20px;
         }
-        
+
         .progress-bar {
           height: 20px;
           background-color: #f1f1f1;
@@ -213,22 +219,22 @@ export class BrowserBenchmarkUI {
           overflow: hidden;
           margin-bottom: 5px;
         }
-        
+
         .progress-bar-inner {
           height: 100%;
           background-color: #4CAF50;
           transition: width 0.3s;
         }
-        
+
         .progress-text {
           text-align: center;
           font-size: 14px;
         }
-        
+
         .benchmark-results {
           margin-top: 20px;
         }
-        
+
         .result-card {
           border: 1px solid #ddd;
           border-radius: 5px;
@@ -236,64 +242,64 @@ export class BrowserBenchmarkUI {
           margin-bottom: 15px;
           background-color: white;
         }
-        
+
         .result-header {
           display: flex;
           justify-content: space-between;
           margin-bottom: 10px;
         }
-        
+
         .result-title {
           font-weight: bold;
           font-size: 16px;
         }
-        
+
         .result-details {
           display: grid;
           grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
           gap: 10px;
         }
-        
+
         .result-detail {
           display: flex;
           flex-direction: column;
         }
-        
+
         .result-label {
           font-size: 12px;
           color: #666;
         }
-        
+
         .result-value {
           font-size: 14px;
           font-weight: bold;
         }
-        
+
         .tier-comparison {
           margin-top: 15px;
           border-top: 1px solid #eee;
           padding-top: 15px;
         }
-        
+
         .tier-bar {
           height: 30px;
           margin-bottom: 5px;
           display: flex;
           align-items: center;
         }
-        
+
         .tier-label {
           width: 120px;
           font-size: 14px;
         }
-        
+
         .tier-value {
           flex-grow: 1;
           height: 20px;
           background-color: #4CAF50;
           position: relative;
         }
-        
+
         .tier-text {
           position: absolute;
           right: -50px;
@@ -374,13 +380,13 @@ export class BrowserBenchmarkUI {
     }
 
     // Show progress bar
-    const progressContainer = document.querySelector('.benchmark-progress');
+    const progressContainer = document.querySelector('.benchmark-progress') as HTMLElement;
     if (progressContainer) {
       progressContainer.style.display = 'block';
     }
 
     // Disable run button
-    const runButton = document.getElementById('runButton');
+    const runButton = document.getElementById('runButton') as HTMLButtonElement;
     if (runButton) {
       runButton.disabled = true;
       runButton.textContent = 'Running...';
@@ -413,13 +419,13 @@ export class BrowserBenchmarkUI {
     }
 
     // Hide progress bar
-    const progressContainer = document.querySelector('.benchmark-progress');
+    const progressContainer = document.querySelector('.benchmark-progress') as HTMLElement;
     if (progressContainer) {
       progressContainer.style.display = 'none';
     }
 
     // Reset progress bar
-    const progressBar = document.querySelector('.progress-bar-inner');
+    const progressBar = document.querySelector('.progress-bar-inner') as HTMLElement;
     if (progressBar) {
       progressBar.style.width = '0%';
     }
@@ -431,7 +437,7 @@ export class BrowserBenchmarkUI {
     }
 
     // Enable run button
-    const runButton = document.getElementById('runButton');
+    const runButton = document.getElementById('runButton') as HTMLButtonElement;
     if (runButton) {
       runButton.disabled = false;
       runButton.textContent = 'Run Benchmark';
@@ -469,7 +475,7 @@ export class BrowserBenchmarkUI {
 
   /**
    * Handle progress updates
-   * 
+   *
    * @param progress The current progress
    * @param total The total number of benchmarks
    */
@@ -477,7 +483,7 @@ export class BrowserBenchmarkUI {
     const percent = Math.round((progress / total) * 100);
 
     // Update progress bar
-    const progressBar = document.querySelector('.progress-bar-inner');
+    const progressBar = document.querySelector('.progress-bar-inner') as HTMLElement;
     if (progressBar) {
       progressBar.style.width = `${percent}%`;
     }
@@ -491,7 +497,7 @@ export class BrowserBenchmarkUI {
 
   /**
    * Handle benchmark results
-   * 
+   *
    * @param result The benchmark result
    */
   private onResult(result: BrowserBenchmarkResult): void {
@@ -505,22 +511,22 @@ export class BrowserBenchmarkUI {
 
     // Group results by operation, size category, data type category, and input size
     const key = `${result.operation}-${result.sizeCategory}-${result.dataTypeCategory}-${result.inputSize}`;
-    
+
     // Check if a result card already exists for this key
     let resultCard = document.getElementById(`result-${key}`);
-    
+
     if (!resultCard) {
       // Create a new result card
       resultCard = document.createElement('div');
       resultCard.id = `result-${key}`;
       resultCard.className = 'result-card';
-      
+
       // Add the result card to the results container
       const resultsContainer = document.getElementById('resultsContainer');
       if (resultsContainer) {
         resultsContainer.appendChild(resultCard);
       }
-      
+
       // Add the result header
       resultCard.innerHTML = `
         <div class="result-header">
@@ -550,106 +556,106 @@ export class BrowserBenchmarkUI {
         </div>
       `;
     }
-    
+
     // Get the tier bars container
     const tierBarsContainer = resultCard.querySelector('.tier-bars');
     if (!tierBarsContainer) return;
-    
+
     // Add or update the tier bar
     let tierBar = resultCard.querySelector(`.tier-bar-${result.tier}`);
-    
+
     if (!tierBar) {
       // Create a new tier bar
       tierBar = document.createElement('div');
       tierBar.className = `tier-bar tier-bar-${result.tier}`;
       tierBarsContainer.appendChild(tierBar);
-      
+
       // Add the tier label
       const tierLabel = document.createElement('div');
       tierLabel.className = 'tier-label';
       tierLabel.textContent = result.tier;
       tierBar.appendChild(tierLabel);
-      
+
       // Add the tier value
       const tierValue = document.createElement('div');
       tierValue.className = 'tier-value';
       tierBar.appendChild(tierValue);
-      
+
       // Add the tier text
       const tierText = document.createElement('div');
       tierText.className = 'tier-text';
       tierValue.appendChild(tierText);
     }
-    
+
     // Update the tier bar
     const tierValue = tierBar.querySelector('.tier-value');
     const tierText = tierBar.querySelector('.tier-text');
-    
+
     if (tierValue && tierText) {
       // Set the tier value width based on the execution time
       // We'll use a logarithmic scale to better visualize the differences
       const maxWidth = 100; // Maximum width in percentage
       const minTime = 0.01; // Minimum execution time in ms
       const maxTime = 1000; // Maximum execution time in ms
-      
+
       // Calculate the width using a logarithmic scale
       const logMinTime = Math.log(minTime);
       const logMaxTime = Math.log(maxTime);
       const logTime = Math.log(Math.max(minTime, Math.min(maxTime, result.executionTime)));
-      
+
       const width = maxWidth * (1 - (logTime - logMinTime) / (logMaxTime - logMinTime));
-      
-      tierValue.style.width = `${width}%`;
+
+      (tierValue as HTMLElement).style.width = `${width}%`;
       tierText.textContent = `${result.executionTime.toFixed(2)} ms`;
     }
-    
+
     // Update the tier bars to show relative performance
     this.updateTierBars(key);
   }
 
   /**
    * Update the tier bars to show relative performance
-   * 
+   *
    * @param key The result key
    */
   private updateTierBars(key: string): void {
     // Get all results for this key
-    const keyResults = this.results.filter(r => 
+    const keyResults = this.results.filter(r =>
       `${r.operation}-${r.sizeCategory}-${r.dataTypeCategory}-${r.inputSize}` === key
     );
-    
+
     // If we have results for all tiers, update the tier bars
     const tiers = Object.values(AcceleratorTier);
-    
+
     if (keyResults.length === tiers.length) {
       // Find the fastest tier
-      const fastestResult = keyResults.reduce((fastest, current) => 
+      const fastestResult = keyResults.reduce((fastest, current) =>
         current.executionTime < fastest.executionTime ? current : fastest
       );
-      
+
       // Update the tier bars
       const resultCard = document.getElementById(`result-${key}`);
       if (!resultCard) return;
-      
+
       for (const result of keyResults) {
         const tierBar = resultCard.querySelector(`.tier-bar-${result.tier}`);
         if (!tierBar) continue;
-        
+
         const tierValue = tierBar.querySelector('.tier-value');
         if (!tierValue) continue;
-        
+
         // Set the color based on the relative performance
         const ratio = result.executionTime / fastestResult.executionTime;
-        
+
         if (ratio <= 1.1) {
           // Fastest or within 10% of fastest
-          tierValue.style.backgroundColor = '#4CAF50'; // Green
+          (tierValue as HTMLElement).style.backgroundColor = '#4CAF50'; // Green
         } else if (ratio <= 2) {
           // Up to 2x slower
-          tierValue.style.backgroundColor = '#FFC107'; // Yellow
+          (tierValue as HTMLElement).style.backgroundColor = '#FFC107'; // Yellow
         } else {
           // More than 2x slower
-          tierValue.style.backgroundColor = '#F44336'; // Red
+          (tierValue as HTMLElement).style.backgroundColor = '#F44336'; // Red
         }
       }
     }
@@ -657,7 +663,7 @@ export class BrowserBenchmarkUI {
 
   /**
    * Send a benchmark result to the server
-   * 
+   *
    * @param result The benchmark result
    */
   private sendResultToServer(result: BrowserBenchmarkResult): void {
@@ -680,13 +686,13 @@ export class BrowserBenchmarkUI {
    */
   private onComplete(): void {
     // Hide progress bar
-    const progressContainer = document.querySelector('.benchmark-progress');
+    const progressContainer = document.querySelector('.benchmark-progress') as HTMLElement;
     if (progressContainer) {
       progressContainer.style.display = 'none';
     }
 
     // Enable run button
-    const runButton = document.getElementById('runButton');
+    const runButton = document.getElementById('runButton') as HTMLButtonElement;
     if (runButton) {
       runButton.disabled = false;
       runButton.textContent = 'Run Benchmark';

@@ -10,6 +10,7 @@ import { createOptimizedList, createNumericList, createPersistentVector } from '
 import { isNumericArray, isStringArray } from './type-detection';
 import { NumericList } from './optimized/numeric-list';
 import { StringList } from './optimized/string-list';
+import { LazyList, lazy } from './lazy-list';
 
 /**
  * Enhanced List class that automatically selects the most efficient implementation
@@ -349,11 +350,18 @@ export class List<T> implements IList<T> {
 
     const result: T[] = [];
 
-    for (let i = start; i < end; i++) {
+    // First filter the entire list
+    const filtered: T[] = [];
+    for (let i = 0; i < this.size; i++) {
       const value = this.get(i);
       if (value !== undefined && filterFn(value, i)) {
-        result.push(value);
+        filtered.push(value);
       }
+    }
+
+    // Then slice the filtered list
+    for (let i = start; i < Math.min(end, filtered.length); i++) {
+      result.push(filtered[i]);
     }
 
     return List.from(result);
@@ -372,7 +380,35 @@ export class List<T> implements IList<T> {
     end: number | undefined,
     filterFn: (value: T, index: number) => boolean
   ): IList<T> {
-    return this.filterSlice(filterFn, start, end);
+    // Normalize indices
+    start = start < 0 ? Math.max(0, this.size + start) : Math.min(this.size, start);
+    end = end === undefined ? this.size :
+          end < 0 ? Math.max(0, this.size + end) : Math.min(this.size, end);
+
+    if (start >= end) {
+      return List.empty<T>();
+    }
+
+    const result: T[] = [];
+
+    // First slice the list
+    const sliced: T[] = [];
+    for (let i = start; i < end; i++) {
+      const value = this.get(i);
+      if (value !== undefined) {
+        sliced.push(value);
+      }
+    }
+
+    // Then filter the sliced list
+    for (let i = 0; i < sliced.length; i++) {
+      const value = sliced[i];
+      if (filterFn(value, i + start)) {
+        result.push(value);
+      }
+    }
+
+    return List.from(result);
   }
 
   /**
@@ -637,6 +673,77 @@ export class List<T> implements IList<T> {
    */
   isStringList(): boolean {
     return this._impl instanceof StringList;
+  }
+
+  /**
+   * Create a lazy version of the list
+   *
+   * This method creates a lazy wrapper around the list that defers operations
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @returns A lazy version of the list
+   */
+  asLazy(): LazyList<T> {
+    return lazy(this);
+  }
+
+  /**
+   * Create a lazy map operation
+   *
+   * This method creates a lazy wrapper around the list that defers the map operation
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @typeParam R - The type of elements in the resulting list
+   * @param fn - The function to apply to each element
+   * @returns A lazy list with the map operation
+   */
+  lazyMap<R>(fn: (value: T, index: number) => R): LazyList<R> {
+    return this.asLazy().map(fn) as LazyList<R>;
+  }
+
+  /**
+   * Create a lazy filter operation
+   *
+   * This method creates a lazy wrapper around the list that defers the filter operation
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @param fn - The predicate function
+   * @returns A lazy list with the filter operation
+   */
+  lazyFilter(fn: (value: T, index: number) => boolean): LazyList<T> {
+    return this.asLazy().filter(fn) as LazyList<T>;
+  }
+
+  /**
+   * Create a lazy slice operation
+   *
+   * This method creates a lazy wrapper around the list that defers the slice operation
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @param start - The start index (inclusive)
+   * @param end - The end index (exclusive)
+   * @returns A lazy list with the slice operation
+   */
+  lazySlice(start: number, end?: number): LazyList<T> {
+    return this.asLazy().slice(start, end) as LazyList<T>;
+  }
+
+  /**
+   * Create a lazy concat operation
+   *
+   * This method creates a lazy wrapper around the list that defers the concat operation
+   * until elements are accessed, which can significantly improve performance
+   * for large collections and chains of operations.
+   *
+   * @param other - The list to concatenate
+   * @returns A lazy list with the concat operation
+   */
+  lazyConcat(other: IList<T>): LazyList<T> {
+    return this.asLazy().concat(other) as LazyList<T>;
   }
 
   /**

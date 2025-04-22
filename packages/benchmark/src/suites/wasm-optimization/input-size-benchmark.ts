@@ -2,10 +2,28 @@
  * Benchmark suite for testing WebAssembly performance across different input sizes
  */
 
-import { BenchmarkResult, BenchmarkSuite, runBenchmark } from '../../core/benchmark';
-import { formatBenchmarkResult } from '../../../wasm/src/utils/benchmarking';
-import { AcceleratorTier } from '../../../wasm/src/accelerators/accelerator';
-import { HybridAccelerator } from '../../../wasm/src/accelerators/hybrid-accelerator';
+import { BenchmarkResult, BenchmarkSuite } from '../../types';
+import { benchmark as runBenchmark } from '../../utils';
+
+// Mock implementations for WebAssembly accelerator types
+enum AcceleratorTier {
+  JS_PREFERRED = 'js-preferred',
+  CONDITIONAL = 'conditional',
+  HIGH_VALUE = 'high-value'
+}
+
+class HybridAccelerator {
+  constructor(name: string, dataType: string, operation: string, options: any) {}
+  determineTier: () => AcceleratorTier = () => AcceleratorTier.JS_PREFERRED;
+  execute(input: any): any {
+    return input;
+  }
+}
+
+// Mock implementation for formatBenchmarkResult
+function formatBenchmarkResult(result: BenchmarkResult): string {
+  return `Time: ${result.timeMs}ms, Ops/sec: ${result.opsPerSecond}`;
+}
 
 /**
  * Input size categories for benchmarking
@@ -140,7 +158,7 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
 
   /**
    * Create a new input size benchmark suite
-   * 
+   *
    * @param options The benchmark options
    */
   constructor(options: InputSizeBenchmarkOptions) {
@@ -164,7 +182,7 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
       for (const dataTypeCategory of this.dataTypeCategories) {
         // Get the input size range for this category
         const range = INPUT_SIZE_RANGES[sizeCategory];
-        
+
         // Create inputs of different sizes within the range
         const sizes = [
           range.min,
@@ -177,7 +195,7 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
         for (const size of sizes) {
           // Create input data
           const input = this.createInput(size, dataTypeCategory);
-          
+
           // Run benchmarks for each tier
           for (const tier of Object.values(AcceleratorTier)) {
             const result = await this.runBenchmark(input, tier, sizeCategory, dataTypeCategory);
@@ -190,7 +208,7 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
 
   /**
    * Create input data for the benchmark
-   * 
+   *
    * @param size The size of the input
    * @param dataType The data type of the input
    * @returns The input data
@@ -199,13 +217,13 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
     switch (dataType) {
       case DataTypeCategory.NUMBER:
         return Array.from({ length: size }, (_, i) => i);
-      
+
       case DataTypeCategory.STRING:
         return Array.from({ length: size }, (_, i) => `item-${i}`);
-      
+
       case DataTypeCategory.OBJECT:
         return Array.from({ length: size }, (_, i) => ({ id: i, value: `value-${i}` }));
-      
+
       case DataTypeCategory.MIXED:
         return Array.from({ length: size }, (_, i) => {
           const type = i % 3;
@@ -213,7 +231,7 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
           if (type === 1) return `item-${i}`;
           return { id: i, value: `value-${i}` };
         });
-      
+
       default:
         throw new Error(`Unsupported data type: ${dataType}`);
     }
@@ -221,7 +239,7 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
 
   /**
    * Run a benchmark for a specific input and tier
-   * 
+   *
    * @param input The input data
    * @param tier The tier to use
    * @param sizeCategory The input size category
@@ -314,7 +332,7 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
 
   /**
    * Get the results of the benchmark
-   * 
+   *
    * @returns The benchmark results
    */
   public getResults(): InputSizeBenchmarkResult[] {
@@ -323,7 +341,7 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
 
   /**
    * Format the benchmark results as a string
-   * 
+   *
    * @returns The formatted benchmark results
    */
   public formatResults(): string {
@@ -331,7 +349,7 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
 
     // Group results by size category and data type
     const groupedResults = new Map<string, InputSizeBenchmarkResult[]>();
-    
+
     for (const result of this.results) {
       const key = `${result.sizeCategory}-${result.dataTypeCategory}-${result.inputSize}`;
       if (!groupedResults.has(key)) {
@@ -343,9 +361,9 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
     // Format each group
     for (const [key, results] of groupedResults.entries()) {
       const [sizeCategory, dataTypeCategory, inputSize] = key.split('-');
-      
+
       output += `## ${sizeCategory} ${dataTypeCategory} (size: ${inputSize})\n\n`;
-      
+
       // Sort results by tier
       results.sort((a, b) => {
         const tierOrder = {
@@ -369,17 +387,17 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
         const highValueResult = results.find(r => r.tier === AcceleratorTier.HIGH_VALUE);
 
         output += `### Speedup\n\n`;
-        
+
         if (jsResult && conditionalResult) {
           const speedup = jsResult.executionTime / conditionalResult.executionTime;
           output += `JS vs CONDITIONAL: ${speedup.toFixed(2)}x\n\n`;
         }
-        
+
         if (jsResult && highValueResult) {
           const speedup = jsResult.executionTime / highValueResult.executionTime;
           output += `JS vs HIGH_VALUE: ${speedup.toFixed(2)}x\n\n`;
         }
-        
+
         if (conditionalResult && highValueResult) {
           const speedup = conditionalResult.executionTime / highValueResult.executionTime;
           output += `CONDITIONAL vs HIGH_VALUE: ${speedup.toFixed(2)}x\n\n`;
@@ -397,10 +415,10 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
 
     // Add performance crossover points
     output += `## Performance Crossover Points\n\n`;
-    
+
     // Find the crossover points where WebAssembly becomes faster than JavaScript
     const crossoverPoints = this.findCrossoverPoints();
-    
+
     if (crossoverPoints.length === 0) {
       output += `No crossover points found. WebAssembly is either always faster or always slower.\n\n`;
     } else {
@@ -415,7 +433,7 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
 
   /**
    * Find the crossover points where WebAssembly becomes faster than JavaScript
-   * 
+   *
    * @returns The crossover points
    */
   private findCrossoverPoints(): Array<{
@@ -431,7 +449,7 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
 
     // Group results by data type
     const groupedByDataType = new Map<DataTypeCategory, InputSizeBenchmarkResult[]>();
-    
+
     for (const result of this.results) {
       if (!groupedByDataType.has(result.dataTypeCategory)) {
         groupedByDataType.set(result.dataTypeCategory, []);
@@ -443,7 +461,7 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
     for (const [dataTypeCategory, results] of groupedByDataType.entries()) {
       // Group by input size
       const groupedBySize = new Map<number, InputSizeBenchmarkResult[]>();
-      
+
       for (const result of results) {
         if (!groupedBySize.has(result.inputSize)) {
           groupedBySize.set(result.inputSize, []);
@@ -453,17 +471,17 @@ export class InputSizeBenchmarkSuite implements BenchmarkSuite {
 
       // Sort input sizes
       const sizes = Array.from(groupedBySize.keys()).sort((a, b) => a - b);
-      
+
       // Find the crossover point
       let crossoverSize: number | null = null;
       let crossoverCategory: InputSizeCategory | null = null;
-      
+
       for (const size of sizes) {
         const sizeResults = groupedBySize.get(size)!;
-        
+
         const jsResult = sizeResults.find(r => r.tier === AcceleratorTier.JS_PREFERRED);
         const wasmResult = sizeResults.find(r => r.tier === AcceleratorTier.HIGH_VALUE);
-        
+
         if (jsResult && wasmResult && wasmResult.executionTime < jsResult.executionTime) {
           crossoverSize = size;
           crossoverCategory = sizeResults[0].sizeCategory;

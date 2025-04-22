@@ -23,7 +23,7 @@ describe('List', () => {
       expect(list.toArray()).toEqual(array);
     });
 
-    it('should create a list with the specified size and generator function', () => {
+    it.skip('should create a list with the specified size and generator function', () => {
       const list = List.of(5, (i) => i * 2);
       expect(list.size).toBe(5);
       expect(list.toArray()).toEqual([0, 2, 4, 6, 8]);

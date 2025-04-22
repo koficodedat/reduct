@@ -13,6 +13,7 @@ Comprehensive benchmarking infrastructure for the Reduct library.
 - **Rich Visualization**: Export results in multiple formats (CSV, Markdown, HTML with interactive charts)
 - **Customizable Templates**: Create and use custom templates for result visualization
 - **Scalability Analysis**: Measure how performance scales with input size
+- **WebAssembly Acceleration**: Benchmark WebAssembly-accelerated implementations
 - **Comprehensive API**: Use the benchmarking infrastructure programmatically
 
 ## Table of Contents
@@ -60,8 +61,8 @@ npx reduct-benchmark complex-compare sequence -o get,map,filter -s 10000
 # Measure scalability
 npx reduct-benchmark scalability list get -s 5 -m 100000
 
-# Run enhanced list benchmarks
-npx reduct-benchmark enhanced-list --type fusion --size 10000
+# Run WebAssembly benchmarks
+npx reduct-benchmark wasm-compare numeric-list -o map,filter,reduce -s 10000
 
 # Export results to different formats
 npx reduct-benchmark export html -i benchmark-results.json -o results.html
@@ -97,6 +98,7 @@ The benchmark package can also be used programmatically:
 import {
   compareImplementationsWithAdapters,
   measureListScalability,
+  compareWasmImplementations,
   exportToHTML,
   exportToCSV
 } from '@reduct/benchmark';
@@ -113,6 +115,12 @@ const scalabilityResults = measureListScalability('get', {
   maxSize: 100000,
   steps: 5
 });
+
+// Compare WebAssembly implementations
+const wasmResults = compareWasmImplementations(
+  ['numeric-list', 'wasm-numeric-list'],
+  { size: 10000, operations: ['map', 'filter', 'reduce'] }
+);
 
 // Export results to HTML
 const html = exportToHTML(scalabilityResults);
@@ -317,4 +325,4 @@ For detailed adapter documentation, see [ADAPTERS.md](./docs/ADAPTERS.md).
 - [Adapters Documentation](./docs/ADAPTERS.md)
 - [Analysis Tools](./docs/ANALYSIS.md)
 - [Examples](./docs/EXAMPLES.md)
-- [Enhanced List Benchmarks](./docs/ENHANCED-LIST.md)
+- [WebAssembly Benchmarks](./docs/WASM-BENCHMARKS.md)
