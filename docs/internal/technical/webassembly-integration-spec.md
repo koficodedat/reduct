@@ -23,22 +23,24 @@ This document outlines Reduct's approach to integrating WebAssembly (Wasm) for p
 
 ## Technical Approach
 
-### 1. Implementation Language Selection
+### 1. Implementation Approach
 
-We will use Rust as the primary language for WebAssembly implementations due to:
+We have implemented a tiered optimization framework that automatically selects the most efficient implementation (JavaScript or WebAssembly) based on input characteristics and runtime conditions. This approach provides the best performance across different browsers, devices, and input sizes.
 
-- Strong type system and memory safety
-- Excellent WebAssembly support
-- Zero-cost abstractions
-- Rich ecosystem for immutable data structures
-- No garbage collection overhead
+Key components of our implementation approach:
+
+- **Tiered Optimization**: Automatic selection between JavaScript and WebAssembly based on input characteristics
+- **Adaptive Thresholds**: Dynamic adjustment of thresholds based on runtime performance
+- **Hybrid Acceleration**: Combining JavaScript and WebAssembly for optimal performance
+- **Memory Pooling**: Efficient memory management to reduce allocation overhead
+- **Frequency Detection**: Optimization of frequently called operations
 
 ```rust
 // Example Rust implementation of a vector operation
 #[no_mangle]
 pub extern "C" fn vector_map(
-    ptr: *const u8, 
-    len: usize, 
+    ptr: *const u8,
+    len: usize,
     fn_ptr: extern "C" fn(i32) -> i32
 ) -> *mut u8 {
     // Implementation
@@ -56,23 +58,23 @@ For large data structures, we'll use a shared memory approach:
 class WasmVector<T> {
   private wasmMemory: WebAssembly.Memory;
   private instance: WebAssembly.Instance;
-  
+
   constructor(initialSize: number) {
     this.wasmMemory = new WebAssembly.Memory({ initial: 1 });
     // Initialize WebAssembly instance with memory
   }
-  
+
   map<U>(fn: (value: T) => U): WasmVector<U> {
     // Create a JavaScript function callable from Wasm
     const fnIndex = this.registerFunction(fn);
-    
+
     // Call Wasm implementation
     const resultPtr = this.instance.exports.vector_map(
-      this.dataPtr, 
-      this.length, 
+      this.dataPtr,
+      this.length,
       fnIndex
     );
-    
+
     // Create new vector from result
     return new WasmVector<U>(resultPtr, this.length);
   }
@@ -86,7 +88,7 @@ For smaller data structures, we'll use a copy-based approach:
 ```typescript
 class SmallWasmList<T> {
   private readonly items: T[];
-  
+
   map<U>(fn: (value: T) => U): SmallWasmList<U> {
     // For small lists, copy to Wasm, process, and copy back
     const wasmArray = this.copyToWasm(this.items);
@@ -99,166 +101,204 @@ class SmallWasmList<T> {
 
 ### 3. JavaScript/WebAssembly Interface
 
-We'll use a layered approach for the JavaScript/WebAssembly interface:
+We've implemented a layered approach for the JavaScript/WebAssembly interface:
 
-1. **Low-Level Interface**: Direct memory access and function calls
-2. **Mid-Level Interface**: Type-safe wrappers around low-level operations
-3. **High-Level Interface**: Idiomatic JavaScript API matching Reduct's functional style
+1. **Accelerator Interface**: Common interface for both JavaScript and WebAssembly implementations
+2. **Tiered Accelerators**: Automatic selection between JavaScript and WebAssembly based on input characteristics
+3. **Hybrid Accelerators**: Combining JavaScript and WebAssembly for complex operations
 
 ```typescript
-// Low-level interface
-interface WasmExports {
-  memory: WebAssembly.Memory;
-  vector_create: (capacity: number) => number;
-  vector_push: (ptr: number, value: number) => number;
-  vector_get: (ptr: number, index: number) => number;
-  // More operations...
+// Accelerator interface
+interface Accelerator<T, R> {
+  execute(input: T): R;
+  isAvailable(): boolean;
+  getPerformanceProfile(): PerformanceProfile;
 }
 
-// Mid-level interface
-class WasmVectorCore<T> {
-  constructor(
-    private readonly exports: WasmExports,
-    private readonly ptr: number,
-    private readonly length: number
-  ) {}
-  
-  get(index: number): T {
-    return this.exports.vector_get(this.ptr, index) as unknown as T;
+// Tiered accelerator
+class TieredMapAccelerator extends BaseAccelerator<number[], number[]> {
+  constructor(options?: AcceleratorOptions) {
+    super('data-structures', 'array', 'map', options);
   }
-  
-  // More operations...
+
+  determineTier(input: number[]): AcceleratorTier {
+    // Determine the appropriate tier based on input characteristics
+    if (input.length < this.thresholds.jsThreshold) {
+      return AcceleratorTier.JS_PREFERRED;
+    } else if (input.length < this.thresholds.wasmThreshold) {
+      return AcceleratorTier.CONDITIONAL;
+    } else {
+      return AcceleratorTier.HIGH_VALUE;
+    }
+  }
+
+  protected jsImplementation(input: number[], mapFn: (x: number) => number): number[] {
+    return input.map(mapFn);
+  }
+
+  protected wasmImplementation(input: number[], mapFn: (x: number) => number): number[] {
+    // WebAssembly implementation
+    // ...
+  }
 }
 
-// High-level interface
-class Vector<T> implements ImmutableVector<T> {
-  private readonly core: WasmVectorCore<T> | JSVectorCore<T>;
-  
+// Hybrid accelerator
+class HybridStringAccelerator extends HybridAccelerator<StringSearchInput, StringSearchResult> {
+  execute(input: StringSearchInput): StringSearchResult {
+    // Preprocess in JavaScript
+    const preprocessed = this.preprocess(input);
+
+    // Core processing (WebAssembly or JavaScript)
+    const processed = this.process(preprocessed);
+
+    // Postprocess in JavaScript
+    return this.postprocess(processed);
+  }
+}
+
   map<U>(fn: (value: T) => U): Vector<U> {
     // Use appropriate implementation
     return this.core.map(fn);
   }
-  
+
   // More operations...
 }
 ```
 
-### 4. Feature Detection and Fallbacks
+### 4. Tiered Optimization Framework
 
-We'll implement robust feature detection and fallbacks:
+We've implemented a tiered optimization framework that automatically selects the most efficient implementation:
 
 ```typescript
-async function createOptimalVector<T>(items: T[]): Promise<Vector<T>> {
-  if (await isWasmSupported()) {
-    try {
-      return new WasmVector<T>(items);
-    } catch (e) {
-      console.warn('WebAssembly vector creation failed, falling back to JS', e);
-      return new JSVector<T>(items);
-    }
-  } else {
-    return new JSVector<T>(items);
+// Tiered optimization with automatic tier selection
+class TieredSortAccelerator extends BaseAccelerator<number[], number[]> {
+  constructor(options?: AcceleratorOptions) {
+    super('data-structures', 'array', 'sort', options);
   }
-}
 
-async function isWasmSupported(): Promise<boolean> {
-  try {
-    // Check for basic WebAssembly support
-    if (typeof WebAssembly !== 'object') return false;
-    
-    // Check for necessary features
-    const requiredFeatures = [
-      WebAssembly.instantiate !== undefined,
-      WebAssembly.Memory !== undefined,
-      // More feature checks...
-    ];
-    
-    return requiredFeatures.every(Boolean);
-  } catch (e) {
-    return false;
+  execute(input: number[]): number[] {
+    // Determine the appropriate tier
+    const tier = this.determineTier(input);
+
+    // Execute with the selected tier
+    return this.executeWithTier(input, tier);
+  }
+
+  determineTier(input: number[]): AcceleratorTier {
+    // Size-based tiering strategy
+    if (input.length < this.thresholds.jsThreshold) {
+      return AcceleratorTier.JS_PREFERRED;
+    } else if (input.length < this.thresholds.wasmThreshold) {
+      return AcceleratorTier.CONDITIONAL;
+    } else {
+      return AcceleratorTier.HIGH_VALUE;
+    }
+  }
+
+  // Feature detection for WebAssembly support
+  isWebAssemblySupported(): boolean {
+    try {
+      return typeof WebAssembly === 'object' &&
+             WebAssembly.instantiate !== undefined &&
+             WebAssembly.Memory !== undefined;
+    } catch (e) {
+      return false;
+    }
   }
 }
 ```
 
 ## Implementation Strategy
 
-### 1. Core Data Structures
+### 1. Tiered Optimization Framework
 
-We'll implement the following data structures in WebAssembly:
+We've implemented a tiered optimization framework with the following components:
 
-1. **Vector/List**: Persistent vector with efficient random access and updates
-2. **Map/Dictionary**: Hash array mapped trie (HAMT) for key-value storage
-3. **Set**: Persistent set based on HAMT
-4. **Queue**: Persistent queue with efficient enqueue/dequeue operations
+1. **AcceleratorTier**: Three tiers of acceleration (JS_PREFERRED, CONDITIONAL, HIGH_VALUE)
+2. **TieringStrategy**: Different strategies for tier selection (SIZE_BASED, COMPLEXITY_BASED, ADAPTIVE, FREQUENCY_BASED)
+3. **BaseAccelerator**: Abstract base class for all accelerators with tier selection logic
+4. **TieredAccelerators**: Specialized accelerators for different operations (sort, map, filter, reduce)
 
-### 2. Performance-Critical Operations
+### 2. Hybrid Acceleration
 
-We'll prioritize these operations for WebAssembly implementation:
+We've implemented hybrid accelerators for complex operations:
 
-1. **Bulk Operations**: map, filter, reduce on large collections
-2. **Sorting**: Efficient sorting algorithms for large collections
-3. **Searching**: Binary search and other search algorithms
-4. **Structural Sharing**: Efficient path copying for immutable updates
-5. **Specialized Algorithms**: Graph algorithms, string processing, etc.
+1. **HybridAccelerator**: Combines JavaScript and WebAssembly for optimal performance
+2. **Preprocessing**: JavaScript preprocessing of input data
+3. **Core Processing**: WebAssembly processing of preprocessed data
+4. **Postprocessing**: JavaScript postprocessing of results
+5. **String Operations**: Hybrid accelerator for string search operations
 
-### 3. Memory Layout
+### 3. Memory Management
 
-We'll use efficient memory layouts for immutable data structures:
+We've implemented efficient memory management for WebAssembly operations:
 
-```
-Vector Memory Layout:
-+----------------+----------------+------------------+
-| Metadata (8B)  | Tail Ptr (4B)  | Root Node Ptr (4B) |
-+----------------+----------------+------------------+
-                                  |
-                                  v
-                        +------------------+
-                        | Node (128B)      |
-                        | [Ptr1, Ptr2,...] |
-                        +------------------+
-                                |
-                                v
-                        +------------------+
-                        | Leaf Node (128B) |
-                        | [Value1, Value2] |
-                        +------------------+
-```
-
-### 4. Compilation and Bundling
-
-We'll use the following build pipeline:
-
-1. **Rust Code**: Write core implementations in Rust
-2. **wasm-pack**: Compile Rust to WebAssembly with optimizations
-3. **wasm-bindgen**: Generate JavaScript bindings
-4. **Bundler Integration**: Integrate with webpack, Rollup, etc.
-5. **Dynamic Loading**: Implement dynamic loading for WebAssembly modules
+1. **WasmMemoryPool**: Pool of WebAssembly memory instances to reduce allocation overhead
+2. **TypedArrayViews**: Efficient access to WebAssembly memory through typed array views
+3. **Batch Processing**: Processing data in batches to reduce boundary crossing overhead
+4. **Memory Reuse**: Reusing memory for sequences of operations
 
 ```typescript
-// Dynamic loading example
-class WasmLoader {
-  private static instance: WasmLoader;
-  private moduleCache: Map<string, WebAssembly.Module> = new Map();
-  
-  static getInstance(): WasmLoader {
-    if (!WasmLoader.instance) {
-      WasmLoader.instance = new WasmLoader();
-    }
-    return WasmLoader.instance;
+// Memory pooling example
+class WasmMemoryPool {
+  private memoryInstances: WebAssembly.Memory[] = [];
+
+  getMemory(minBytes: number): WebAssembly.Memory {
+    // Find a suitable memory instance or create a new one
+    const memory = this.findSuitableMemory(minBytes) || this.createMemory(minBytes);
+    return memory;
   }
-  
-  async loadModule(name: string): Promise<WebAssembly.Module> {
-    if (this.moduleCache.has(name)) {
-      return this.moduleCache.get(name)!;
-    }
-    
-    const response = await fetch(`/wasm/${name}.wasm`);
-    const buffer = await response.arrayBuffer();
-    const module = await WebAssembly.compile(buffer);
-    
-    this.moduleCache.set(name, module);
-    return module;
+
+  releaseMemory(memory: WebAssembly.Memory): void {
+    // Return memory to the pool
+    this.memoryInstances.push(memory);
   }
+}
+```
+
+### 4. Benchmarking and Analysis
+
+We've implemented comprehensive benchmarking and analysis tools:
+
+1. **Benchmark Framework**: Tools for comparing JavaScript and WebAssembly implementations
+2. **Performance Crossover Analysis**: Identifying the input sizes where WebAssembly becomes more efficient
+3. **Browser-Based Benchmarking**: Testing performance across different browsers and devices
+4. **Performance Statistics**: Tracking execution time and tier usage for optimization
+
+```typescript
+// Benchmarking example
+function benchmark<T, R>(
+  jsImplementation: (input: T) => R,
+  wasmAccelerator: Accelerator<T, R>,
+  input: T,
+  options?: BenchmarkOptions
+): BenchmarkResult {
+  // Warm up
+  for (let i = 0; i < options?.warmupIterations || 5; i++) {
+    jsImplementation(input);
+    wasmAccelerator.execute(input);
+  }
+
+  // Benchmark JavaScript implementation
+  const jsStartTime = performance.now();
+  for (let i = 0; i < options?.iterations || 10; i++) {
+    jsImplementation(input);
+  }
+  const jsEndTime = performance.now();
+  const jsTime = (jsEndTime - jsStartTime) / (options?.iterations || 10);
+
+  // Benchmark WebAssembly implementation
+  const wasmStartTime = performance.now();
+  for (let i = 0; i < options?.iterations || 10; i++) {
+    wasmAccelerator.execute(input);
+  }
+  const wasmEndTime = performance.now();
+  const wasmTime = (wasmEndTime - wasmStartTime) / (options?.iterations || 10);
+
+  // Calculate speedup
+  const speedup = jsTime / wasmTime;
+
+  return { jsTime, wasmTime, speedup };
 }
 ```
 
@@ -315,41 +355,52 @@ We'll test across multiple environments:
 
 ## Implementation Phases
 
-### Phase 1: Proof of Concept
+### Phase 1: Proof of Concept (Completed)
 
-1. Implement core vector operations in WebAssembly
-2. Create basic JavaScript/WebAssembly interface
-3. Develop feature detection and fallbacks
-4. Benchmark against JavaScript implementations
+1. ✅ Implement core vector operations in WebAssembly
+2. ✅ Create basic JavaScript/WebAssembly interface
+3. ✅ Develop feature detection and fallbacks
+4. ✅ Benchmark against JavaScript implementations
 
-### Phase 2: Core Data Structures
+### Phase 2: Tiered Optimization Framework (Completed)
 
-1. Implement complete vector/list in WebAssembly
-2. Add map/dictionary implementation
-3. Develop set implementation
-4. Create queue implementation
-5. Comprehensive benchmarking
+1. ✅ Implement tiered optimization framework
+2. ✅ Create adaptive threshold management
+3. ✅ Develop memory pooling for efficient WebAssembly memory usage
+4. ✅ Implement hybrid accelerators for complex operations
+5. ✅ Create comprehensive benchmarking across browsers and devices
 
-### Phase 3: Advanced Features
+### Phase 3: String Operations and Hybrid Acceleration (Completed)
 
-1. Implement specialized algorithms
-2. Add bulk operations optimization
-3. Develop advanced memory management
-4. Create optimized string handling
-5. Implement custom numeric types
+1. ✅ Implement string search operations with hybrid approach
+2. ✅ Create frequency detection for optimizing repeated operations
+3. ✅ Develop enhanced input characteristics analysis
+4. ✅ Implement browser-based benchmarking
+5. ✅ Create comprehensive documentation
 
-### Phase 4: Production Readiness
+### Phase 4: Additional Data Structures (In Progress)
 
-1. Comprehensive cross-browser testing
-2. Performance optimization
-3. Bundle size optimization
-4. Documentation
-5. Example applications
+1. Implement WebAssembly acceleration for Map/Dictionary
+2. Develop WebAssembly acceleration for Set
+3. Create WebAssembly acceleration for Queue
+4. Implement WebAssembly acceleration for specialized algorithms
+5. Comprehensive cross-browser testing and optimization
+
+## Current Status
+
+The WebAssembly integration is now largely complete with the following components implemented:
+
+1. ✅ Tiered optimization framework with automatic tier selection
+2. ✅ Memory pooling for efficient WebAssembly memory management
+3. ✅ Hybrid accelerators for complex operations
+4. ✅ String operations accelerator with hybrid approach
+5. ✅ Comprehensive benchmarking across browsers and devices
+6. ✅ Detailed documentation for WebAssembly package
 
 ## Next Steps
 
-1. Set up Rust/WebAssembly development environment
-2. Create proof-of-concept implementation for vector operations
-3. Develop JavaScript wrapper and testing infrastructure
-4. Implement feature detection and fallbacks
-5. Create initial benchmarking suite
+1. Extend WebAssembly acceleration to additional data structures
+2. Implement WebAssembly acceleration for specialized algorithms
+3. Create optimized numeric operations for machine learning primitives
+4. Develop advanced memory management for large data structures
+5. Implement parallel processing for suitable operations
