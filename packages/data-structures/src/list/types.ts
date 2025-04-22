@@ -6,36 +6,7 @@
  * @packageDocumentation
  */
 
-/**
- * Representation types for the List implementation
- */
-export enum RepresentationType {
-  /**
-   * Simple array representation for very small collections
-   */
-  ARRAY = 'array',
-
-  /**
-   * SmallList representation for small collections
-   */
-  SMALL = 'small',
-
-  /**
-   * Chunked array representation for medium collections
-   */
-  CHUNKED = 'chunked',
-
-  /**
-   * Vector representation for large collections
-   */
-  VECTOR = 'vector',
-
-  /**
-   * HAMT Vector representation for very large collections
-   * Uses Hash Array Mapped Trie for efficient structural sharing
-   */
-  HAMT_VECTOR = 'hamt_vector'
-}
+import { RepresentationType } from '@reduct/shared-types/data-structures';
 
 /**
  * Interface for a transient (temporarily mutable) list

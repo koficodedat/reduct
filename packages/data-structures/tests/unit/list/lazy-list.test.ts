@@ -234,7 +234,7 @@ describe('LazyList', () => {
     });
   });
 
-  describe.skip('performance', () => {
+  describe('performance', () => {
     it('should be more efficient than eager operations for large collections', () => {
       // Create a large list
       const size = 10000;

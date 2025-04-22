@@ -2,10 +2,12 @@
  * WebAssembly accelerator interfaces and types
  */
 import { WasmAcceleratorNotAvailableError } from '../core/error-handling';
-import { isWebAssemblySupported, WebAssemblyFeature } from '../core/feature-detection';
+import { isWebAssemblySupported } from '../core/feature-detection';
+import { WebAssemblyFeature } from '@reduct/shared-types/wasm';
 import { adaptiveThresholdManager, ThresholdConfig } from '../utils/adaptive-threshold-manager';
 import { performanceCounter } from '../utils/performance-counter';
-import { InputCharacteristicsAnalyzer, InputSizeCategory, InputDataType } from '../utils/input-characteristics';
+import { InputCharacteristicsAnalyzer } from '../utils/input-characteristics';
+import { InputSizeCategory, InputDataType } from '@reduct/shared-types/utils';
 import { FrequencyDetector, FrequencyDetectorConfig } from './frequency-detector';
 
 import { AcceleratorTier, PerformanceProfile, AcceleratorOptions, Accelerator } from '@reduct/shared-types/wasm';

@@ -11,10 +11,11 @@
 export { List, NumericOperations, StringOperations } from './enhanced';
 
 // Export the List interface
-export { IList, IListFactory, TransientList, RepresentationType } from './types';
+export { IList, IListFactory, TransientList } from './types';
+export { RepresentationType } from '@reduct/shared-types/data-structures';
 
 // Export the specialized list implementations
-export { 
+export {
   createNumericList as numericList,
   createStringList as stringList,
   createObjectList as objectList,

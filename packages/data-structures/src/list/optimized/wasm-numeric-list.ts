@@ -11,7 +11,8 @@ import { getPooledArray, releasePooledArray } from '../../memory/pool';
 import { NumericList } from './numeric-list';
 import { NumericAccelerator } from '../../utils/mock-wasm';
 import { isWebAssemblySupported } from '../../utils/mock-wasm';
-import { InputCharacteristicsAnalyzer, InputDataType, InputSizeCategory } from '../../utils/input-characteristics';
+import { InputCharacteristicsAnalyzer } from '../../utils/input-characteristics';
+import { InputDataType, InputSizeCategory } from '@reduct/shared-types/utils';
 
 // Create a singleton accelerator instance
 const accelerator = new NumericAccelerator();

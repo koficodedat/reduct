@@ -5,94 +5,16 @@
  * when to use WebAssembly and which implementation strategy to use.
  */
 
-import { 
-  InputCharacteristicsAnalyzer, 
-  InputCharacteristics, 
-  InputSizeCategory, 
+import { InputCharacteristicsAnalyzer } from './input-characteristics';
+import {
+  InputCharacteristics,
+  InputSizeCategory,
   InputDataType,
   InputDensityCategory,
-  InputValueRangeCategory
-} from './input-characteristics';
-
-/**
- * Enhanced input characteristics
- */
-export interface EnhancedInputCharacteristics extends InputCharacteristics {
-  /**
-   * Whether the input is suitable for WebAssembly acceleration
-   */
-  isWasmSuitable: boolean;
-
-  /**
-   * Whether the input is suitable for SIMD acceleration
-   */
-  isSIMDSuitable: boolean;
-
-  /**
-   * Whether the input is suitable for parallel processing
-   */
-  isParallelSuitable: boolean;
-
-  /**
-   * Whether the input is suitable for hybrid processing
-   */
-  isHybridSuitable: boolean;
-
-  /**
-   * Recommended processing strategy
-   */
-  recommendedStrategy: ProcessingStrategy;
-
-  /**
-   * Estimated speedup factor for WebAssembly
-   */
-  estimatedWasmSpeedup: number;
-
-  /**
-   * Estimated memory overhead for WebAssembly
-   */
-  estimatedMemoryOverhead: number;
-
-  /**
-   * Complexity score (higher means more complex)
-   */
-  complexityScore: number;
-}
-
-/**
- * Processing strategy
- */
-export enum ProcessingStrategy {
-  /**
-   * Use JavaScript implementation
-   */
-  JAVASCRIPT = 'javascript',
-
-  /**
-   * Use WebAssembly implementation
-   */
-  WEBASSEMBLY = 'webassembly',
-
-  /**
-   * Use hybrid implementation (part JavaScript, part WebAssembly)
-   */
-  HYBRID = 'hybrid',
-
-  /**
-   * Use SIMD-accelerated implementation
-   */
-  SIMD = 'simd',
-
-  /**
-   * Use parallel implementation
-   */
-  PARALLEL = 'parallel',
-
-  /**
-   * Use specialized implementation for the specific input characteristics
-   */
-  SPECIALIZED = 'specialized'
-}
+  InputValueRangeCategory,
+  EnhancedInputCharacteristics,
+  ProcessingStrategy
+} from '@reduct/shared-types/utils';
 
 /**
  * Enhanced input characteristics analyzer
@@ -106,22 +28,22 @@ export class EnhancedInputCharacteristicsAnalyzer {
   public static analyzeArray<T>(array: T[]): EnhancedInputCharacteristics {
     // Get basic characteristics
     const basicCharacteristics = InputCharacteristicsAnalyzer.analyzeArray(array);
-    
+
     // Calculate complexity score
     const complexityScore = this._calculateComplexityScore(basicCharacteristics);
-    
+
     // Determine if the input is suitable for WebAssembly
     const isWasmSuitable = this._isWasmSuitable(basicCharacteristics);
-    
+
     // Determine if the input is suitable for SIMD
     const isSIMDSuitable = this._isSIMDSuitable(basicCharacteristics);
-    
+
     // Determine if the input is suitable for parallel processing
     const isParallelSuitable = this._isParallelSuitable(basicCharacteristics);
-    
+
     // Determine if the input is suitable for hybrid processing
     const isHybridSuitable = this._isHybridSuitable(basicCharacteristics);
-    
+
     // Determine the recommended strategy
     const recommendedStrategy = this._determineStrategy(
       basicCharacteristics,
@@ -130,13 +52,13 @@ export class EnhancedInputCharacteristicsAnalyzer {
       isParallelSuitable,
       isHybridSuitable
     );
-    
+
     // Estimate WebAssembly speedup
     const estimatedWasmSpeedup = this._estimateWasmSpeedup(basicCharacteristics);
-    
+
     // Estimate memory overhead
     const estimatedMemoryOverhead = this._estimateMemoryOverhead(basicCharacteristics);
-    
+
     return {
       ...basicCharacteristics,
       isWasmSuitable,
@@ -149,7 +71,7 @@ export class EnhancedInputCharacteristicsAnalyzer {
       complexityScore
     };
   }
-  
+
   /**
    * Calculate the complexity score of the input
    * @param characteristics The basic characteristics of the input
@@ -157,7 +79,7 @@ export class EnhancedInputCharacteristicsAnalyzer {
    */
   private static _calculateComplexityScore(characteristics: InputCharacteristics): number {
     let score = 0;
-    
+
     // Size contributes to complexity
     switch (characteristics.sizeCategory) {
       case InputSizeCategory.TINY:
@@ -179,7 +101,7 @@ export class EnhancedInputCharacteristicsAnalyzer {
         score += 5;
         break;
     }
-    
+
     // Data type contributes to complexity
     switch (characteristics.dataType) {
       case InputDataType.NUMBER:
@@ -205,24 +127,24 @@ export class EnhancedInputCharacteristicsAnalyzer {
       default:
         score += 2;
     }
-    
+
     // Homogeneity reduces complexity
     if (characteristics.isHomogeneous) {
       score -= 1;
     } else {
       score += 1;
     }
-    
+
     // Special values increase complexity
     if (characteristics.hasSpecialValues) {
       score += 2;
     }
-    
+
     // Sorting status affects complexity
     if (characteristics.isSorted || characteristics.isReverseSorted) {
       score -= 1; // Sorted arrays are simpler for some operations
     }
-    
+
     // Value range affects complexity
     switch (characteristics.valueRangeCategory) {
       case InputValueRangeCategory.NARROW:
@@ -235,10 +157,10 @@ export class EnhancedInputCharacteristicsAnalyzer {
         score += 2;
         break;
     }
-    
+
     return Math.max(0, score); // Ensure score is non-negative
   }
-  
+
   /**
    * Determine if the input is suitable for WebAssembly
    * @param characteristics The basic characteristics of the input
@@ -249,26 +171,26 @@ export class EnhancedInputCharacteristicsAnalyzer {
     // 1. Medium to huge arrays
     // 2. Homogeneous numeric arrays
     // 3. Arrays without special values
-    
+
     const sizeIsSuitable = [
       InputSizeCategory.MEDIUM,
       InputSizeCategory.LARGE,
       InputSizeCategory.VERY_LARGE,
       InputSizeCategory.HUGE
     ].includes(characteristics.sizeCategory);
-    
+
     const typeIsSuitable = [
       InputDataType.NUMBER,
       InputDataType.INTEGER,
       InputDataType.FLOAT
     ].includes(characteristics.dataType);
-    
-    return sizeIsSuitable && 
-           typeIsSuitable && 
-           characteristics.isHomogeneous && 
+
+    return sizeIsSuitable &&
+           typeIsSuitable &&
+           characteristics.isHomogeneous &&
            !characteristics.hasSpecialValues;
   }
-  
+
   /**
    * Determine if the input is suitable for SIMD
    * @param characteristics The basic characteristics of the input
@@ -279,25 +201,25 @@ export class EnhancedInputCharacteristicsAnalyzer {
     // 1. Large to huge arrays
     // 2. Homogeneous numeric arrays
     // 3. Arrays without special values
-    
+
     const sizeIsSuitable = [
       InputSizeCategory.LARGE,
       InputSizeCategory.VERY_LARGE,
       InputSizeCategory.HUGE
     ].includes(characteristics.sizeCategory);
-    
+
     const typeIsSuitable = [
       InputDataType.NUMBER,
       InputDataType.INTEGER,
       InputDataType.FLOAT
     ].includes(characteristics.dataType);
-    
-    return sizeIsSuitable && 
-           typeIsSuitable && 
-           characteristics.isHomogeneous && 
+
+    return sizeIsSuitable &&
+           typeIsSuitable &&
+           characteristics.isHomogeneous &&
            !characteristics.hasSpecialValues;
   }
-  
+
   /**
    * Determine if the input is suitable for parallel processing
    * @param characteristics The basic characteristics of the input
@@ -307,15 +229,15 @@ export class EnhancedInputCharacteristicsAnalyzer {
     // Parallel processing is suitable for:
     // 1. Very large to huge arrays
     // 2. Homogeneous arrays
-    
+
     const sizeIsSuitable = [
       InputSizeCategory.VERY_LARGE,
       InputSizeCategory.HUGE
     ].includes(characteristics.sizeCategory);
-    
+
     return sizeIsSuitable && characteristics.isHomogeneous;
   }
-  
+
   /**
    * Determine if the input is suitable for hybrid processing
    * @param characteristics The basic characteristics of the input
@@ -326,18 +248,18 @@ export class EnhancedInputCharacteristicsAnalyzer {
     // 1. Medium to large arrays
     // 2. Mixed data types or non-homogeneous arrays
     // 3. Complex operations that benefit from specialized handling
-    
+
     const sizeIsSuitable = [
       InputSizeCategory.MEDIUM,
       InputSizeCategory.LARGE
     ].includes(characteristics.sizeCategory);
-    
-    const typeIsSuitable = characteristics.dataType === InputDataType.MIXED || 
+
+    const typeIsSuitable = characteristics.dataType === InputDataType.MIXED ||
                           !characteristics.isHomogeneous;
-    
+
     return sizeIsSuitable || typeIsSuitable;
   }
-  
+
   /**
    * Determine the recommended processing strategy
    * @param characteristics The basic characteristics of the input
@@ -358,39 +280,39 @@ export class EnhancedInputCharacteristicsAnalyzer {
     if ([InputSizeCategory.TINY, InputSizeCategory.SMALL].includes(characteristics.sizeCategory)) {
       return ProcessingStrategy.JAVASCRIPT;
     }
-    
+
     // For huge arrays with numeric data, use parallel processing if suitable
-    if (isParallelSuitable && 
-        characteristics.sizeCategory === InputSizeCategory.HUGE && 
+    if (isParallelSuitable &&
+        characteristics.sizeCategory === InputSizeCategory.HUGE &&
         [InputDataType.NUMBER, InputDataType.INTEGER, InputDataType.FLOAT].includes(characteristics.dataType)) {
       return ProcessingStrategy.PARALLEL;
     }
-    
+
     // For large arrays with numeric data, use SIMD if suitable
-    if (isSIMDSuitable && 
-        [InputSizeCategory.LARGE, InputSizeCategory.VERY_LARGE].includes(characteristics.sizeCategory) && 
+    if (isSIMDSuitable &&
+        [InputSizeCategory.LARGE, InputSizeCategory.VERY_LARGE].includes(characteristics.sizeCategory) &&
         [InputDataType.NUMBER, InputDataType.INTEGER, InputDataType.FLOAT].includes(characteristics.dataType)) {
       return ProcessingStrategy.SIMD;
     }
-    
+
     // For medium to large arrays with mixed data types, use hybrid approach
-    if (isHybridSuitable && 
-        [InputSizeCategory.MEDIUM, InputSizeCategory.LARGE].includes(characteristics.sizeCategory) && 
+    if (isHybridSuitable &&
+        [InputSizeCategory.MEDIUM, InputSizeCategory.LARGE].includes(characteristics.sizeCategory) &&
         (characteristics.dataType === InputDataType.MIXED || !characteristics.isHomogeneous)) {
       return ProcessingStrategy.HYBRID;
     }
-    
+
     // For medium to huge arrays with numeric data, use WebAssembly if suitable
-    if (isWasmSuitable && 
-        [InputSizeCategory.MEDIUM, InputSizeCategory.LARGE, InputSizeCategory.VERY_LARGE, InputSizeCategory.HUGE].includes(characteristics.sizeCategory) && 
+    if (isWasmSuitable &&
+        [InputSizeCategory.MEDIUM, InputSizeCategory.LARGE, InputSizeCategory.VERY_LARGE, InputSizeCategory.HUGE].includes(characteristics.sizeCategory) &&
         [InputDataType.NUMBER, InputDataType.INTEGER, InputDataType.FLOAT].includes(characteristics.dataType)) {
       return ProcessingStrategy.WEBASSEMBLY;
     }
-    
+
     // Default to JavaScript
     return ProcessingStrategy.JAVASCRIPT;
   }
-  
+
   /**
    * Estimate the WebAssembly speedup factor
    * @param characteristics The basic characteristics of the input
@@ -399,7 +321,7 @@ export class EnhancedInputCharacteristicsAnalyzer {
   private static _estimateWasmSpeedup(characteristics: InputCharacteristics): number {
     // Base speedup factor
     let speedup = 1.0;
-    
+
     // Size affects speedup
     switch (characteristics.sizeCategory) {
       case InputSizeCategory.TINY:
@@ -421,7 +343,7 @@ export class EnhancedInputCharacteristicsAnalyzer {
         speedup *= 3.0; // WebAssembly is significantly faster for huge arrays
         break;
     }
-    
+
     // Data type affects speedup
     switch (characteristics.dataType) {
       case InputDataType.INTEGER:
@@ -451,24 +373,24 @@ export class EnhancedInputCharacteristicsAnalyzer {
       default:
         speedup *= 1.0;
     }
-    
+
     // Homogeneity affects speedup
     if (characteristics.isHomogeneous) {
       speedup *= 1.2; // WebAssembly is more efficient for homogeneous arrays
     } else {
       speedup *= 0.8; // WebAssembly is less efficient for non-homogeneous arrays
     }
-    
+
     // Special values affect speedup
     if (characteristics.hasSpecialValues) {
       speedup *= 0.7; // WebAssembly is less efficient for arrays with special values
     }
-    
+
     // Sorting status affects speedup
     if (characteristics.isSorted) {
       speedup *= 1.1; // WebAssembly can take advantage of sorted arrays
     }
-    
+
     // Value range affects speedup
     switch (characteristics.valueRangeCategory) {
       case InputValueRangeCategory.NARROW:
@@ -481,10 +403,10 @@ export class EnhancedInputCharacteristicsAnalyzer {
         speedup *= 0.9; // WebAssembly is less efficient for wide value ranges
         break;
     }
-    
+
     return Math.max(0.5, speedup); // Ensure speedup is at least 0.5
   }
-  
+
   /**
    * Estimate the memory overhead of WebAssembly
    * @param characteristics The basic characteristics of the input
@@ -493,10 +415,10 @@ export class EnhancedInputCharacteristicsAnalyzer {
   private static _estimateMemoryOverhead(characteristics: InputCharacteristics): number {
     // Base memory overhead
     let overhead = 1024; // 1KB base overhead
-    
+
     // Size affects overhead
     overhead += characteristics.size * 4; // 4 bytes per element for copying
-    
+
     // Data type affects overhead
     switch (characteristics.dataType) {
       case InputDataType.INTEGER:
@@ -519,7 +441,7 @@ export class EnhancedInputCharacteristicsAnalyzer {
       default:
         overhead += characteristics.size * 8;
     }
-    
+
     return overhead;
   }
 }

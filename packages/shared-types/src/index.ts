@@ -13,3 +13,5 @@ export * from './wasm';
 export * from './registry';
 export * from './core';
 export * from './data-structures';
+export * from './utils';
+export * from './benchmark';

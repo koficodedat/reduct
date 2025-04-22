@@ -11,7 +11,8 @@ import { NumericList } from './numeric-list';
 import { StringList } from './string-list';
 import { ObjectList } from './object-list';
 import { WasmNumericList } from './wasm-numeric-list';
-import { detectDataType, DataType, isObjectArray } from '../type-detection';
+import { detectDataType, isObjectArray } from '../type-detection';
+import { DataType } from '@reduct/shared-types/data-structures';
 import { HAMTPersistentVector } from '../hamt-persistent-vector';
 import { WasmHAMTPersistentVector } from '../wasm-hamt-persistent-vector';
 // Import from our mock implementation

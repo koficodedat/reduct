@@ -5,16 +5,7 @@
  * specialized optimizations for different data types.
  */
 
-/**
- * Data type categories for specialized optimizations
- */
-export enum DataType {
-  UNKNOWN = 'unknown',
-  NUMERIC = 'numeric',
-  STRING = 'string',
-  OBJECT_REFERENCE = 'object_reference',
-  MIXED = 'mixed'
-}
+import { DataType } from '@reduct/shared-types/data-structures';
 
 /**
  * Detect the data type of an array

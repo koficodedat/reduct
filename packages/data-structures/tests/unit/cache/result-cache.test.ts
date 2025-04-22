@@ -40,7 +40,7 @@ describe('Result Cache', () => {
       expect(cache.getHitRate()).toBeCloseTo(0.5, 2);
     });
 
-    it.skip('should respect the maximum size', () => {
+    it('should respect the maximum size', () => {
       const cache = new ResultCache<string, number>(3, 1000);
 
       // Set values
@@ -57,16 +57,16 @@ describe('Result Cache', () => {
       cache.set('key4', 4);
 
       // The cache should contain the most recently used values
-      expect(cache.get('key1')).toBeDefined();
+      expect(cache.get('key1')).toBeUndefined(); // This should be evicted as the oldest
       expect(cache.get('key2')).toBeDefined();
       expect(cache.get('key3')).toBeDefined();
-      expect(cache.get('key4')).toBeUndefined();
+      expect(cache.get('key4')).toBeDefined();
 
       // Cache size should be limited to 3
       expect(cache.getSize()).toBe(3);
     });
 
-    it.skip('should clear the cache', () => {
+    it('should clear the cache', () => {
       const cache = new ResultCache<string, number>(10, 1000);
 
       // Set values
@@ -83,7 +83,7 @@ describe('Result Cache', () => {
       expect(cache.getHitRate()).toBe(0);
     });
 
-    it.skip('should resize the cache', () => {
+    it('should resize the cache', () => {
       const cache = new ResultCache<string, number>(5, 1000);
 
       // Set values
@@ -100,7 +100,7 @@ describe('Result Cache', () => {
       expect(cache.getSize()).toBe(3);
     });
 
-    it.skip('should compute values on demand', () => {
+    it('should compute values on demand', () => {
       const cache = new ResultCache<string, number>(10, 1000);
       const compute = vi.fn(() => 42);
 

@@ -5,30 +5,7 @@
  */
 
 import { SimpleOperationAdapter } from './adapter-factory';
-
-/**
- * Definition of a benchmark operation
- */
-export interface BenchmarkOperation {
-  /** Name of the operation */
-  name: string;
-  /** Description of the operation */
-  description?: string;
-  /** Adapter function for the operation */
-  adapter: SimpleOperationAdapter;
-}
-
-/**
- * Special case for benchmark setup
- */
-export interface BenchmarkSpecialCase {
-  /** Name of the special case */
-  name: string;
-  /** Description of the special case */
-  description?: string;
-  /** Setup function for the special case */
-  setupFn: (size: number) => any;
-}
+import { BenchmarkOperation, BenchmarkSpecialCase } from '@reduct/shared-types/benchmark';
 
 /**
  * Definition of a benchmark suite

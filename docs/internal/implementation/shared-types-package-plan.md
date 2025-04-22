@@ -39,12 +39,28 @@ Based on analysis of the codebase, the following types are used across multiple 
 | `Tagged`, `RequireKeys` | `packages/core/src/types.ts` | Type utilities for object manipulation |
 | `TypeMapper`, `MapObjectProps` | `packages/core/src/types.ts` | Type-level programming utilities |
 
-### 1.4 Data Structure Types
+### 1.4 Benchmark Types
+
+| Type | Current Locations | Description |
+|------|------------------|-------------|
+| `OperationCategory` | `packages/benchmark/src/adapters/types.ts` | Enum for operation categories |
+| `OperationComplexity` | `packages/benchmark/src/adapters/types.ts` | Enum for operation complexity |
+| `BenchmarkOperationMetadata` | `packages/benchmark/src/adapters/types.ts` | Interface for benchmark operation metadata |
+| `BenchmarkOperation` | `packages/benchmark/src/benchmark-registry/types.ts` | Interface for benchmark operations |
+| `BenchmarkSpecialCase` | `packages/benchmark/src/benchmark-registry/types.ts` | Interface for benchmark special cases |
+
+### 1.5 Data Structure Types
 
 | Type | Current Locations | Description |
 |------|------------------|-------------|
 | `DataStructureType` | `packages/data-structures/src/profiling/memory-monitor.ts` | Enum for data structure types |
 | `MemoryStats` | `packages/data-structures/src/profiling/memory-monitor.ts` | Interface for memory usage statistics |
+| `DataType` | `packages/data-structures/src/list/type-detection.ts` | Enum for data type categories |
+| `RepresentationType` | `packages/data-structures/src/list/types.ts` | Enum for list representation types |
+| `OperationType` | `packages/data-structures/src/profiling/index.ts` | Enum for operation types |
+| `InternalDataStructureType` | `packages/data-structures/src/profiling/index.ts` | Enum for internal data structure types |
+| `ProfilingData` | `packages/data-structures/src/profiling/index.ts` | Interface for profiling data |
+| `ProfilingOptions` | `packages/data-structures/src/profiling/index.ts` | Interface for profiling options |
 
 ## 2. Package Structure
 
@@ -59,7 +75,8 @@ packages/shared-types/
 │   ├── wasm/                    # WebAssembly-related types
 │   │   ├── index.ts
 │   │   ├── accelerator.ts
-│   │   └── features.ts
+│   │   ├── features.ts
+│   │   └── profiling.ts
 │   ├── registry/                # Registry-related types
 │   │   ├── index.ts
 │   │   ├── implementation.ts
@@ -68,15 +85,21 @@ packages/shared-types/
 │   │   ├── index.ts
 │   │   ├── utility-types.ts
 │   │   └── type-guards.ts
+│   ├── benchmark/               # Benchmark-related types
+│   │   ├── index.ts
+│   │   └── operations.ts
 │   └── data-structures/         # Data structure types
 │       ├── index.ts
-│       └── profiling.ts
+│       ├── profiling.ts
+│       └── list.ts
 └── tests/
     └── unit/
         ├── wasm.test.ts
         ├── registry.test.ts
         ├── core.test.ts
-        └── data-structures.test.ts
+        ├── benchmark.test.ts
+        ├── data-structures.test.ts
+        └── data-structures-list.test.ts
 ```
 
 ## 3. Migration Strategy
@@ -518,7 +541,128 @@ export function isEnum<T extends Record<string, string | number>>(
 }
 ```
 
-### 4.4 Data Structure Types
+### 4.4 Benchmark Types
+
+```typescript
+// packages/shared-types/src/benchmark/operations.ts
+
+/**
+ * Operation category
+ */
+export enum OperationCategory {
+  /** Operations that access data without modifying it */
+  ACCESS = 'access',
+
+  /** Operations that modify data */
+  MODIFICATION = 'modification',
+
+  /** Operations that traverse data */
+  TRAVERSAL = 'traversal',
+
+  /** Operations that search for data */
+  SEARCH = 'search',
+
+  /** Operations that sort data */
+  SORT = 'sort',
+
+  /** Operations that create new data structures */
+  CREATION = 'creation',
+
+  /** Operations that convert between data structures */
+  CONVERSION = 'conversion',
+
+  /** Operations that perform bulk operations */
+  BULK = 'bulk',
+
+  /** Operations that perform utility functions */
+  UTILITY = 'utility',
+}
+
+/**
+ * Operation complexity
+ */
+export enum OperationComplexity {
+  /** O(1) - Constant time */
+  CONSTANT = 'O(1)',
+
+  /** O(log n) - Logarithmic time */
+  LOGARITHMIC = 'O(log n)',
+
+  /** O(n) - Linear time */
+  LINEAR = 'O(n)',
+
+  /** O(n log n) - Linearithmic time */
+  LINEARITHMIC = 'O(n log n)',
+
+  /** O(n²) - Quadratic time */
+  QUADRATIC = 'O(n²)',
+
+  /** O(n³) - Cubic time */
+  CUBIC = 'O(n³)',
+
+  /** O(2^n) - Exponential time */
+  EXPONENTIAL = 'O(2^n)',
+
+  /** O(n!) - Factorial time */
+  FACTORIAL = 'O(n!)',
+}
+
+/**
+ * Enhanced operation metadata with additional fields for benchmarking
+ */
+export interface BenchmarkOperationMetadata {
+  /** Name of the operation */
+  name: string;
+
+  /** Description of the operation */
+  description?: string;
+
+  /** Category of the operation */
+  category: OperationCategory;
+
+  /** Whether the operation is read-only */
+  readOnly: boolean;
+
+  /** Expected time complexity */
+  complexity?: OperationComplexity;
+
+  /** Tags for the operation */
+  tags?: string[];
+
+  /** Version of the operation */
+  version?: string;
+}
+
+/**
+ * Definition of a benchmark operation
+ */
+export interface BenchmarkOperation {
+  /** Name of the operation */
+  name: string;
+
+  /** Description of the operation */
+  description?: string;
+
+  /** Adapter function for the operation */
+  adapter: Function;
+}
+
+/**
+ * Special case for benchmark setup
+ */
+export interface BenchmarkSpecialCase {
+  /** Name of the special case */
+  name: string;
+
+  /** Description of the special case */
+  description?: string;
+
+  /** Setup function for the special case */
+  setupFn: (size: number) => any;
+}
+```
+
+### 4.5 Data Structure Types
 
 ```typescript
 // packages/shared-types/src/data-structures/profiling.ts
@@ -561,6 +705,71 @@ export interface MemoryStats {
    * Average memory usage per element in bytes
    */
   memoryPerElement: number;
+}
+```
+
+```typescript
+// packages/shared-types/src/data-structures/list.ts
+
+/**
+ * Data type categories for specialized optimizations
+ */
+export enum DataType {
+  /**
+   * Unknown data type
+   */
+  UNKNOWN = 'unknown',
+
+  /**
+   * Numeric data type
+   */
+  NUMERIC = 'numeric',
+
+  /**
+   * String data type
+   */
+  STRING = 'string',
+
+  /**
+   * Object reference data type
+   */
+  OBJECT_REFERENCE = 'object_reference',
+
+  /**
+   * Mixed data types
+   */
+  MIXED = 'mixed'
+}
+
+/**
+ * Representation types for the List implementation
+ */
+export enum RepresentationType {
+  /**
+   * Simple array representation for very small collections
+   */
+  ARRAY = 'array',
+
+  /**
+   * SmallList representation for small collections
+   */
+  SMALL = 'small',
+
+  /**
+   * Chunked array representation for medium collections
+   */
+  CHUNKED = 'chunked',
+
+  /**
+   * Vector representation for large collections
+   */
+  VECTOR = 'vector',
+
+  /**
+   * HAMT Vector representation for very large collections
+   * Uses Hash Array Mapped Trie for efficient structural sharing
+   */
+  HAMT_VECTOR = 'hamt_vector'
 }
 ```
 
@@ -708,6 +917,28 @@ enum DataStructureType {
 
 // After
 import { DataStructureType } from '@reduct/shared-types/data-structures';
+```
+
+```typescript
+// Before
+enum DataType {
+  NUMERIC = 'numeric',
+  // ...
+}
+
+// After
+import { DataType } from '@reduct/shared-types/data-structures';
+```
+
+```typescript
+// Before
+enum OperationCategory {
+  ACCESS = 'access',
+  // ...
+}
+
+// After
+import { OperationCategory } from '@reduct/shared-types/benchmark';
 ```
 
 ### 6.4 @reduct/core

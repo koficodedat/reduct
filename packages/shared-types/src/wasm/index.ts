@@ -8,3 +8,4 @@
 
 export * from './accelerator';
 export * from './features';
+export * from './profiling';
