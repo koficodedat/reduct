@@ -1,0 +1,71 @@
+{
+  "name": "@reduct/shared-types",
+  "version": "0.1.0",
+  "description": "Shared type definitions for Reduct packages",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "tsup": "^7.0.0",
+    "vitest": "^0.34.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  },
+  "peerDependencies": {},
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./wasm": {
+      "types": "./dist/wasm/index.d.ts",
+      "import": "./dist/wasm/index.mjs",
+      "require": "./dist/wasm/index.js"
+    },
+    "./registry": {
+      "types": "./dist/registry/index.d.ts",
+      "import": "./dist/registry/index.mjs",
+      "require": "./dist/registry/index.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.mjs",
+      "require": "./dist/core/index.js"
+    },
+    "./data-structures": {
+      "types": "./dist/data-structures/index.d.ts",
+      "import": "./dist/data-structures/index.mjs",
+      "require": "./dist/data-structures/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "wasm": [
+        "./dist/wasm/index.d.ts"
+      ],
+      "registry": [
+        "./dist/registry/index.d.ts"
+      ],
+      "core": [
+        "./dist/core/index.d.ts"
+      ],
+      "data-structures": [
+        "./dist/data-structures/index.d.ts"
+      ]
+    }
+  }
+}

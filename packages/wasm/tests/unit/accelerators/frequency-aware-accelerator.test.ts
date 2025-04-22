@@ -4,7 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { FrequencyAwareAccelerator } from '../../../src/accelerators/frequency-aware-accelerator';
-import { AcceleratorTier } from '../../../src/accelerators/accelerator';
+import { AcceleratorTier } from '@reduct/shared-types/wasm';
 
 describe('FrequencyAwareAccelerator', () => {
   // Test domain, type, and operation

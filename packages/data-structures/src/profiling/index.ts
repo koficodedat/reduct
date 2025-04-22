@@ -35,10 +35,12 @@ export enum OperationType {
   SPECIALIZED = 'specialized'
 }
 
+import { DataStructureType } from '@reduct/shared-types/data-structures';
+
 /**
- * Types of data structures that can be profiled
+ * Extended data structure types for internal profiling
  */
-export enum DataStructureType {
+export enum InternalDataStructureType {
   LIST = 'list',
   SMALL_LIST = 'smallList',
   CHUNKED_LIST = 'chunkedList',
@@ -61,7 +63,7 @@ export interface ProfilingData {
   /**
    * The type of data structure
    */
-  dataStructureType: DataStructureType;
+  dataStructureType: InternalDataStructureType;
 
   /**
    * The size of the data structure
@@ -134,7 +136,7 @@ export class ProfilingSystem {
   private options: ProfilingOptions;
   private data: ProfilingData[] = [];
   private operationCounts: Record<OperationType, number> = {} as Record<OperationType, number>;
-  private dataStructureCounts: Record<DataStructureType, number> = {} as Record<DataStructureType, number>;
+  private dataStructureCounts: Record<InternalDataStructureType, number> = {} as Record<InternalDataStructureType, number>;
   private poolHits = 0;
   private poolMisses = 0;
   private cacheHits = 0;
@@ -157,9 +159,9 @@ export class ProfilingSystem {
     }
 
     // Initialize data structure counts
-    for (const ds in DataStructureType) {
+    for (const ds in InternalDataStructureType) {
       if (isNaN(Number(ds))) {
-        this.dataStructureCounts[DataStructureType[ds as keyof typeof DataStructureType]] = 0;
+        this.dataStructureCounts[InternalDataStructureType[ds as keyof typeof InternalDataStructureType]] = 0;
       }
     }
   }
@@ -217,7 +219,7 @@ export class ProfilingSystem {
 
     // Reset data structure counts
     for (const ds in this.dataStructureCounts) {
-      this.dataStructureCounts[ds as DataStructureType] = 0;
+      this.dataStructureCounts[ds as InternalDataStructureType] = 0;
     }
 
     // Reset pool and cache counts
@@ -334,7 +336,7 @@ export class ProfilingSystem {
    *
    * @returns Data structure counts
    */
-  public getDataStructureCounts(): Record<DataStructureType, number> {
+  public getDataStructureCounts(): Record<InternalDataStructureType, number> {
     return { ...this.dataStructureCounts };
   }
 
@@ -386,7 +388,7 @@ export class ProfilingSystem {
    */
   public getSummary(): {
     operationCounts: Record<OperationType, number>;
-    dataStructureCounts: Record<DataStructureType, number>;
+    dataStructureCounts: Record<InternalDataStructureType, number>;
     poolStats: { hits: number; misses: number; hitRate: number };
     cacheStats: { hits: number; misses: number; hitRate: number };
     transitionStats: Record<string, number>;
@@ -451,7 +453,7 @@ export class ProfilingSystem {
     report += '|----------------|-------|\n';
 
     for (const ds in summary.dataStructureCounts) {
-      const count = summary.dataStructureCounts[ds as DataStructureType];
+      const count = summary.dataStructureCounts[ds as InternalDataStructureType];
       report += `| ${ds} | ${count} |\n`;
     }
 

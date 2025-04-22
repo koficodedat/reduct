@@ -1,10 +1,11 @@
 /**
  * Frequency-aware accelerator for WebAssembly
- * 
+ *
  * An accelerator that uses frequency detection to optimize operations in tight loops.
  */
 
-import { BaseAccelerator, AcceleratorOptions, AcceleratorTier, PerformanceProfile } from './accelerator';
+import { AcceleratorOptions, AcceleratorTier, PerformanceProfile } from '@reduct/shared-types/wasm';
+import { BaseAccelerator } from './accelerator';
 
 /**
  * Options for a frequency-aware accelerator
@@ -38,7 +39,7 @@ export interface FrequencyAwareAcceleratorOptions extends AcceleratorOptions {
 
 /**
  * Frequency-aware accelerator for WebAssembly
- * 
+ *
  * An accelerator that uses frequency detection to optimize operations in tight loops.
  */
 export class FrequencyAwareAccelerator<T, R> extends BaseAccelerator<T, R> {
@@ -69,7 +70,7 @@ export class FrequencyAwareAccelerator<T, R> extends BaseAccelerator<T, R> {
 
   /**
    * Create a new frequency-aware accelerator
-   * 
+   *
    * @param domain The domain of the accelerator (e.g., 'data-structures')
    * @param type The type of the accelerator (e.g., 'list')
    * @param operation The operation to accelerate (e.g., 'map')
@@ -98,7 +99,7 @@ export class FrequencyAwareAccelerator<T, R> extends BaseAccelerator<T, R> {
 
   /**
    * Execute the operation using the appropriate implementation for the given tier
-   * 
+   *
    * @param input The input for the operation
    * @param tier The tier to use
    * @returns The result of the operation
@@ -121,7 +122,7 @@ export class FrequencyAwareAccelerator<T, R> extends BaseAccelerator<T, R> {
 
   /**
    * Get the performance profile of the accelerator
-   * 
+   *
    * @returns The performance profile
    */
   public getPerformanceProfile(): PerformanceProfile {

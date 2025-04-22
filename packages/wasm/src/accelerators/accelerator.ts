@@ -8,25 +8,7 @@ import { performanceCounter } from '../utils/performance-counter';
 import { InputCharacteristicsAnalyzer, InputSizeCategory, InputDataType } from '../utils/input-characteristics';
 import { FrequencyDetector, FrequencyDetectorConfig } from './frequency-detector';
 
-/**
- * Accelerator tiers for optimization strategy
- */
-export enum AcceleratorTier {
-  /**
-   * Always use WebAssembly (significant performance benefit)
-   */
-  HIGH_VALUE = 'high-value',
-
-  /**
-   * Use WebAssembly conditionally (based on input characteristics)
-   */
-  CONDITIONAL = 'conditional',
-
-  /**
-   * Prefer JavaScript (WebAssembly overhead outweighs benefits)
-   */
-  JS_PREFERRED = 'js-preferred'
-}
+import { AcceleratorTier, PerformanceProfile, AcceleratorOptions, Accelerator } from '@reduct/shared-types/wasm';
 
 /**
  * Tiering strategy for determining when to use WebAssembly
@@ -68,40 +50,16 @@ export interface AcceleratorPerformanceStats {
   inputSizeDistribution: Record<AcceleratorTier, number[]>;
 }
 
-/**
- * Performance profile for an accelerator
- */
-export interface PerformanceProfile {
-  /**
-   * Estimated speedup factor compared to JavaScript
-   */
-  estimatedSpeedup: number;
-
-  /**
-   * Minimum input size for which the accelerator is effective
-   */
-  effectiveInputSize?: number;
-
-  /**
-   * Memory overhead of the accelerator
-   */
-  memoryOverhead?: number;
-}
+// Using PerformanceProfile from shared-types
 
 /**
- * Options for an accelerator
+ * Extended options for an accelerator
  */
-export interface AcceleratorOptions {
-  /**
-   * Element type for the accelerator
-   */
-  elementType?: string;
-
+export interface ExtendedAcceleratorOptions extends AcceleratorOptions {
   /**
    * Required WebAssembly features
    */
   requiredFeatures?: WebAssemblyFeature[];
-
   /**
    * Whether to use shared memory
    */
@@ -151,35 +109,17 @@ export interface AcceleratorOptions {
    * Configuration for frequency detection
    */
   frequencyDetectionConfig?: FrequencyDetectorConfig;
-
-  /**
-   * Custom options for the accelerator
-   */
-  [key: string]: any;
 }
 
 /**
- * Accelerator interface
+ * Extended accelerator interface
  */
-export interface Accelerator<T, R> {
-  /**
-   * Execute the accelerated operation
-   * @param input The input for the operation
-   * @returns The result of the operation
-   */
-  execute(input: T): R;
-
+export interface ExtendedAccelerator<T, R> extends Accelerator<T, R> {
   /**
    * Check if the accelerator is available in the current environment
    * @returns True if the accelerator is available, false otherwise
    */
   isAvailable(): boolean;
-
-  /**
-   * Get the performance profile of the accelerator
-   * @returns The performance profile
-   */
-  getPerformanceProfile(): PerformanceProfile;
 
   /**
    * Determine the appropriate tier for the given input
@@ -198,7 +138,7 @@ export interface Accelerator<T, R> {
 /**
  * Base class for accelerators
  */
-export abstract class BaseAccelerator<T, R> implements Accelerator<T, R> {
+export abstract class BaseAccelerator<T, R> implements ExtendedAccelerator<T, R> {
   /**
    * Performance statistics for this accelerator
    */
@@ -246,7 +186,7 @@ export abstract class BaseAccelerator<T, R> implements Accelerator<T, R> {
     protected readonly domain: string,
     protected readonly type: string,
     protected readonly operation: string,
-    protected readonly options: AcceleratorOptions = {}
+    protected readonly options: ExtendedAcceleratorOptions = {}
   ) {
     // Initialize adaptive thresholds if enabled
     if (options.thresholds?.adaptive) {

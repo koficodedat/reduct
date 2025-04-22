@@ -1,13 +1,13 @@
 /**
  * Hybrid string accelerator
- * 
+ *
  * Provides optimized implementations of string operations using a hybrid approach
  * that combines JavaScript and WebAssembly.
  */
 
 import { HybridAccelerator, HybridOperationImplementation } from '../hybrid-accelerator';
-import { AcceleratorOptions, AcceleratorTier } from '../accelerator';
-import { WebAssemblyFeature } from '../../core/feature-detection';
+import { AcceleratorOptions, AcceleratorTier } from '@reduct/shared-types/wasm';
+import { WebAssemblyFeature } from '@reduct/shared-types/wasm';
 import { EnhancedInputCharacteristicsAnalyzer } from '../../utils/enhanced-input-characteristics';
 
 /**
@@ -72,14 +72,14 @@ interface StringSearchIntermediate {
 
 /**
  * Hybrid string accelerator
- * 
+ *
  * Provides optimized implementations of string operations using a hybrid approach
  * that combines JavaScript and WebAssembly.
  */
 export class HybridStringAccelerator extends HybridAccelerator<StringSearchInput, StringSearchResult, StringSearchIntermediate> {
   /**
    * Create a new hybrid string accelerator
-   * 
+   *
    * @param options Options for the accelerator
    */
   constructor(options: AcceleratorOptions = {}) {
@@ -196,7 +196,7 @@ export class HybridStringAccelerator extends HybridAccelerator<StringSearchInput
 
   /**
    * Determine the appropriate tier for the input
-   * 
+   *
    * @param input The input for the operation
    * @returns The appropriate tier
    */

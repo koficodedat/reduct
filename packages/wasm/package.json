@@ -20,7 +20,8 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
-    "@reduct/core": "^0.1.0"
+    "@reduct/core": "^0.1.0",
+    "@reduct/shared-types": "^0.1.0"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",

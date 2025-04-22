@@ -1,10 +1,10 @@
 /**
  * Frequency detector for WebAssembly acceleration
- * 
+ *
  * Tracks the frequency of operations to determine when to use WebAssembly acceleration.
  */
 
-import { AcceleratorTier } from './accelerator';
+import { AcceleratorTier } from '@reduct/shared-types/wasm';
 
 /**
  * Operation call record
@@ -78,22 +78,22 @@ const DEFAULT_CONFIG: FrequencyDetectorConfig = {
 
 /**
  * Frequency detector for WebAssembly acceleration
- * 
+ *
  * Tracks the frequency of operations to determine when to use WebAssembly acceleration.
  */
 export class FrequencyDetector {
   /** Configuration */
   private config: Required<FrequencyDetectorConfig>;
-  
+
   /** Operation statistics by domain, type, and operation */
   private stats: Map<string, Map<string, Map<string, OperationStats>>>;
-  
+
   /** Cache by domain, type, operation, and input hash */
   private cache: Map<string, Map<string, Map<string, Map<string, any>>>>;
-  
+
   /**
    * Create a new frequency detector
-   * 
+   *
    * @param config Configuration options
    */
   constructor(config: FrequencyDetectorConfig = {}) {
@@ -101,10 +101,10 @@ export class FrequencyDetector {
     this.stats = new Map();
     this.cache = new Map();
   }
-  
+
   /**
    * Record an operation call
-   * 
+   *
    * @param domain The domain of the operation
    * @param type The type of the operation
    * @param operation The operation name
@@ -124,40 +124,40 @@ export class FrequencyDetector {
       lastTierDecision: AcceleratorTier.JS_PREFERRED,
       lastTierDecisionTime: 0
     };
-    
+
     // Generate a hash for the input
     const inputHash = this.hashInput(input);
-    
+
     // Record the call
     const call: OperationCall = {
       timestamp: Date.now(),
       inputHash
     };
-    
+
     // Update the stats
     operationStats.callCount++;
     operationStats.recentCalls.push(call);
-    
+
     // Trim the recent calls list if it's too long
     if (operationStats.recentCalls.length > this.config.maxRecentCalls) {
       operationStats.recentCalls.shift();
     }
-    
+
     // Update the frequency
     this.updateFrequency(operationStats);
-    
+
     // Store the updated stats
     typeStats.set(operation, operationStats);
     domainStats.set(type, typeStats);
     this.stats.set(domain, domainStats);
-    
+
     // Return the input hash for later reference
     return inputHash;
   }
-  
+
   /**
    * Record the result of an operation call
-   * 
+   *
    * @param domain The domain of the operation
    * @param type The type of the operation
    * @param operation The operation name
@@ -176,33 +176,33 @@ export class FrequencyDetector {
     // Get the stats for this operation
     const domainStats = this.stats.get(domain);
     if (!domainStats) return;
-    
+
     const typeStats = domainStats.get(type);
     if (!typeStats) return;
-    
+
     const operationStats = typeStats.get(operation);
     if (!operationStats) return;
-    
+
     // Find the call with this input hash
     const call = operationStats.recentCalls.find(c => c.inputHash === inputHash);
     if (!call) return;
-    
+
     // Record the result and execution time
     call.result = result;
     call.executionTime = executionTime;
-    
+
     // Update the average execution time
     this.updateAverageExecutionTime(operationStats);
-    
+
     // Cache the result if caching is enabled
     if (this.config.enableCaching) {
       this.cacheResult(domain, type, operation, inputHash, result);
     }
   }
-  
+
   /**
    * Get the cached result for an operation call
-   * 
+   *
    * @param domain The domain of the operation
    * @param type The type of the operation
    * @param operation The operation name
@@ -211,27 +211,27 @@ export class FrequencyDetector {
    */
   public getCachedResult(domain: string, type: string, operation: string, input: any): any {
     if (!this.config.enableCaching) return undefined;
-    
+
     // Generate a hash for the input
     const inputHash = this.hashInput(input);
-    
+
     // Get the cache for this operation
     const domainCache = this.cache.get(domain);
     if (!domainCache) return undefined;
-    
+
     const typeCache = domainCache.get(type);
     if (!typeCache) return undefined;
-    
+
     const operationCache = typeCache.get(operation);
     if (!operationCache) return undefined;
-    
+
     // Get the cached result
     return operationCache.get(inputHash);
   }
-  
+
   /**
    * Determine the appropriate tier for an operation
-   * 
+   *
    * @param domain The domain of the operation
    * @param type The type of the operation
    * @param operation The operation name
@@ -242,22 +242,22 @@ export class FrequencyDetector {
     // Get the stats for this operation
     const domainStats = this.stats.get(domain);
     if (!domainStats) return AcceleratorTier.JS_PREFERRED;
-    
+
     const typeStats = domainStats.get(type);
     if (!typeStats) return AcceleratorTier.JS_PREFERRED;
-    
+
     const operationStats = typeStats.get(operation);
     if (!operationStats) return AcceleratorTier.JS_PREFERRED;
-    
+
     // Check if we've made a tier decision recently
     const now = Date.now();
     if (now - operationStats.lastTierDecisionTime < 1000) {
       return operationStats.lastTierDecision;
     }
-    
+
     // Determine the appropriate tier based on frequency and execution time
     let tier = AcceleratorTier.JS_PREFERRED;
-    
+
     if (
       operationStats.frequency >= this.config.highValueFrequencyThreshold ||
       operationStats.averageExecutionTime >= this.config.highValueExecutionTimeThreshold
@@ -269,17 +269,17 @@ export class FrequencyDetector {
     ) {
       tier = AcceleratorTier.CONDITIONAL;
     }
-    
+
     // Record the tier decision
     operationStats.lastTierDecision = tier;
     operationStats.lastTierDecisionTime = now;
-    
+
     return tier;
   }
-  
+
   /**
    * Get statistics for an operation
-   * 
+   *
    * @param domain The domain of the operation
    * @param type The type of the operation
    * @param operation The operation name
@@ -288,13 +288,13 @@ export class FrequencyDetector {
   public getStats(domain: string, type: string, operation: string): OperationStats | undefined {
     const domainStats = this.stats.get(domain);
     if (!domainStats) return undefined;
-    
+
     const typeStats = domainStats.get(type);
     if (!typeStats) return undefined;
-    
+
     return typeStats.get(operation);
   }
-  
+
   /**
    * Clear all statistics and cache
    */
@@ -302,41 +302,41 @@ export class FrequencyDetector {
     this.stats.clear();
     this.cache.clear();
   }
-  
+
   /**
    * Update the frequency for an operation
-   * 
+   *
    * @param stats The operation statistics
    */
   private updateFrequency(stats: OperationStats): void {
     const now = Date.now();
     const windowStart = now - this.config.frequencyWindow;
-    
+
     // Count the number of calls in the window
     const callsInWindow = stats.recentCalls.filter(call => call.timestamp >= windowStart).length;
-    
+
     // Calculate the frequency (calls per second)
     stats.frequency = (callsInWindow * 1000) / this.config.frequencyWindow;
   }
-  
+
   /**
    * Update the average execution time for an operation
-   * 
+   *
    * @param stats The operation statistics
    */
   private updateAverageExecutionTime(stats: OperationStats): void {
     // Get all calls with execution times
     const callsWithTimes = stats.recentCalls.filter(call => call.executionTime !== undefined);
     if (callsWithTimes.length === 0) return;
-    
+
     // Calculate the average execution time
     const totalTime = callsWithTimes.reduce((sum, call) => sum + (call.executionTime || 0), 0);
     stats.averageExecutionTime = totalTime / callsWithTimes.length;
   }
-  
+
   /**
    * Cache the result of an operation
-   * 
+   *
    * @param domain The domain of the operation
    * @param type The type of the operation
    * @param operation The operation name
@@ -354,26 +354,26 @@ export class FrequencyDetector {
     const domainCache = this.cache.get(domain) || new Map();
     const typeCache = domainCache.get(type) || new Map();
     const operationCache = typeCache.get(operation) || new Map();
-    
+
     // Add the result to the cache
     operationCache.set(inputHash, result);
-    
+
     // Trim the cache if it's too large
     if (operationCache.size > this.config.maxCacheSize) {
       // Remove the oldest entry
       const oldestKey = operationCache.keys().next().value;
       operationCache.delete(oldestKey);
     }
-    
+
     // Store the updated cache
     typeCache.set(operation, operationCache);
     domainCache.set(type, typeCache);
     this.cache.set(domain, domainCache);
   }
-  
+
   /**
    * Generate a hash for an input
-   * 
+   *
    * @param input The input to hash
    * @returns A hash string
    */
@@ -389,7 +389,7 @@ export class FrequencyDetector {
       ) {
         return String(input);
       }
-      
+
       // For arrays, hash each element
       if (Array.isArray(input)) {
         // For large arrays, hash a sample
@@ -401,14 +401,14 @@ export class FrequencyDetector {
           ];
           return `array:${input.length}:${this.hashInput(sample)}`;
         }
-        
+
         return `array:${input.length}:${input.map(item => this.hashInput(item)).join(',')}`;
       }
-      
+
       // For objects, hash the keys and values
       if (typeof input === 'object') {
         const keys = Object.keys(input).sort();
-        
+
         // For large objects, hash a sample of keys
         if (keys.length > 20) {
           const sampleKeys = keys.slice(0, 20);
@@ -418,15 +418,15 @@ export class FrequencyDetector {
           });
           return `object:${keys.length}:${JSON.stringify(sampleObj)}`;
         }
-        
+
         return `object:${JSON.stringify(input)}`;
       }
-      
+
       // For functions, use the function name
       if (typeof input === 'function') {
         return `function:${input.name || 'anonymous'}`;
       }
-      
+
       // For everything else, use toString
       return `other:${String(input)}`;
     } catch (error) {

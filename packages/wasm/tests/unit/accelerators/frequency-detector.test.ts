@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { FrequencyDetector, FrequencyDetectorConfig } from '../../../src/accelerators/frequency-detector';
-import { AcceleratorTier } from '../../../src/accelerators/accelerator';
+import { AcceleratorTier } from '@reduct/shared-types/wasm';
 
 describe('FrequencyDetector', () => {
   let detector: FrequencyDetector;

@@ -4,7 +4,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HybridStringAccelerator, StringSearchInput, StringSearchResult } from '../../../../src/accelerators/data-structures/hybrid-string-accelerator';
-import { AcceleratorTier } from '../../../../src/accelerators/accelerator';
+import { AcceleratorTier } from '@reduct/shared-types/wasm';
 import { ProcessingStrategy } from '../../../../src/utils/enhanced-input-characteristics';
 
 // Mock the EnhancedInputCharacteristicsAnalyzer

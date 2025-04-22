@@ -16,6 +16,9 @@
       "lint": "eslint src --ext .ts",
       "clean": "rimraf dist"
     },
+    "dependencies": {
+      "@reduct/shared-types": "^0.1.0"
+    },
     "devDependencies": {
       "@types/node": "^18.0.0",
       "eslint": "^8.0.0",

@@ -23,6 +23,11 @@
       "noUnusedParameters": true,
       "noImplicitReturns": true,
       "noFallthroughCasesInSwitch": true,
+      "baseUrl": ".",
+      "paths": {
+        "@reduct/shared-types": ["packages/shared-types/src"],
+        "@reduct/shared-types/*": ["packages/shared-types/src/*"]
+      },
     },
     "exclude": ["node_modules", "dist", "src/archive/**/*"]
 }

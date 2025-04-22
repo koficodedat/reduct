@@ -1,10 +1,11 @@
 /**
  * Hybrid accelerator for WebAssembly
- * 
+ *
  * An accelerator that uses both JavaScript and WebAssembly for different parts of an operation.
  */
 
-import { BaseAccelerator, AcceleratorOptions, AcceleratorTier, PerformanceProfile } from './accelerator';
+import { AcceleratorOptions, AcceleratorTier, PerformanceProfile } from '@reduct/shared-types/wasm';
+import { BaseAccelerator } from './accelerator';
 import { EnhancedInputCharacteristicsAnalyzer, ProcessingStrategy } from '../utils/enhanced-input-characteristics';
 
 /**
@@ -92,7 +93,7 @@ export interface HybridAcceleratorOptions extends AcceleratorOptions {
 
 /**
  * Hybrid accelerator for WebAssembly
- * 
+ *
  * An accelerator that uses both JavaScript and WebAssembly for different parts of an operation.
  */
 export class HybridAccelerator<T, R, I = any> extends BaseAccelerator<T, R> {
@@ -123,7 +124,7 @@ export class HybridAccelerator<T, R, I = any> extends BaseAccelerator<T, R> {
 
   /**
    * Create a new hybrid accelerator
-   * 
+   *
    * @param domain The domain of the accelerator (e.g., 'data-structures')
    * @param type The type of the accelerator (e.g., 'list')
    * @param operation The operation to accelerate (e.g., 'map')
@@ -146,7 +147,7 @@ export class HybridAccelerator<T, R, I = any> extends BaseAccelerator<T, R> {
 
   /**
    * Execute the operation
-   * 
+   *
    * @param input The input for the operation
    * @returns The result of the operation
    */
@@ -160,7 +161,7 @@ export class HybridAccelerator<T, R, I = any> extends BaseAccelerator<T, R> {
 
   /**
    * Determine the appropriate tier for the input
-   * 
+   *
    * @param input The input for the operation
    * @returns The appropriate tier
    */
@@ -168,30 +169,30 @@ export class HybridAccelerator<T, R, I = any> extends BaseAccelerator<T, R> {
     // If enhanced analysis is enabled, use it to determine the tier
     if (this.useEnhancedAnalysis && Array.isArray(input)) {
       const characteristics = EnhancedInputCharacteristicsAnalyzer.analyzeArray(input);
-      
+
       // Use the recommended strategy to determine the tier
       switch (characteristics.recommendedStrategy) {
         case ProcessingStrategy.WEBASSEMBLY:
         case ProcessingStrategy.SIMD:
         case ProcessingStrategy.PARALLEL:
           return AcceleratorTier.HIGH_VALUE;
-        
+
         case ProcessingStrategy.HYBRID:
           return AcceleratorTier.CONDITIONAL;
-        
+
         case ProcessingStrategy.JAVASCRIPT:
         default:
           return AcceleratorTier.JS_PREFERRED;
       }
     }
-    
+
     // Otherwise, use the default tier determination
     return super.determineTier(input);
   }
 
   /**
    * Execute the operation using the appropriate implementation for the given tier
-   * 
+   *
    * @param input The input for the operation
    * @param tier The tier to use
    * @returns The result of the operation
@@ -207,7 +208,7 @@ export class HybridAccelerator<T, R, I = any> extends BaseAccelerator<T, R> {
           console.warn('Hybrid implementation failed, falling back to JavaScript:', error);
           return this.implementation.jsImplementation(input);
         }
-      
+
       case AcceleratorTier.JS_PREFERRED:
       default:
         return this.implementation.jsImplementation(input);
@@ -216,24 +217,24 @@ export class HybridAccelerator<T, R, I = any> extends BaseAccelerator<T, R> {
 
   /**
    * Execute the operation using the hybrid implementation
-   * 
+   *
    * @param input The input for the operation
    * @returns The result of the operation
    */
   private executeHybrid(input: T): R {
     // Preprocess the input (JavaScript)
     const preprocessed = this.implementation.preprocess(input);
-    
+
     // Process the input (WebAssembly)
     const processed = this.implementation.process(preprocessed);
-    
+
     // Postprocess the output (JavaScript)
     return this.implementation.postprocess(processed);
   }
 
   /**
    * Get the performance profile of the accelerator
-   * 
+   *
    * @returns The performance profile
    */
   public getPerformanceProfile(): PerformanceProfile {

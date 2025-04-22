@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "@reduct/core": "^0.1.0",
-    "@reduct/wasm": "^0.1.0"
+    "@reduct/wasm": "^0.1.0",
+    "@reduct/shared-types": "^0.1.0"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
