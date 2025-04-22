@@ -3,7 +3,8 @@
  */
 import { BaseAccelerator, PerformanceProfile, AcceleratorOptions, AcceleratorTier } from './accelerator';
 import { WasmModule } from '../core/wasm-module';
-import { WasmModuleLoader } from '../core/wasm-module-loader';
+import { WasmModuleLoader, WasmModuleLoaderConfig } from '../core/wasm-module-loader';
+import { WasmMemoryPool } from '../core/wasm-memory-pool';
 
 /**
  * Base class for WebAssembly accelerators
@@ -13,6 +14,11 @@ export abstract class WasmAccelerator extends BaseAccelerator<any, any> {
    * The WebAssembly module loader
    */
   private static moduleLoader: WasmModuleLoader | null = null;
+
+  /**
+   * The memory pool
+   */
+  private static memoryPool: WasmMemoryPool = WasmMemoryPool.getInstance();
 
   /**
    * Create a new WebAssembly accelerator
@@ -31,7 +37,16 @@ export abstract class WasmAccelerator extends BaseAccelerator<any, any> {
 
     // Initialize the module loader if not already initialized
     if (!WasmAccelerator.moduleLoader) {
-      WasmAccelerator.moduleLoader = new WasmModuleLoader();
+      // Create module loader configuration
+      const moduleLoaderConfig: WasmModuleLoaderConfig = {
+        memoryPool: WasmAccelerator.memoryPool,
+        useBatchProcessing: true,
+        maxBatchSize: 100,
+        maxBatchDelay: 10
+      };
+
+      // Create the module loader
+      WasmAccelerator.moduleLoader = new WasmModuleLoader(moduleLoaderConfig);
     }
   }
 
@@ -110,4 +125,39 @@ export abstract class WasmAccelerator extends BaseAccelerator<any, any> {
    * @returns The performance profile
    */
   public abstract getPerformanceProfile(): PerformanceProfile;
+
+  /**
+   * Execute an operation with batch processing
+   *
+   * @param input The input for the operation
+   * @param operation The operation to perform
+   * @returns A promise that resolves with the result of the operation
+   */
+  protected async executeBatch<T, R>(input: T, operation: (input: T) => R): Promise<R> {
+    if (!WasmAccelerator.moduleLoader) {
+      return operation(input);
+    }
+
+    return WasmAccelerator.moduleLoader.executeBatch(input, operation);
+  }
+
+  /**
+   * Flush the batch processor
+   *
+   * @returns A promise that resolves when the batch has been processed
+   */
+  protected async flushBatch(): Promise<void> {
+    if (WasmAccelerator.moduleLoader) {
+      await WasmAccelerator.moduleLoader.flushBatch();
+    }
+  }
+
+  /**
+   * Get the memory pool
+   *
+   * @returns The memory pool
+   */
+  protected getMemoryPool(): WasmMemoryPool {
+    return WasmAccelerator.memoryPool;
+  }
 }

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reduct WebAssembly Benchmark</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    
+    header {
+      background-color: #333;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    footer {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      text-align: center;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Reduct WebAssembly Benchmark</h1>
+    <p>Test WebAssembly performance across different browsers and devices</p>
+  </header>
+  
+  <div class="container">
+    <div id="benchmarkContainer"></div>
+  </div>
+  
+  <footer>
+    <p>&copy; 2023 Reduct Library</p>
+  </footer>
+  
+  <script type="module">
+    import { BrowserBenchmarkUI } from './browser-benchmark-ui.js';
+    
+    // Initialize the benchmark UI
+    const ui = new BrowserBenchmarkUI();
+    ui.initialize('benchmarkContainer', 'https://your-server-url.com/api/benchmark-results');
+  </script>
+</body>
+</html>

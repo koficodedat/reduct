@@ -6,6 +6,7 @@ import { isWebAssemblySupported, WebAssemblyFeature } from '../core/feature-dete
 import { adaptiveThresholdManager, ThresholdConfig } from '../utils/adaptive-threshold-manager';
 import { performanceCounter } from '../utils/performance-counter';
 import { InputCharacteristicsAnalyzer, InputSizeCategory, InputDataType } from '../utils/input-characteristics';
+import { FrequencyDetector, FrequencyDetectorConfig } from './frequency-detector';
 
 /**
  * Accelerator tiers for optimization strategy
@@ -142,6 +143,16 @@ export interface AcceleratorOptions {
   };
 
   /**
+   * Whether to use frequency detection for tight loops
+   */
+  useFrequencyDetection?: boolean;
+
+  /**
+   * Configuration for frequency detection
+   */
+  frequencyDetectionConfig?: FrequencyDetectorConfig;
+
+  /**
    * Custom options for the accelerator
    */
   [key: string]: any;
@@ -215,6 +226,16 @@ export abstract class BaseAccelerator<T, R> implements Accelerator<T, R> {
   private useAdaptiveThresholds: boolean = false;
 
   /**
+   * Whether to use frequency detection for tight loops
+   */
+  private useFrequencyDetection: boolean = false;
+
+  /**
+   * Frequency detector for tight loops
+   */
+  private frequencyDetector: FrequencyDetector | null = null;
+
+  /**
    * Create a new accelerator
    * @param domain The domain of the accelerator (e.g., 'data-structures')
    * @param type The type of the accelerator (e.g., 'list')
@@ -234,6 +255,12 @@ export abstract class BaseAccelerator<T, R> implements Accelerator<T, R> {
       // Set performance profile in the adaptive threshold manager
       const profile = this.getPerformanceProfile();
       adaptiveThresholdManager.setPerformanceProfile(domain, type, operation, profile);
+    }
+
+    // Initialize frequency detection if enabled
+    if (options.useFrequencyDetection) {
+      this.useFrequencyDetection = true;
+      this.frequencyDetector = new FrequencyDetector(options.frequencyDetectionConfig);
     }
   }
 
@@ -332,6 +359,17 @@ export abstract class BaseAccelerator<T, R> implements Accelerator<T, R> {
     } else {
       // Standard execution without adaptive thresholds
 
+      // Record the call in the frequency detector if enabled
+      let inputHash: string | undefined;
+      if (this.useFrequencyDetection && this.frequencyDetector) {
+        inputHash = this.frequencyDetector.recordCall(
+          this.domain,
+          this.type,
+          this.operation,
+          input
+        );
+      }
+
       // Measure execution time
       const startTime = performance.now();
 
@@ -341,6 +379,18 @@ export abstract class BaseAccelerator<T, R> implements Accelerator<T, R> {
       // Update execution time statistics
       const endTime = performance.now();
       const executionTime = endTime - startTime;
+
+      // Record the result in the frequency detector if enabled
+      if (this.useFrequencyDetection && this.frequencyDetector && inputHash) {
+        this.frequencyDetector.recordResult(
+          this.domain,
+          this.type,
+          this.operation,
+          inputHash,
+          result,
+          executionTime
+        );
+      }
 
       // Update average execution time using a weighted average
       const currentAvg = this.stats.averageExecutionTime[tier];
@@ -418,6 +468,45 @@ export abstract class BaseAccelerator<T, R> implements Accelerator<T, R> {
    * @returns The appropriate tier for the input
    */
   public determineTier(input: T): AcceleratorTier {
+    // Use frequency detection if enabled
+    if (this.useFrequencyDetection && this.frequencyDetector) {
+      // Check if we have a cached result from the frequency detector
+      const cachedResult = this.frequencyDetector.getCachedResult(
+        this.domain,
+        this.type,
+        this.operation,
+        input
+      );
+
+      if (cachedResult !== undefined) {
+        // Return the cached result
+        return cachedResult;
+      }
+
+      // Record the call in the frequency detector
+      this.frequencyDetector.recordCall(
+        this.domain,
+        this.type,
+        this.operation,
+        input
+      );
+
+      // Determine the tier based on frequency
+      const tier = this.frequencyDetector.determineTier(
+        this.domain,
+        this.type,
+        this.operation,
+        input
+      );
+
+      // If the tier is not JS_PREFERRED, return it immediately
+      if (tier !== AcceleratorTier.JS_PREFERRED) {
+        return tier;
+      }
+
+      // Otherwise, continue with the normal tiering strategy
+    }
+
     const { tiering } = this.options;
 
     // If no tiering strategy is provided, use default thresholds
@@ -582,6 +671,18 @@ export abstract class BaseAccelerator<T, R> implements Accelerator<T, R> {
     }
 
     return adaptiveThresholdManager.config;
+  }
+
+  /**
+   * Get frequency detection statistics
+   * @returns The frequency detection statistics, or undefined if frequency detection is not enabled
+   */
+  public getFrequencyDetectionStats(): any | undefined {
+    if (!this.useFrequencyDetection || !this.frequencyDetector) {
+      return undefined;
+    }
+
+    return this.frequencyDetector.getStats(this.domain, this.type, this.operation);
   }
 
   /**

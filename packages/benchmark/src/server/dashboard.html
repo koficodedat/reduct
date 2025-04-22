@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reduct WebAssembly Benchmark Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    
+    header {
+      background-color: #333;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .dashboard-section {
+      margin-bottom: 30px;
+      background-color: white;
+      border-radius: 5px;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .dashboard-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .dashboard-controls {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .dashboard-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 200px;
+    }
+    
+    .filter-label {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .filter-select {
+      padding: 5px;
+      border-radius: 3px;
+      border: 1px solid #ddd;
+    }
+    
+    .chart-container {
+      height: 400px;
+      margin-bottom: 20px;
+    }
+    
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .data-table th,
+    .data-table td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .data-table th {
+      background-color: #f1f1f1;
+      font-weight: bold;
+    }
+    
+    .data-table tr:hover {
+      background-color: #f9f9f9;
+    }
+    
+    footer {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      text-align: center;
+      margin-top: 50px;
+    }
+    
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+    }
+    
+    .loading-spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #3498db;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 2s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Reduct WebAssembly Benchmark Dashboard</h1>
+    <p>Performance analysis across browsers and devices</p>
+  </header>
+  
+  <div class="container">
+    <div class="dashboard-section">
+      <div class="dashboard-header">
+        <div class="dashboard-title">Performance Overview</div>
+        <div class="dashboard-controls">
+          <button id="refreshButton">Refresh Data</button>
+        </div>
+      </div>
+      
+      <div class="dashboard-filter">
+        <div class="filter-group">
+          <div class="filter-label">Operation</div>
+          <select id="operationFilter" class="filter-select">
+            <option value="all">All Operations</option>
+            <option value="map">Map</option>
+            <option value="filter">Filter</option>
+            <option value="reduce">Reduce</option>
+            <option value="sort">Sort</option>
+            <option value="find">Find</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <div class="filter-label">Input Size</div>
+          <select id="sizeFilter" class="filter-select">
+            <option value="all">All Sizes</option>
+            <option value="tiny">Tiny</option>
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+            <option value="very_large">Very Large</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <div class="filter-label">Data Type</div>
+          <select id="dataTypeFilter" class="filter-select">
+            <option value="all">All Data Types</option>
+            <option value="number">Numbers</option>
+            <option value="string">Strings</option>
+            <option value="object">Objects</option>
+            <option value="mixed">Mixed</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <div class="filter-label">Browser</div>
+          <select id="browserFilter" class="filter-select">
+            <option value="all">All Browsers</option>
+          </select>
+        </div>
+      </div>
+      
+      <div id="overviewChartContainer" class="chart-container">
+        <canvas id="overviewChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="dashboard-section">
+      <div class="dashboard-header">
+        <div class="dashboard-title">Browser Comparison</div>
+      </div>
+      
+      <div id="browserComparisonChartContainer" class="chart-container">
+        <canvas id="browserComparisonChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="dashboard-section">
+      <div class="dashboard-header">
+        <div class="dashboard-title">Tier Performance</div>
+      </div>
+      
+      <div id="tierPerformanceChartContainer" class="chart-container">
+        <canvas id="tierPerformanceChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="dashboard-section">
+      <div class="dashboard-header">
+        <div class="dashboard-title">Input Size Impact</div>
+      </div>
+      
+      <div id="inputSizeChartContainer" class="chart-container">
+        <canvas id="inputSizeChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="dashboard-section">
+      <div class="dashboard-header">
+        <div class="dashboard-title">Raw Data</div>
+      </div>
+      
+      <div id="dataTableContainer">
+        <table id="dataTable" class="data-table">
+          <thead>
+            <tr>
+              <th>Browser</th>
+              <th>OS</th>
+              <th>Device</th>
+              <th>Operation</th>
+              <th>Size</th>
+              <th>Data Type</th>
+              <th>Tier</th>
+              <th>Execution Time (ms)</th>
+            </tr>
+          </thead>
+          <tbody id="dataTableBody">
+            <!-- Data will be populated here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    <p>&copy; 2023 Reduct Library</p>
+  </footer>
+  
+  <script>
+    // Dashboard state
+    let benchmarkData = [];
+    let filteredData = [];
+    let browsers = [];
+    let operations = ['map', 'filter', 'reduce', 'sort', 'find'];
+    let sizeCategories = ['tiny', 'small', 'medium', 'large', 'very_large'];
+    let dataTypeCategories = ['number', 'string', 'object', 'mixed'];
+    let tiers = ['JS_PREFERRED', 'CONDITIONAL', 'HIGH_VALUE'];
+    
+    // Charts
+    let overviewChart;
+    let browserComparisonChart;
+    let tierPerformanceChart;
+    let inputSizeChart;
+    
+    // Initialize the dashboard
+    document.addEventListener('DOMContentLoaded', () => {
+      // Add event listeners
+      document.getElementById('refreshButton').addEventListener('click', fetchData);
+      document.getElementById('operationFilter').addEventListener('change', applyFilters);
+      document.getElementById('sizeFilter').addEventListener('change', applyFilters);
+      document.getElementById('dataTypeFilter').addEventListener('change', applyFilters);
+      document.getElementById('browserFilter').addEventListener('change', applyFilters);
+      
+      // Fetch initial data
+      fetchData();
+    });
+    
+    // Fetch benchmark data from the server
+    async function fetchData() {
+      try {
+        // Show loading indicators
+        showLoading();
+        
+        // Fetch aggregated benchmark results
+        const response = await fetch('/api/benchmark-results/aggregated');
+        benchmarkData = await response.json();
+        
+        // Extract unique browsers
+        browsers = [...new Set(benchmarkData.map(result => result.browser))];
+        
+        // Populate browser filter
+        const browserFilter = document.getElementById('browserFilter');
+        browserFilter.innerHTML = '<option value="all">All Browsers</option>';
+        
+        for (const browser of browsers) {
+          const option = document.createElement('option');
+          option.value = browser;
+          option.textContent = browser;
+          browserFilter.appendChild(option);
+        }
+        
+        // Apply filters and update charts
+        applyFilters();
+        
+        // Hide loading indicators
+        hideLoading();
+      } catch (error) {
+        console.error('Error fetching benchmark data:', error);
+        alert('Error fetching benchmark data. Please try again.');
+        hideLoading();
+      }
+    }
+    
+    // Apply filters to the benchmark data
+    function applyFilters() {
+      // Get filter values
+      const operationFilter = document.getElementById('operationFilter').value;
+      const sizeFilter = document.getElementById('sizeFilter').value;
+      const dataTypeFilter = document.getElementById('dataTypeFilter').value;
+      const browserFilter = document.getElementById('browserFilter').value;
+      
+      // Filter the data
+      filteredData = benchmarkData.filter(result => {
+        if (operationFilter !== 'all' && result.operation !== operationFilter) return false;
+        if (sizeFilter !== 'all' && result.sizeCategory !== sizeFilter) return false;
+        if (dataTypeFilter !== 'all' && result.dataTypeCategory !== dataTypeFilter) return false;
+        if (browserFilter !== 'all' && result.browser !== browserFilter) return false;
+        return true;
+      });
+      
+      // Update charts and table
+      updateOverviewChart();
+      updateBrowserComparisonChart();
+      updateTierPerformanceChart();
+      updateInputSizeChart();
+      updateDataTable();
+    }
+    
+    // Update the overview chart
+    function updateOverviewChart() {
+      const ctx = document.getElementById('overviewChart').getContext('2d');
+      
+      // Group data by operation
+      const operationData = {};
+      
+      for (const operation of operations) {
+        operationData[operation] = {
+          js: [],
+          conditional: [],
+          highValue: []
+        };
+      }
+      
+      for (const result of filteredData) {
+        if (!operationData[result.operation]) continue;
+        
+        if (result.tier === 'JS_PREFERRED') {
+          operationData[result.operation].js.push(result.averageExecutionTime);
+        } else if (result.tier === 'CONDITIONAL') {
+          operationData[result.operation].conditional.push(result.averageExecutionTime);
+        } else if (result.tier === 'HIGH_VALUE') {
+          operationData[result.operation].highValue.push(result.averageExecutionTime);
+        }
+      }
+      
+      // Calculate average execution time for each operation and tier
+      const labels = [];
+      const jsData = [];
+      const conditionalData = [];
+      const highValueData = [];
+      
+      for (const operation of operations) {
+        if (operationData[operation].js.length === 0 &&
+            operationData[operation].conditional.length === 0 &&
+            operationData[operation].highValue.length === 0) {
+          continue;
+        }
+        
+        labels.push(operation);
+        
+        const jsAvg = operationData[operation].js.length > 0
+          ? operationData[operation].js.reduce((sum, time) => sum + time, 0) / operationData[operation].js.length
+          : 0;
+        
+        const conditionalAvg = operationData[operation].conditional.length > 0
+          ? operationData[operation].conditional.reduce((sum, time) => sum + time, 0) / operationData[operation].conditional.length
+          : 0;
+        
+        const highValueAvg = operationData[operation].highValue.length > 0
+          ? operationData[operation].highValue.reduce((sum, time) => sum + time, 0) / operationData[operation].highValue.length
+          : 0;
+        
+        jsData.push(jsAvg);
+        conditionalData.push(conditionalAvg);
+        highValueData.push(highValueAvg);
+      }
+      
+      // Create or update the chart
+      if (overviewChart) {
+        overviewChart.data.labels = labels;
+        overviewChart.data.datasets[0].data = jsData;
+        overviewChart.data.datasets[1].data = conditionalData;
+        overviewChart.data.datasets[2].data = highValueData;
+        overviewChart.update();
+      } else {
+        overviewChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'JavaScript',
+                data: jsData,
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                borderColor: 'rgb(255, 99, 132)',
+                borderWidth: 1
+              },
+              {
+                label: 'Conditional',
+                data: conditionalData,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgb(54, 162, 235)',
+                borderWidth: 1
+              },
+              {
+                label: 'High Value',
+                data: highValueData,
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                borderColor: 'rgb(75, 192, 192)',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Execution Time (ms)'
+                }
+              }
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: 'Average Execution Time by Operation and Tier'
+              }
+            }
+          }
+        });
+      }
+    }
+    
+    // Update the browser comparison chart
+    function updateBrowserComparisonChart() {
+      const ctx = document.getElementById('browserComparisonChart').getContext('2d');
+      
+      // Group data by browser
+      const browserData = {};
+      
+      for (const browser of browsers) {
+        browserData[browser] = {
+          js: [],
+          conditional: [],
+          highValue: []
+        };
+      }
+      
+      for (const result of filteredData) {
+        if (!browserData[result.browser]) continue;
+        
+        if (result.tier === 'JS_PREFERRED') {
+          browserData[result.browser].js.push(result.averageExecutionTime);
+        } else if (result.tier === 'CONDITIONAL') {
+          browserData[result.browser].conditional.push(result.averageExecutionTime);
+        } else if (result.tier === 'HIGH_VALUE') {
+          browserData[result.browser].highValue.push(result.averageExecutionTime);
+        }
+      }
+      
+      // Calculate average execution time for each browser and tier
+      const labels = [];
+      const jsData = [];
+      const conditionalData = [];
+      const highValueData = [];
+      
+      for (const browser of browsers) {
+        if (browserData[browser].js.length === 0 &&
+            browserData[browser].conditional.length === 0 &&
+            browserData[browser].highValue.length === 0) {
+          continue;
+        }
+        
+        labels.push(browser);
+        
+        const jsAvg = browserData[browser].js.length > 0
+          ? browserData[browser].js.reduce((sum, time) => sum + time, 0) / browserData[browser].js.length
+          : 0;
+        
+        const conditionalAvg = browserData[browser].conditional.length > 0
+          ? browserData[browser].conditional.reduce((sum, time) => sum + time, 0) / browserData[browser].conditional.length
+          : 0;
+        
+        const highValueAvg = browserData[browser].highValue.length > 0
+          ? browserData[browser].highValue.reduce((sum, time) => sum + time, 0) / browserData[browser].highValue.length
+          : 0;
+        
+        jsData.push(jsAvg);
+        conditionalData.push(conditionalAvg);
+        highValueData.push(highValueAvg);
+      }
+      
+      // Create or update the chart
+      if (browserComparisonChart) {
+        browserComparisonChart.data.labels = labels;
+        browserComparisonChart.data.datasets[0].data = jsData;
+        browserComparisonChart.data.datasets[1].data = conditionalData;
+        browserComparisonChart.data.datasets[2].data = highValueData;
+        browserComparisonChart.update();
+      } else {
+        browserComparisonChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'JavaScript',
+                data: jsData,
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                borderColor: 'rgb(255, 99, 132)',
+                borderWidth: 1
+              },
+              {
+                label: 'Conditional',
+                data: conditionalData,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgb(54, 162, 235)',
+                borderWidth: 1
+              },
+              {
+                label: 'High Value',
+                data: highValueData,
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                borderColor: 'rgb(75, 192, 192)',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Execution Time (ms)'
+                }
+              }
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: 'Average Execution Time by Browser and Tier'
+              }
+            }
+          }
+        });
+      }
+    }
+    
+    // Update the tier performance chart
+    function updateTierPerformanceChart() {
+      const ctx = document.getElementById('tierPerformanceChart').getContext('2d');
+      
+      // Group data by tier and data type
+      const tierData = {};
+      
+      for (const tier of tiers) {
+        tierData[tier] = {};
+        
+        for (const dataType of dataTypeCategories) {
+          tierData[tier][dataType] = [];
+        }
+      }
+      
+      for (const result of filteredData) {
+        if (!tierData[result.tier] || !tierData[result.tier][result.dataTypeCategory]) continue;
+        
+        tierData[result.tier][result.dataTypeCategory].push(result.averageExecutionTime);
+      }
+      
+      // Calculate average execution time for each tier and data type
+      const labels = dataTypeCategories.filter(dataType => {
+        return tiers.some(tier => tierData[tier][dataType].length > 0);
+      });
+      
+      const datasets = tiers.map(tier => {
+        const data = labels.map(dataType => {
+          if (tierData[tier][dataType].length === 0) return 0;
+          
+          return tierData[tier][dataType].reduce((sum, time) => sum + time, 0) / tierData[tier][dataType].length;
+        });
+        
+        return {
+          label: tier,
+          data,
+          backgroundColor: tier === 'JS_PREFERRED'
+            ? 'rgba(255, 99, 132, 0.5)'
+            : tier === 'CONDITIONAL'
+              ? 'rgba(54, 162, 235, 0.5)'
+              : 'rgba(75, 192, 192, 0.5)',
+          borderColor: tier === 'JS_PREFERRED'
+            ? 'rgb(255, 99, 132)'
+            : tier === 'CONDITIONAL'
+              ? 'rgb(54, 162, 235)'
+              : 'rgb(75, 192, 192)',
+          borderWidth: 1
+        };
+      });
+      
+      // Create or update the chart
+      if (tierPerformanceChart) {
+        tierPerformanceChart.data.labels = labels;
+        tierPerformanceChart.data.datasets = datasets;
+        tierPerformanceChart.update();
+      } else {
+        tierPerformanceChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Execution Time (ms)'
+                }
+              }
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: 'Average Execution Time by Tier and Data Type'
+              }
+            }
+          }
+        });
+      }
+    }
+    
+    // Update the input size chart
+    function updateInputSizeChart() {
+      const ctx = document.getElementById('inputSizeChart').getContext('2d');
+      
+      // Group data by input size and tier
+      const sizeData = {};
+      
+      for (const result of filteredData) {
+        const size = result.inputSize;
+        
+        if (!sizeData[size]) {
+          sizeData[size] = {
+            JS_PREFERRED: [],
+            CONDITIONAL: [],
+            HIGH_VALUE: []
+          };
+        }
+        
+        sizeData[size][result.tier].push(result.averageExecutionTime);
+      }
+      
+      // Calculate average execution time for each input size and tier
+      const sizes = Object.keys(sizeData).map(Number).sort((a, b) => a - b);
+      
+      const jsData = [];
+      const conditionalData = [];
+      const highValueData = [];
+      
+      for (const size of sizes) {
+        const jsAvg = sizeData[size].JS_PREFERRED.length > 0
+          ? sizeData[size].JS_PREFERRED.reduce((sum, time) => sum + time, 0) / sizeData[size].JS_PREFERRED.length
+          : null;
+        
+        const conditionalAvg = sizeData[size].CONDITIONAL.length > 0
+          ? sizeData[size].CONDITIONAL.reduce((sum, time) => sum + time, 0) / sizeData[size].CONDITIONAL.length
+          : null;
+        
+        const highValueAvg = sizeData[size].HIGH_VALUE.length > 0
+          ? sizeData[size].HIGH_VALUE.reduce((sum, time) => sum + time, 0) / sizeData[size].HIGH_VALUE.length
+          : null;
+        
+        jsData.push({ x: size, y: jsAvg });
+        conditionalData.push({ x: size, y: conditionalAvg });
+        highValueData.push({ x: size, y: highValueAvg });
+      }
+      
+      // Create or update the chart
+      if (inputSizeChart) {
+        inputSizeChart.data.datasets[0].data = jsData;
+        inputSizeChart.data.datasets[1].data = conditionalData;
+        inputSizeChart.data.datasets[2].data = highValueData;
+        inputSizeChart.update();
+      } else {
+        inputSizeChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            datasets: [
+              {
+                label: 'JavaScript',
+                data: jsData,
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                tension: 0.1
+              },
+              {
+                label: 'Conditional',
+                data: conditionalData,
+                borderColor: 'rgb(54, 162, 235)',
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                tension: 0.1
+              },
+              {
+                label: 'High Value',
+                data: highValueData,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                tension: 0.1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                type: 'logarithmic',
+                title: {
+                  display: true,
+                  text: 'Input Size (log scale)'
+                }
+              },
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Execution Time (ms)'
+                }
+              }
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: 'Execution Time by Input Size and Tier'
+              }
+            }
+          }
+        });
+      }
+    }
+    
+    // Update the data table
+    function updateDataTable() {
+      const tableBody = document.getElementById('dataTableBody');
+      tableBody.innerHTML = '';
+      
+      // Sort data by browser, operation, size, data type, and tier
+      const sortedData = [...filteredData].sort((a, b) => {
+        if (a.browser !== b.browser) return a.browser.localeCompare(b.browser);
+        if (a.operation !== b.operation) return a.operation.localeCompare(b.operation);
+        if (a.inputSize !== b.inputSize) return a.inputSize - b.inputSize;
+        if (a.dataTypeCategory !== b.dataTypeCategory) return a.dataTypeCategory.localeCompare(b.dataTypeCategory);
+        return a.tier.localeCompare(b.tier);
+      });
+      
+      // Add rows to the table
+      for (const result of sortedData) {
+        const row = document.createElement('tr');
+        
+        row.innerHTML = `
+          <td>${result.browser}</td>
+          <td>${result.os}</td>
+          <td>${result.deviceType}</td>
+          <td>${result.operation}</td>
+          <td>${result.sizeCategory} (${result.inputSize})</td>
+          <td>${result.dataTypeCategory}</td>
+          <td>${result.tier}</td>
+          <td>${result.averageExecutionTime.toFixed(2)}</td>
+        `;
+        
+        tableBody.appendChild(row);
+      }
+    }
+    
+    // Show loading indicators
+    function showLoading() {
+      const containers = [
+        'overviewChartContainer',
+        'browserComparisonChartContainer',
+        'tierPerformanceChartContainer',
+        'inputSizeChartContainer',
+        'dataTableContainer'
+      ];
+      
+      for (const containerId of containers) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `
+          <div class="loading">
+            <div class="loading-spinner"></div>
+          </div>
+        `;
+      }
+    }
+    
+    // Hide loading indicators
+    function hideLoading() {
+      const containers = [
+        'overviewChartContainer',
+        'browserComparisonChartContainer',
+        'tierPerformanceChartContainer',
+        'inputSizeChartContainer',
+        'dataTableContainer'
+      ];
+      
+      for (const containerId of containers) {
+        const container = document.getElementById(containerId);
+        
+        if (containerId === 'overviewChartContainer') {
+          container.innerHTML = '<canvas id="overviewChart"></canvas>';
+        } else if (containerId === 'browserComparisonChartContainer') {
+          container.innerHTML = '<canvas id="browserComparisonChart"></canvas>';
+        } else if (containerId === 'tierPerformanceChartContainer') {
+          container.innerHTML = '<canvas id="tierPerformanceChart"></canvas>';
+        } else if (containerId === 'inputSizeChartContainer') {
+          container.innerHTML = '<canvas id="inputSizeChart"></canvas>';
+        } else if (containerId === 'dataTableContainer') {
+          container.innerHTML = `
+            <table id="dataTable" class="data-table">
+              <thead>
+                <tr>
+                  <th>Browser</th>
+                  <th>OS</th>
+                  <th>Device</th>
+                  <th>Operation</th>
+                  <th>Size</th>
+                  <th>Data Type</th>
+                  <th>Tier</th>
+                  <th>Execution Time (ms)</th>
+                </tr>
+              </thead>
+              <tbody id="dataTableBody">
+                <!-- Data will be populated here -->
+              </tbody>
+            </table>
+          `;
+        }
+      }
+    }
+  </script>
+</body>
+</html>

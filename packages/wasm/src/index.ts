@@ -30,6 +30,10 @@ export {
   AcceleratorPerformanceStats,
   TieringStrategy,
   TieredSortAccelerator,
+  HybridAccelerator,
+  HybridAcceleratorFactory,
+  HybridAcceleratorManager,
+  HybridStringAccelerator,
 } from './accelerators';
 
 // Export list accelerators
