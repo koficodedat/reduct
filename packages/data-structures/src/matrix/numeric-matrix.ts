@@ -6,8 +6,8 @@
  * @packageDocumentation
  */
 
-import { INumericMatrix, INumericMatrixFactory } from './types';
 import { Matrix, MatrixFactory } from './matrix';
+import { INumericMatrix, INumericMatrixFactory } from './types';
 
 /**
  * NumericMatrix implementation
@@ -285,7 +285,7 @@ export class NumericMatrix extends Matrix<number> implements INumericMatrix {
       if (discriminant < 0) {
         // Complex eigenvalues
         const real = trace / 2;
-        const imag = Math.sqrt(-discriminant) / 2;
+        const _imag = Math.sqrt(-discriminant) / 2; // Imaginary part not used in this implementation
         return [real, real]; // Return only real parts for now
       } else {
         const lambda1 = (trace + Math.sqrt(discriminant)) / 2;

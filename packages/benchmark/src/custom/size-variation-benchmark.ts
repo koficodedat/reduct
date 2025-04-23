@@ -4,10 +4,11 @@
  * Tests performance of List vs. native arrays across different collection sizes
  */
 
-import { List } from '@reduct/data-structures';
-import { performance } from 'perf_hooks';
 import * as fs from 'fs';
 import * as path from 'path';
+import { performance } from 'perf_hooks';
+
+import { List } from '@reduct/data-structures';
 
 // Size categories to test
 const SIZE_CATEGORIES = [10, 100, 1000, 10000, 100000];

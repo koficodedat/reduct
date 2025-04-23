@@ -2,8 +2,9 @@
  * Browser-based benchmark UI
  */
 
-import { BrowserBenchmarkRunner, BrowserBenchmarkResult, BrowserBenchmarkConfig } from './browser-benchmark-runner';
 import { InputSizeCategory, DataTypeCategory } from '../suites/wasm-optimization/input-size-benchmark';
+
+import { BrowserBenchmarkRunner, BrowserBenchmarkResult, BrowserBenchmarkConfig } from './browser-benchmark-runner';
 
 // Mock implementation for AcceleratorTier
 enum AcceleratorTier {

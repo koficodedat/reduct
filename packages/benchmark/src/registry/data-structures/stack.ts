@@ -11,8 +11,8 @@
 
 // Use the temporary Stack implementation from the benchmark package
 import { Stack } from '../../data-structures/stack';
-import { Registry, Implementation } from '../types';
 import { generateRandomArray } from '../../utils';
+import { Registry, Implementation } from '../types';
 
 /**
  * Reduct Stack implementation

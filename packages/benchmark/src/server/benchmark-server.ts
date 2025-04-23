@@ -37,6 +37,7 @@ express.static = (_path: string) => (_req: any, _res: any, next: any) => { next(
 const cors = () => (_req: any, _res: any, next: any) => { next(); };
 import fs from 'fs';
 import path from 'path';
+
 import { BrowserBenchmarkResult } from '../browser/browser-benchmark-runner';
 
 /**

@@ -1,9 +1,9 @@
 /**
  * Template Engine
- * 
+ *
  * Provides a simple template engine for rendering benchmark results
  * in different formats.
- * 
+ *
  * @packageDocumentation
  */
 
@@ -16,7 +16,7 @@ export interface TemplateContext {
   /** Template options */
   options?: TemplateOptions;
   /** Helper functions */
-  helpers?: Record<string, Function>;
+  helpers?: Record<string, (...args: any[]) => any>;
 }
 
 /**
@@ -60,7 +60,7 @@ const templates: Record<string, Template> = {};
 
 /**
  * Registers a template
- * 
+ *
  * @param template - Template to register
  */
 export function registerTemplate(template: Template): void {
@@ -69,7 +69,7 @@ export function registerTemplate(template: Template): void {
 
 /**
  * Gets a template by name
- * 
+ *
  * @param name - Template name
  * @returns Template or undefined if not found
  */
@@ -79,7 +79,7 @@ export function getTemplate(name: string): Template | undefined {
 
 /**
  * Gets all templates
- * 
+ *
  * @returns All registered templates
  */
 export function getAllTemplates(): Template[] {
@@ -88,7 +88,7 @@ export function getAllTemplates(): Template[] {
 
 /**
  * Gets templates by format
- * 
+ *
  * @param format - Template format
  * @returns Templates with the specified format
  */
@@ -98,7 +98,7 @@ export function getTemplatesByFormat(format: string): Template[] {
 
 /**
  * Renders a template with the given context
- * 
+ *
  * @param templateName - Template name
  * @param context - Template context
  * @returns Rendered template
@@ -108,7 +108,7 @@ export function renderTemplate(templateName: string, context: TemplateContext): 
   if (!template) {
     throw new Error(`Template '${templateName}' not found`);
   }
-  
+
   // Process template inheritance
   let content = template.content;
   if (template.parent) {
@@ -116,10 +116,10 @@ export function renderTemplate(templateName: string, context: TemplateContext): 
     if (!parentTemplate) {
       throw new Error(`Parent template '${template.parent}' not found`);
     }
-    
+
     // Start with parent content
     content = parentTemplate.content;
-    
+
     // Replace blocks
     if (template.blocks) {
       for (const [blockName, blockContent] of Object.entries(template.blocks)) {
@@ -128,7 +128,7 @@ export function renderTemplate(templateName: string, context: TemplateContext): 
       }
     }
   }
-  
+
   // Process includes
   const includeRegex = /\{\{\s*include\s+([a-zA-Z0-9_-]+)\s*\}\}/g;
   let match;
@@ -140,22 +140,22 @@ export function renderTemplate(templateName: string, context: TemplateContext): 
     }
     content = content.replace(match[0], includeTemplate.content);
   }
-  
+
   // Process conditionals
   content = processConditionals(content, context);
-  
+
   // Process loops
   content = processLoops(content, context);
-  
+
   // Process variables
   content = processVariables(content, context);
-  
+
   return content;
 }
 
 /**
  * Processes conditional statements in a template
- * 
+ *
  * @param content - Template content
  * @param context - Template context
  * @returns Processed content
@@ -178,7 +178,7 @@ function processConditionals(content: string, context: TemplateContext): string 
 
 /**
  * Processes loop statements in a template
- * 
+ *
  * @param content - Template content
  * @param context - Template context
  * @returns Processed content
@@ -191,12 +191,12 @@ function processLoops(content: string, context: TemplateContext): string {
       // Create a function to evaluate the collection
       const collectionFn = new Function('data', 'options', 'helpers', `return ${collection};`);
       const items = collectionFn(context.data, context.options, context.helpers);
-      
+
       if (!Array.isArray(items)) {
         console.error(`Collection '${collection}' is not an array`);
         return '';
       }
-      
+
       // Process each item in the collection
       return items.map(item => {
         // Create a new context with the item
@@ -207,7 +207,7 @@ function processLoops(content: string, context: TemplateContext): string {
             [itemName]: item,
           },
         };
-        
+
         // Process the loop content with the item context
         let itemContent = loopContent;
         itemContent = processConditionals(itemContent, itemContext);
@@ -223,7 +223,7 @@ function processLoops(content: string, context: TemplateContext): string {
 
 /**
  * Processes variables in a template
- * 
+ *
  * @param content - Template content
  * @param context - Template context
  * @returns Processed content
@@ -236,7 +236,7 @@ function processVariables(content: string, context: TemplateContext): string {
     if (/^\s*(block|include|if|else|endif|for|endfor)\s/.test(variable)) {
       return match;
     }
-    
+
     try {
       // Create a function to evaluate the variable
       const variableFn = new Function('data', 'options', 'helpers', `return ${variable};`);
@@ -255,17 +255,17 @@ function processVariables(content: string, context: TemplateContext): string {
 export const defaultHelpers = {
   /**
    * Formats a number with thousands separator
-   * 
+   *
    * @param value - Number to format
    * @returns Formatted number
    */
   formatNumber: (value: number): string => {
     return value.toLocaleString();
   },
-  
+
   /**
    * Formats a date
-   * 
+   *
    * @param value - Date to format
    * @param format - Date format (default: ISO string)
    * @returns Formatted date
@@ -274,7 +274,7 @@ export const defaultHelpers = {
     if (!format) {
       return value.toISOString();
     }
-    
+
     // Simple date formatting
     const year = value.getFullYear();
     const month = String(value.getMonth() + 1).padStart(2, '0');
@@ -282,7 +282,7 @@ export const defaultHelpers = {
     const hours = String(value.getHours()).padStart(2, '0');
     const minutes = String(value.getMinutes()).padStart(2, '0');
     const seconds = String(value.getSeconds()).padStart(2, '0');
-    
+
     return format
       .replace('YYYY', String(year))
       .replace('MM', month)
@@ -291,10 +291,10 @@ export const defaultHelpers = {
       .replace('mm', minutes)
       .replace('ss', seconds);
   },
-  
+
   /**
    * Truncates a string to a maximum length
-   * 
+   *
    * @param value - String to truncate
    * @param maxLength - Maximum length
    * @param suffix - Suffix to add if truncated (default: '...')
@@ -306,10 +306,10 @@ export const defaultHelpers = {
     }
     return value.substring(0, maxLength) + suffix;
   },
-  
+
   /**
    * Escapes HTML special characters
-   * 
+   *
    * @param value - String to escape
    * @returns Escaped string
    */
@@ -321,10 +321,10 @@ export const defaultHelpers = {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
   },
-  
+
   /**
    * Converts a value to JSON
-   * 
+   *
    * @param value - Value to convert
    * @param pretty - Whether to pretty-print the JSON (default: true)
    * @returns JSON string

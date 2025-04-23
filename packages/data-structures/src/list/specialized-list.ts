@@ -5,12 +5,13 @@
  * specific data types like numbers, strings, and object references.
  */
 
-import { IList } from './types';
-import List from './index';
-import { DataType, detectDataType } from './type-detection';
 import * as numericOps from './numeric-operations';
-import * as stringOps from './string-operations';
 import * as objectOps from './object-operations';
+import * as stringOps from './string-operations';
+import { DataType, detectDataType } from './type-detection';
+import { IList } from './types';
+
+import List from './index';
 
 /**
  * Create a specialized list for numeric data

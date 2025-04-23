@@ -6,8 +6,9 @@
  * the smallest performance gap compared to native arrays.
  */
 
-import { IList, TransientList } from '../types';
 import { getPooledArray, releasePooledArray } from '../../memory/pool';
+import { IList, TransientList } from '../types';
+
 import { CompactList } from './compact-list';
 
 /**

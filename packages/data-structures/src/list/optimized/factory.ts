@@ -5,18 +5,22 @@
  * list implementation based on our benchmark findings.
  */
 
+// Internal shared types
+import { DataType } from '@reduct/shared-types/data-structures';
+
+// Local imports from the same package
+import { isWebAssemblySupported } from '../../utils/mock-wasm';
+import { HAMTPersistentVector } from '../hamt-persistent-vector';
+import { detectDataType, isObjectArray } from '../type-detection';
 import { IList } from '../types';
+import { WasmHAMTPersistentVector } from '../wasm-hamt-persistent-vector';
+
 import { CompactList } from './compact-list';
 import { NumericList } from './numeric-list';
-import { StringList } from './string-list';
 import { ObjectList } from './object-list';
+import { StringList } from './string-list';
 import { WasmNumericList } from './wasm-numeric-list';
-import { detectDataType, isObjectArray } from '../type-detection';
-import { DataType } from '@reduct/shared-types/data-structures';
-import { HAMTPersistentVector } from '../hamt-persistent-vector';
-import { WasmHAMTPersistentVector } from '../wasm-hamt-persistent-vector';
-// Import from our mock implementation
-import { isWebAssemblySupported } from '../../utils/mock-wasm';
+
 
 // Size threshold based on benchmark results
 const SMALL_LIST_THRESHOLD = 100;

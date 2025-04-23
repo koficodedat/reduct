@@ -1,6 +1,6 @@
-import { WasmAccelerator } from '../wasm-accelerator';
-import { PerformanceProfile, AcceleratorOptions, AcceleratorTier } from '../accelerator';
 import { WebAssemblyFeature } from '../../core/feature-detection';
+import { PerformanceProfile, AcceleratorOptions, AcceleratorTier } from '../accelerator';
+import { WasmAccelerator } from '../wasm-accelerator';
 
 /**
  * Numeric array operations accelerator

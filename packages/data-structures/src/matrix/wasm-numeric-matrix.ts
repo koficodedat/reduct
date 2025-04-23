@@ -6,9 +6,14 @@
  * @packageDocumentation
  */
 
-import { INumericMatrix, INumericMatrixFactory } from './types';
-import { NumericMatrix, NumericMatrixFactory } from './numeric-matrix';
+// External libraries
+import { performance } from 'perf_hooks';
+
+// Local imports from the same package
 import { isWebAssemblySupported } from '../utils/mock-wasm';
+
+import { NumericMatrix, NumericMatrixFactory } from './numeric-matrix';
+import { INumericMatrix, INumericMatrixFactory as _INumericMatrixFactory } from './types';
 
 // Import types for testing
 interface MatrixMultiplyInput {
@@ -28,11 +33,11 @@ enum AcceleratorTier {
 
 // Mock MatrixAccelerator for testing
 class MatrixAccelerator {
-  constructor(options?: any) {}
+  constructor(_options?: any) {}
 
   multiply(input: MatrixMultiplyInput): number[] {
     // Mock implementation that just performs the multiplication in JavaScript
-    const { a, b, aRows, aCols, bRows, bCols } = input;
+    const { a, b, aRows, aCols, _bRows, bCols } = input;
     const result = new Array(aRows * bCols).fill(0);
     for (let i = 0; i < aRows; i++) {
       for (let j = 0; j < bCols; j++) {

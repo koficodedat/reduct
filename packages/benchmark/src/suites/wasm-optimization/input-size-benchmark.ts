@@ -2,18 +2,15 @@
  * Benchmark suite for testing WebAssembly performance across different input sizes
  */
 
+// Internal shared types
+import { AcceleratorTier } from '@reduct/shared-types/wasm/accelerator';
+
+// Local imports from the same package
 import { BenchmarkResult, BenchmarkSuite } from '../../types';
 import { benchmark as runBenchmark } from '../../utils';
 
-// Mock implementations for WebAssembly accelerator types
-enum AcceleratorTier {
-  JS_PREFERRED = 'js-preferred',
-  CONDITIONAL = 'conditional',
-  HIGH_VALUE = 'high-value'
-}
-
 class HybridAccelerator {
-  constructor(name: string, dataType: string, operation: string, options: any) {}
+  constructor(_name: string, _dataType: string, _operation: string, _options: any) {}
   determineTier: () => AcceleratorTier = () => AcceleratorTier.JS_PREFERRED;
   execute(input: any): any {
     return input;

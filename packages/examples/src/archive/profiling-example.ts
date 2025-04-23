@@ -2,6 +2,9 @@
  * Example demonstrating the profiling system
  */
 
+import fs from 'fs';
+import path from 'path';
+
 import { List } from '@reduct/data-structures';
 import { 
   enableProfiling, 
@@ -15,15 +18,13 @@ import {
   clearChunkPoolStats 
 } from '@reduct/data-structures/src/profiling/chunk-pool-monitor';
 import { 
-  generateNodeCacheReport, 
-  clearNodeCacheStats 
-} from '@reduct/data-structures/src/profiling/node-cache-monitor';
-import { 
   generateMemoryReport, 
   clearMemoryStats 
 } from '@reduct/data-structures/src/profiling/memory-monitor';
-import fs from 'fs';
-import path from 'path';
+import { 
+  generateNodeCacheReport, 
+  clearNodeCacheStats 
+} from '@reduct/data-structures/src/profiling/node-cache-monitor';
 
 // Enable profiling with custom options
 enableProfiling({

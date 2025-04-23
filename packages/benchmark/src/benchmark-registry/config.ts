@@ -5,6 +5,7 @@
  */
 
 import { BenchmarkConfig } from './types';
+
 import { BenchmarkRegistry } from './index';
 
 /**

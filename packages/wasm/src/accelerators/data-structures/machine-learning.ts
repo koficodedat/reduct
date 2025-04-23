@@ -1,6 +1,6 @@
-import { WasmAccelerator } from '../wasm-accelerator';
-import { PerformanceProfile, AcceleratorOptions } from '../accelerator';
 import { WebAssemblyFeature } from '../../core/feature-detection';
+import { PerformanceProfile, AcceleratorOptions } from '../accelerator';
+import { WasmAccelerator } from '../wasm-accelerator';
 
 /**
  * Linear regression result interface
@@ -427,7 +427,7 @@ export class MachineLearningAccelerator extends WasmAccelerator {
     }
 
     // Initialize assignments
-    let assignments: number[] = Array(numPoints).fill(0);
+    const assignments: number[] = Array(numPoints).fill(0);
     let converged = false;
     let iteration = 0;
 

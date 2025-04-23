@@ -1,10 +1,11 @@
 /**
  * Base class for WebAssembly accelerators
  */
-import { BaseAccelerator, PerformanceProfile, AcceleratorOptions, AcceleratorTier } from './accelerator';
+import { WasmMemoryPool } from '../core/wasm-memory-pool';
 import { WasmModule } from '../core/wasm-module';
 import { WasmModuleLoader, WasmModuleLoaderConfig } from '../core/wasm-module-loader';
-import { WasmMemoryPool } from '../core/wasm-memory-pool';
+
+import { BaseAccelerator, PerformanceProfile, AcceleratorOptions, AcceleratorTier } from './accelerator';
 
 /**
  * Base class for WebAssembly accelerators

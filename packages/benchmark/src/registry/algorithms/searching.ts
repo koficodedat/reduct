@@ -11,8 +11,8 @@
 
 // Use the temporary implementations from the benchmark package
 import { linearSearch, binarySearch } from '../../algorithms/searching';
-import { Registry, Implementation } from '../types';
 import { generateRandomArray, generateSortedArray } from '../../utils';
+import { Registry, Implementation } from '../types';
 
 // Helper type for searching algorithms
 type SearchingAlgorithm<T, V> = (arr: T[], value: V) => number;

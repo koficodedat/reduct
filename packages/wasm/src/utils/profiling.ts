@@ -2,7 +2,7 @@
  * Profiling utilities for WebAssembly
  */
 
-import { ProfileEntry } from '@reduct/shared-types/wasm';
+import { ProfileEntry } from '@reduct/shared-types/wasm/profiling';
 
 /**
  * Profiler for WebAssembly operations

@@ -7,7 +7,7 @@
  * @packageDocumentation
  */
 
-import { OperationCategory, OperationComplexity, BenchmarkOperationMetadata } from '@reduct/shared-types/benchmark';
+import { BenchmarkOperationMetadata } from '@reduct/shared-types/benchmark';
 
 /**
  * Operation metadata

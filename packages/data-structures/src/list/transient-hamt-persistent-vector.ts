@@ -4,9 +4,9 @@
  * A mutable version of HAMTPersistentVector for efficient batch operations.
  */
 
-import { TransientList } from './types';
 import { HAMTNode } from './hamt-node';
 import { HAMTPersistentVector } from './hamt-persistent-vector';
+import { TransientList } from './types';
 
 // Constants
 const BITS_PER_LEVEL = 5;

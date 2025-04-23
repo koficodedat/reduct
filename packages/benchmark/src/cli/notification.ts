@@ -2,11 +2,14 @@
 /**
  * CLI script to send notifications about performance regressions
  */
-import { detectRegressions } from '../utils/regression-detection';
-import { sendNotifications, NotificationChannel } from '../utils/notification';
+import * as path from 'path';
+
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import * as path from 'path';
+
+import { sendNotifications, NotificationChannel } from '../utils/notification';
+import { detectRegressions } from '../utils/regression-detection';
+
 
 // Parse command line arguments
 const argv = yargs(hideBin(process.argv))

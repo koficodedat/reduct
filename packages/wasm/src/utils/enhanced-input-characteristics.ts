@@ -5,16 +5,17 @@
  * when to use WebAssembly and which implementation strategy to use.
  */
 
-import { InputCharacteristicsAnalyzer } from './input-characteristics';
 import {
   InputCharacteristics,
   InputSizeCategory,
   InputDataType,
-  InputDensityCategory,
+  InputDensityCategory as _InputDensityCategory,
   InputValueRangeCategory,
   EnhancedInputCharacteristics,
   ProcessingStrategy
 } from '@reduct/shared-types/utils';
+
+import { InputCharacteristicsAnalyzer } from './input-characteristics';
 
 /**
  * Enhanced input characteristics analyzer

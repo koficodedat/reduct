@@ -1,9 +1,9 @@
 /**
  * WebAssembly accelerators for list operations
  */
-import { BaseAccelerator, PerformanceProfile, AcceleratorOptions } from '../accelerator';
 import { safeWasmOperation } from '../../core/error-handling';
 import { WebAssemblyFeature } from '../../core/feature-detection';
+import { BaseAccelerator, PerformanceProfile, AcceleratorOptions } from '../accelerator';
 
 // Export the list accelerator
 export * from './list-accelerator';

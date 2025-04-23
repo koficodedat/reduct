@@ -1,8 +1,8 @@
 /**
  * WebAssembly module loader and initialization
  */
-import { isWebAssemblySupported } from './feature-detection';
 import { WasmNotSupportedError, WasmLoadError } from './error-handling';
+import { isWebAssemblySupported } from './feature-detection';
 
 /**
  * WebAssembly module interface
@@ -14,21 +14,21 @@ export interface WasmModule {
   get_version(): string;
 
   // List operations
-  vector_map(input: any, mapFn: Function): any;
-  vector_filter(input: any, filterFn: Function): any;
-  vector_reduce(input: any, reduceFn: Function, initial: any): any;
-  vector_sort(input: any, compareFn: Function): any;
-  vector_map_filter(input: any, mapFn: Function, filterFn: Function): any;
-  vector_map_reduce(input: any, mapFn: Function, reduceFn: Function, initial: any): any;
-  vector_filter_reduce(input: any, filterFn: Function, reduceFn: Function, initial: any): any;
-  vector_map_filter_reduce(input: any, mapFn: Function, filterFn: Function, reduceFn: Function, initial: any): any;
+  vector_map(input: any, mapFn: (value: any, index: number) => any): any;
+  vector_filter(input: any, filterFn: (value: any, index: number) => boolean): any;
+  vector_reduce(input: any, reduceFn: (accumulator: any, value: any, index: number) => any, initial: any): any;
+  vector_sort(input: any, compareFn: (a: any, b: any) => number): any;
+  vector_map_filter(input: any, mapFn: (value: any, index: number) => any, filterFn: (value: any, index: number) => boolean): any;
+  vector_map_reduce(input: any, mapFn: (value: any, index: number) => any, reduceFn: (accumulator: any, value: any, index: number) => any, initial: any): any;
+  vector_filter_reduce(input: any, filterFn: (value: any, index: number) => boolean, reduceFn: (accumulator: any, value: any, index: number) => any, initial: any): any;
+  vector_map_filter_reduce(input: any, mapFn: (value: any, index: number) => any, filterFn: (value: any, index: number) => boolean, reduceFn: (accumulator: any, value: any, index: number) => any, initial: any): any;
 
   // Numeric operations
-  numeric_map_f64(input: any, mapFn: Function): any;
-  numeric_filter_f64(input: any, filterFn: Function): any;
-  numeric_reduce_f64(input: any, reduceFn: Function, initial: any): any;
-  numeric_sort_f64(input: any, compareFn?: Function): any;
-  numeric_map_filter_f64(input: any, mapFn: Function, filterFn: Function): any;
+  numeric_map_f64(input: any, mapFn: (value: number, index: number) => number): any;
+  numeric_filter_f64(input: any, filterFn: (value: number, index: number) => boolean): any;
+  numeric_reduce_f64(input: any, reduceFn: (accumulator: number, value: number, index: number) => number, initial: any): any;
+  numeric_sort_f64(input: any, compareFn?: (a: number, b: number) => number): any;
+  numeric_map_filter_f64(input: any, mapFn: (value: number, index: number) => number, filterFn: (value: number, index: number) => boolean): any;
   numeric_sum_f64(input: any): number;
   numeric_average_f64(input: any): number;
   numeric_min_f64(input: any): number;
@@ -214,7 +214,11 @@ export class WasmModuleLoader {
       // Import the WebAssembly module
       // Use a dynamic import with a string literal to avoid TypeScript errors
       const wasmModulePath = '../../../dist/wasm/reduct_wasm.js';
-      const wasmModule = await (Function('return import("' + wasmModulePath + '")')() as Promise<any>);
+      // Using a safer approach than Function constructor
+      const importModule = async (path: string): Promise<any> => {
+        return import(/* webpackIgnore: true */ path);
+      };
+      const wasmModule = await importModule(wasmModulePath);
 
       // Initialize the module
       wasmModule.init_panic_hook();

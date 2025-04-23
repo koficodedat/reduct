@@ -5,8 +5,8 @@
  * common operations based on benchmark results.
  */
 
-import { IList, TransientList } from '../types';
 import { getPooledArray, releasePooledArray } from '../../memory/pool';
+import { IList, TransientList } from '../types';
 
 /**
  * A memory-efficient implementation for small to medium lists

@@ -1,12 +1,12 @@
 /**
  * WebAssembly accelerator for HAMTPersistentVector operations
- * 
+ *
  * Provides WebAssembly-accelerated implementations of common HAMTPersistentVector operations.
  */
 
-import { Accelerator, AcceleratorOptions, AcceleratorTier } from '../accelerator';
 import { safeWasmOperation } from '../../core/error-handling';
-import { getWasmModule } from '../../core/wasm-module';
+import { getWasmModule as _getWasmModule } from '../../core/wasm-module';
+import { Accelerator, AcceleratorOptions, AcceleratorTier } from '../accelerator';
 
 /**
  * Input for path finding operation
@@ -48,7 +48,7 @@ export interface BulkOperationInput {
 
 /**
  * HAMTPersistentVector accelerator
- * 
+ *
  * Provides WebAssembly-accelerated implementations of common HAMTPersistentVector operations.
  */
 export class HAMTVectorAccelerator extends Accelerator<any, any> {
@@ -58,7 +58,7 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
 
   /**
    * Find the path to a node at the specified index
-   * 
+   *
    * @param input The input for the path finding operation
    * @returns The path to the node (array of positions)
    */
@@ -76,7 +76,7 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
 
   /**
    * Find the path to a node at the specified index using WebAssembly
-   * 
+   *
    * @param input The input for the path finding operation
    * @returns The path to the node (array of positions)
    */
@@ -91,7 +91,7 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
       try {
         // Call the WebAssembly implementation
         const result = module.hamt_find_path(input.index, input.height, input.size);
-        
+
         // Convert the result to a JavaScript array
         return Array.from(new Int32Array(result));
       } catch (error) {
@@ -104,7 +104,7 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
 
   /**
    * Find the path to a node at the specified index using JavaScript
-   * 
+   *
    * @param input The input for the path finding operation
    * @returns The path to the node (array of positions)
    */
@@ -113,20 +113,20 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
     const path: number[] = [];
     const BITS_PER_LEVEL = 5;
     const MASK = (1 << BITS_PER_LEVEL) - 1; // 0x1F
-    
+
     // Calculate the positions at each level
     for (let level = height; level >= 0; level--) {
       const shift = level * BITS_PER_LEVEL;
       const position = (index >>> shift) & MASK;
       path.push(position);
     }
-    
+
     return path;
   }
 
   /**
    * Manipulate a node (get, set, or remove a child)
-   * 
+   *
    * @param input The input for the node manipulation operation
    * @returns The result of the operation
    */
@@ -144,7 +144,7 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
 
   /**
    * Manipulate a node using WebAssembly
-   * 
+   *
    * @param input The input for the node manipulation operation
    * @returns The result of the operation
    */
@@ -178,13 +178,13 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
 
   /**
    * Manipulate a node using JavaScript
-   * 
+   *
    * @param input The input for the node manipulation operation
    * @returns The result of the operation
    */
   private manipulateNodeJs(input: NodeManipulationInput): any {
     const { bitmap, position, operation } = input;
-    
+
     switch (operation) {
       case 'get': {
         // Count the number of bits set in the bitmap before the position
@@ -208,7 +208,7 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
 
   /**
    * Perform a bulk operation on a vector
-   * 
+   *
    * @param input The input for the bulk operation
    * @returns The result of the operation
    */
@@ -226,7 +226,7 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
 
   /**
    * Perform a bulk operation using WebAssembly
-   * 
+   *
    * @param input The input for the bulk operation
    * @returns The result of the operation
    */
@@ -241,7 +241,7 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
       try {
         // Convert the data to a typed array for better performance
         const dataArray = new Float64Array(input.data);
-        
+
         // Call the WebAssembly implementation based on the operation
         let result;
         switch (input.operation) {
@@ -260,7 +260,7 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
           default:
             throw new Error(`Unknown operation: ${input.operation}`);
         }
-        
+
         // Convert the result to a JavaScript array
         return Array.from(new Float64Array(result));
       } catch (error) {
@@ -273,16 +273,16 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
 
   /**
    * Perform a bulk operation using JavaScript
-   * 
+   *
    * @param input The input for the bulk operation
    * @returns The result of the operation
    */
   private bulkOperationJs(input: BulkOperationInput): number[] {
     const { data, operation, index, value } = input;
-    
+
     // Create a copy of the data
     const result = [...data];
-    
+
     // Perform the operation
     switch (operation) {
       case 'append':
@@ -300,13 +300,13 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
       default:
         throw new Error(`Unknown operation: ${operation}`);
     }
-    
+
     return result;
   }
 
   /**
    * Determine the appropriate tier for the input
-   * 
+   *
    * @param input The input
    * @returns The appropriate tier
    */
@@ -320,12 +320,12 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
     if ('data' in input) {
       // Bulk operation input
       const dataSize = input.data.length;
-      
+
       // Always use WebAssembly for large arrays
       if (dataSize >= 100000) {
         return AcceleratorTier.HIGH_VALUE;
       }
-      
+
       // Use WebAssembly conditionally for medium-sized arrays
       if (dataSize >= 10000) {
         return AcceleratorTier.CONDITIONAL;
@@ -333,18 +333,18 @@ export class HAMTVectorAccelerator extends Accelerator<any, any> {
     } else if ('height' in input) {
       // Path finding input
       const height = input.height;
-      
+
       // Always use WebAssembly for deep tries
       if (height >= 4) {
         return AcceleratorTier.HIGH_VALUE;
       }
-      
+
       // Use WebAssembly conditionally for medium-depth tries
       if (height >= 2) {
         return AcceleratorTier.CONDITIONAL;
       }
     }
-    
+
     // Use JavaScript for everything else
     return AcceleratorTier.JS_PREFERRED;
   }

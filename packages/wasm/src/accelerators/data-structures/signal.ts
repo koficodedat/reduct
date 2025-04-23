@@ -1,12 +1,12 @@
 /**
  * WebAssembly accelerator for signal processing operations
- * 
+ *
  * Provides WebAssembly-accelerated implementations of common signal processing operations.
  */
 
-import { Accelerator, AcceleratorOptions, AcceleratorTier } from '../accelerator';
 import { safeWasmOperation } from '../../core/error-handling';
-import { getWasmModule } from '../../core/wasm-module';
+import { getWasmModule as _getWasmModule } from '../../core/wasm-module';
+import { Accelerator, AcceleratorOptions, AcceleratorTier } from '../accelerator';
 
 /**
  * Input for FFT operation
@@ -28,7 +28,7 @@ export interface ConvolutionInput {
 
 /**
  * Signal processing accelerator
- * 
+ *
  * Provides WebAssembly-accelerated implementations of common signal processing operations.
  */
 export class SignalAccelerator extends Accelerator<any, any> {
@@ -38,7 +38,7 @@ export class SignalAccelerator extends Accelerator<any, any> {
 
   /**
    * Perform a Fast Fourier Transform (FFT) on a real-valued signal
-   * 
+   *
    * @param input The input signal
    * @returns The FFT result (complex values as alternating real and imaginary parts)
    */
@@ -56,7 +56,7 @@ export class SignalAccelerator extends Accelerator<any, any> {
 
   /**
    * Perform a Fast Fourier Transform (FFT) on a real-valued signal using WebAssembly
-   * 
+   *
    * @param input The input signal
    * @returns The FFT result (complex values as alternating real and imaginary parts)
    */
@@ -77,10 +77,10 @@ export class SignalAccelerator extends Accelerator<any, any> {
 
         // Convert to Float64Array for better performance
         const signalTypedArray = new Float64Array(input.signal);
-        
+
         // Call the WebAssembly implementation
         const result = module.fft_f64(signalTypedArray);
-        
+
         // Convert the result back to a regular array
         return Array.from(new Float64Array(result));
       } catch (error) {
@@ -93,7 +93,7 @@ export class SignalAccelerator extends Accelerator<any, any> {
 
   /**
    * Perform a Fast Fourier Transform (FFT) on a real-valued signal using JavaScript
-   * 
+   *
    * @param input The input signal
    * @returns The FFT result (complex values as alternating real and imaginary parts)
    */
@@ -116,7 +116,7 @@ export class SignalAccelerator extends Accelerator<any, any> {
 
   /**
    * Recursive implementation of the FFT algorithm using JavaScript
-   * 
+   *
    * @param signal The input signal (complex values as alternating real and imaginary parts)
    * @returns The FFT result (complex values as alternating real and imaginary parts)
    */
@@ -147,19 +147,19 @@ export class SignalAccelerator extends Accelerator<any, any> {
       const angle = -2 * Math.PI * k / n;
       const twiddleReal = Math.cos(angle);
       const twiddleImag = Math.sin(angle);
-      
+
       // Get the odd term
       const oddReal = oddFFT[k * 2];
       const oddImag = oddFFT[k * 2 + 1];
-      
+
       // Calculate the odd term multiplied by the twiddle factor
       const oddTermReal = oddReal * twiddleReal - oddImag * twiddleImag;
       const oddTermImag = oddReal * twiddleImag + oddImag * twiddleReal;
-      
+
       // Get the even term
       const evenReal = evenFFT[k * 2];
       const evenImag = evenFFT[k * 2 + 1];
-      
+
       // Calculate the FFT values
       result[k * 2] = evenReal + oddTermReal;
       result[k * 2 + 1] = evenImag + oddTermImag;
@@ -172,7 +172,7 @@ export class SignalAccelerator extends Accelerator<any, any> {
 
   /**
    * Perform a convolution of two signals
-   * 
+   *
    * @param input The input signals
    * @returns The convolution result
    */
@@ -190,7 +190,7 @@ export class SignalAccelerator extends Accelerator<any, any> {
 
   /**
    * Perform a convolution of two signals using WebAssembly
-   * 
+   *
    * @param input The input signals
    * @returns The convolution result
    */
@@ -206,14 +206,14 @@ export class SignalAccelerator extends Accelerator<any, any> {
         // Get the signal lengths
         const n1 = input.signal1.length;
         const n2 = input.signal2.length;
-        
+
         // Convert to Float64Array for better performance
         const signal1TypedArray = new Float64Array(input.signal1);
         const signal2TypedArray = new Float64Array(input.signal2);
-        
+
         // Call the WebAssembly implementation
         const result = module.convolve_f64(signal1TypedArray, signal2TypedArray, n1, n2);
-        
+
         // Convert the result back to a regular array
         return Array.from(new Float64Array(result));
       } catch (error) {
@@ -226,7 +226,7 @@ export class SignalAccelerator extends Accelerator<any, any> {
 
   /**
    * Perform a convolution of two signals using JavaScript
-   * 
+   *
    * @param input The input signals
    * @returns The convolution result
    */
@@ -251,7 +251,7 @@ export class SignalAccelerator extends Accelerator<any, any> {
 
   /**
    * Determine the appropriate tier for the input
-   * 
+   *
    * @param input The input
    * @returns The appropriate tier
    */
@@ -263,7 +263,7 @@ export class SignalAccelerator extends Accelerator<any, any> {
 
     // Default tiering strategy based on signal size
     let signalSize = 0;
-    
+
     if ('signal' in input) {
       // FFT input
       signalSize = input.signal.length;

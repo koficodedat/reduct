@@ -17,11 +17,11 @@ export const adaptiveThresholdManager = {
     learningRate: 0.1,
   } as ThresholdConfig,
 
-  setPerformanceProfile(domain: string, type: string, operation: string, profile: any): void {
+  setPerformanceProfile(_domain: string, _type: string, _operation: string, _profile: any): void {
     // Mock implementation
   },
 
-  recordSample(domain: string, type: string, operation: string, sample: {
+  recordSample(_domain: string, _type: string, _operation: string, _sample: {
     inputSize: number;
     jsTime: number;
     wasmTime: number;
@@ -30,17 +30,17 @@ export const adaptiveThresholdManager = {
     // Mock implementation
   },
 
-  shouldUseWasm(domain: string, type: string, operation: string, inputSize: number): boolean {
+  shouldUseWasm(_domain: string, _type: string, _operation: string, inputSize: number): boolean {
     // Mock implementation - use WebAssembly for inputs larger than minInputSize
     return inputSize >= this.config.minInputSize;
   },
 
-  getThreshold(domain: string, type: string, operation: string): number {
+  getThreshold(_domain: string, _type: string, _operation: string): number {
     // Mock implementation
     return this.config.minInputSize;
   },
 
-  getSamples(domain: string, type: string, operation: string): Array<{
+  getSamples(_domain: string, _type: string, _operation: string): Array<{
     inputSize: number;
     jsTime: number;
     wasmTime: number;
@@ -54,19 +54,19 @@ export const adaptiveThresholdManager = {
 // Mock implementation of performance counter
 export const performanceCounter = {
   recordMeasurement(
-    domain: string,
-    type: string,
-    operation: string,
-    jsTime: number,
-    wasmTime: number,
-    inputSize: number,
-    usedWasm: boolean,
-    fallback: boolean
+    _domain: string,
+    _type: string,
+    _operation: string,
+    _jsTime: number,
+    _wasmTime: number,
+    _inputSize: number,
+    _usedWasm: boolean,
+    _fallback: boolean
   ): void {
     // Mock implementation
   },
 
-  getMetrics(domain: string, type: string, operation: string): {
+  getMetrics(_domain: string, _type: string, _operation: string): {
     totalExecutions: number;
     wasmExecutions: number;
     jsExecutions: number;

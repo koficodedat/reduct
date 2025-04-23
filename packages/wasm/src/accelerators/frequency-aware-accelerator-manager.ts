@@ -4,9 +4,9 @@
  * Provides methods for managing and using frequency-aware accelerators.
  */
 
-import { FrequencyAwareAcceleratorFactory } from './frequency-aware-accelerator-factory';
-import { FrequencyAwareAcceleratorOptions } from './frequency-aware-accelerator';
 import { AcceleratorTier } from './accelerator';
+import { FrequencyAwareAcceleratorOptions } from './frequency-aware-accelerator';
+import { FrequencyAwareAcceleratorFactory } from './frequency-aware-accelerator-factory';
 
 /**
  * Manager for frequency-aware accelerators

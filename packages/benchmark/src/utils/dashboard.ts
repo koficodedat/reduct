@@ -3,7 +3,9 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
+
 import * as glob from 'glob';
+
 import { RegressionBenchmarkResult } from './regression-detection';
 
 /**

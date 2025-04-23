@@ -5,6 +5,7 @@
  */
 
 import { BenchmarkResult, BenchmarkSuite, BenchmarkComparison, ScalabilityResult } from '../types';
+
 import { formatBenchmarkResult, formatRelativeFactor, formatSectionHeader, formatSubsectionHeader, shouldUseColors } from './colors';
 
 /**

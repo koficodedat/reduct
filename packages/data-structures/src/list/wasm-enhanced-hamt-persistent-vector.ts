@@ -6,9 +6,10 @@
  * Uses WebAssembly for accelerating path finding, node manipulation, and numeric operations.
  */
 
-import { IList, TransientList } from './types';
-import { EnhancedHAMTPersistentVector } from './enhanced-hamt-persistent-vector';
 import { NumericAccelerator, isWebAssemblySupported } from '../utils/mock-wasm';
+
+import { EnhancedHAMTPersistentVector } from './enhanced-hamt-persistent-vector';
+import { IList, TransientList } from './types';
 
 // Create a singleton accelerator instance
 const accelerator = new NumericAccelerator();
@@ -69,17 +70,17 @@ export class WasmEnhancedHAMTPersistentVector implements IList<number> {
       try {
         // Use WebAssembly for bulk operations
         const data = this._impl.toArray();
-        const input = {
+        const _input = {
           data,
           operation: 'insert',
           index,
           value
         };
-        
+
         // This is a mock implementation for testing
         // In a real implementation, we would call the WebAssembly accelerator
         const result = [...data.slice(0, index), value, ...data.slice(index)];
-        
+
         return new WasmEnhancedHAMTPersistentVector(result);
       } catch (error) {
         // Fall back to JavaScript implementation
@@ -102,16 +103,16 @@ export class WasmEnhancedHAMTPersistentVector implements IList<number> {
       try {
         // Use WebAssembly for bulk operations
         const data = this._impl.toArray();
-        const input = {
+        const _input = {
           data,
           operation: 'remove',
           index
         };
-        
+
         // This is a mock implementation for testing
         // In a real implementation, we would call the WebAssembly accelerator
         const result = [...data.slice(0, index), ...data.slice(index + 1)];
-        
+
         return new WasmEnhancedHAMTPersistentVector(result);
       } catch (error) {
         // Fall back to JavaScript implementation
@@ -134,16 +135,16 @@ export class WasmEnhancedHAMTPersistentVector implements IList<number> {
       try {
         // Use WebAssembly for bulk operations
         const data = this._impl.toArray();
-        const input = {
+        const _input = {
           data,
           operation: 'append',
           value
         };
-        
+
         // This is a mock implementation for testing
         // In a real implementation, we would call the WebAssembly accelerator
         const result = [...data, value];
-        
+
         return new WasmEnhancedHAMTPersistentVector(result);
       } catch (error) {
         // Fall back to JavaScript implementation
@@ -166,16 +167,16 @@ export class WasmEnhancedHAMTPersistentVector implements IList<number> {
       try {
         // Use WebAssembly for bulk operations
         const data = this._impl.toArray();
-        const input = {
+        const _input = {
           data,
           operation: 'prepend',
           value
         };
-        
+
         // This is a mock implementation for testing
         // In a real implementation, we would call the WebAssembly accelerator
         const result = [value, ...data];
-        
+
         return new WasmEnhancedHAMTPersistentVector(result);
       } catch (error) {
         // Fall back to JavaScript implementation
@@ -339,8 +340,8 @@ export class WasmEnhancedHAMTPersistentVector implements IList<number> {
   ): V {
     // Use WebAssembly acceleration if available and all result types are numeric
     if (
-      this._acceleratorAvailable && 
-      typeof mapFn(0, 0) === 'number' && 
+      this._acceleratorAvailable &&
+      typeof mapFn(0, 0) === 'number' &&
       typeof initial === 'number'
     ) {
       try {
@@ -373,8 +374,8 @@ export class WasmEnhancedHAMTPersistentVector implements IList<number> {
   ): V {
     // Use WebAssembly acceleration if available and all result types are numeric
     if (
-      this._acceleratorAvailable && 
-      typeof mapFn(0, 0) === 'number' && 
+      this._acceleratorAvailable &&
+      typeof mapFn(0, 0) === 'number' &&
       typeof initial === 'number'
     ) {
       try {
@@ -439,7 +440,7 @@ export class WasmEnhancedHAMTPersistentVector implements IList<number> {
         const data = this._impl.toArray();
         const filtered = accelerator.filter(data, filterFn);
         const result = accelerator.map(
-          filtered, 
+          filtered,
           mapFn as (value: number, index: number) => number
         );
         return new WasmEnhancedHAMTPersistentVector(result) as unknown as IList<U>;
@@ -466,8 +467,8 @@ export class WasmEnhancedHAMTPersistentVector implements IList<number> {
         // Use WebAssembly for mapFilter
         const data = this._impl.toArray();
         const result = accelerator.mapFilter(
-          data, 
-          mapFn as (value: number, index: number) => number, 
+          data,
+          mapFn as (value: number, index: number) => number,
           filterFn as (value: number, index: number) => boolean
         );
         return new WasmEnhancedHAMTPersistentVector(result) as unknown as IList<U>;

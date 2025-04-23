@@ -6,22 +6,27 @@
  * @packageDocumentation
  */
 
-import { BenchmarkOptions } from '../../types';
+import * as fs from 'fs';
+
+import { quickSort, binarySearch } from '@reduct/algorithms';
+
+import { measureSearchingScalability } from '../../algorithms/searching';
+import { measureSortingScalability } from '../../algorithms/sorting';
 import { measureListScalability } from '../../data-structures/list';
 import { measureMapScalability } from '../../data-structures/map';
 import { measureStackScalability } from '../../data-structures/stack';
-import { measureSortingScalability } from '../../algorithms/sorting';
-import { measureSearchingScalability } from '../../algorithms/searching';
-import { formatScalabilityResult } from '../../visualization/formatters';
+import { BenchmarkOptions } from '../../types';
+import { resolveReportPath } from '../../utils/paths';
 import {
   exportScalabilityToCSV,
   exportScalabilityToMarkdown,
   exportScalabilityToHTML,
   exportToJSON
 } from '../../visualization/exporters';
-import { quickSort, binarySearch } from '@reduct/algorithms';
-import * as fs from 'fs';
-import { resolveReportPath } from '../../utils/paths';
+import { formatScalabilityResult } from '../../visualization/formatters';
+
+
+
 
 /**
  * Command handler for the 'scalability' command

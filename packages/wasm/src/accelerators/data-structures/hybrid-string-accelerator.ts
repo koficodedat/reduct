@@ -5,10 +5,11 @@
  * that combines JavaScript and WebAssembly.
  */
 
-import { HybridAccelerator, HybridOperationImplementation } from '../hybrid-accelerator';
-import { AcceleratorOptions, AcceleratorTier } from '@reduct/shared-types/wasm';
-import { WebAssemblyFeature } from '@reduct/shared-types/wasm';
+import { AcceleratorOptions, AcceleratorTier } from '@reduct/shared-types/wasm/accelerator';
+import { WebAssemblyFeature } from '@reduct/shared-types/wasm/features';
+
 import { EnhancedInputCharacteristicsAnalyzer } from '../../utils/enhanced-input-characteristics';
+import { HybridAccelerator, HybridOperationImplementation } from '../hybrid-accelerator';
 
 /**
  * Input for the string search operation
@@ -126,7 +127,7 @@ export class HybridStringAccelerator extends HybridAccelerator<StringSearchInput
 
       // Postprocessing: Extract matches and format result (JavaScript)
       postprocess: (input: StringSearchIntermediate): StringSearchResult => {
-        const { text, pattern, indices } = input;
+        const { _text, pattern, indices } = input;
         const matches: string[] = indices.map(() => pattern);
 
         return {

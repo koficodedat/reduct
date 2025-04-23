@@ -5,6 +5,7 @@
  * specialized optimizations for different data types.
  */
 
+// Internal shared types
 import { DataType } from '@reduct/shared-types/data-structures';
 
 /**

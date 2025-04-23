@@ -3,6 +3,7 @@
  */
 import * as fs from 'fs';
 import * as path from 'path';
+
 import { getHistory, NotificationHistoryEntry, NotificationHistoryOptions } from './notification-history';
 
 /**

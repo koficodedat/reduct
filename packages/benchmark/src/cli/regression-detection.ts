@@ -2,10 +2,13 @@
 /**
  * CLI script to detect performance regressions
  */
-import { detectRegressions, saveRegressionResult, hasRegressions } from '../utils/regression-detection';
+import * as path from 'path';
+
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import * as path from 'path';
+
+import { detectRegressions, saveRegressionResult, hasRegressions } from '../utils/regression-detection';
+
 
 // Parse command line arguments
 const argv = yargs(hideBin(process.argv))

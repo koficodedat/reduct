@@ -4,7 +4,7 @@
  * Tracks the frequency of operations to determine when to use WebAssembly acceleration.
  */
 
-import { AcceleratorTier } from '@reduct/shared-types/wasm';
+import { AcceleratorTier } from '@reduct/shared-types/wasm/accelerator';
 
 /**
  * Operation call record
@@ -238,7 +238,7 @@ export class FrequencyDetector {
    * @param input The input to the operation
    * @returns The appropriate tier
    */
-  public determineTier(domain: string, type: string, operation: string, input: any): AcceleratorTier {
+  public determineTier(domain: string, type: string, operation: string, _input: any): AcceleratorTier {
     // Get the stats for this operation
     const domainStats = this.stats.get(domain);
     if (!domainStats) return AcceleratorTier.JS_PREFERRED;

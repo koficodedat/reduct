@@ -7,13 +7,14 @@
  * @packageDocumentation
  */
 
+import { quickSort, binarySearch } from '@reduct/algorithms';
+
+import { runSearchingBenchmarks, measureSearchingScalability } from '../algorithms/searching';
+import { runSortingBenchmarks, runSortingBenchmarkSuite, measureSortingScalability } from '../algorithms/sorting';
+import { compareImplementationsWithAdapters } from '../comparison/adapter-based';
 import { runListBenchmarks, measureListScalability } from '../data-structures/list';
 import { runMapBenchmarks, measureMapScalability } from '../data-structures/map';
 import { runStackBenchmarks, measureStackScalability } from '../data-structures/stack';
-import { compareImplementationsWithAdapters } from '../comparison/adapter-based';
-import { runSortingBenchmarks, runSortingBenchmarkSuite, measureSortingScalability } from '../algorithms/sorting';
-import { runSearchingBenchmarks, measureSearchingScalability } from '../algorithms/searching';
-
 import {
   formatBenchmarkSuite,
   formatScalabilityResult,
@@ -21,7 +22,6 @@ import {
   exportScalabilityToCSV,
 } from '../visualization';
 
-import { quickSort, binarySearch } from '@reduct/algorithms';
 
 // Run list benchmarks
 console.log('Running List benchmarks...');

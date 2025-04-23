@@ -16,6 +16,24 @@ import {
   isArray,
   isObject,
   isEnum
+,
+  Partial,
+  Required,
+  Readonly,
+  Pick,
+  Omit,
+  ElementOf,
+  Awaited,
+  DeepReadonly,
+  Record,
+  KeysOfType,
+  TypeMapper,
+  MapObjectProps,
+  Tagged,
+  RequireKeys,
+  ValueOf,
+  DeepPartial,
+  Stringified
 } from '@reduct/shared-types/core';
 
 // Re-export the shared types
@@ -175,25 +193,6 @@ export function isLiteral<T extends string | number | boolean | null | undefined
 // Type Utilities
 // ============================================================================
 
-import {
-  Partial,
-  Required,
-  Readonly,
-  Pick,
-  Omit,
-  ElementOf,
-  Awaited,
-  DeepReadonly,
-  Record,
-  KeysOfType,
-  TypeMapper,
-  MapObjectProps,
-  Tagged,
-  RequireKeys,
-  ValueOf,
-  DeepPartial,
-  Stringified
-} from '@reduct/shared-types/core';
 
 // Re-export the shared types
 export {

@@ -7,14 +7,16 @@
  * @packageDocumentation
  */
 
+// These types are imported for reference but not directly used in this file
+// They are used by other files that import from this module
 import {
-  InstanceCreator,
+  _InstanceCreator as _,
   OperationFunction,
-  OperationsMap,
-  Implementation,
-  Registry,
-  OperationMetadata,
-  OperationsRegistry
+  _OperationsMap as __,
+  _Implementation as ___,
+  _Registry as ____,
+  _OperationMetadata as _____,
+  _OperationsRegistry as ______
 } from '@reduct/shared-types/registry';
 
 /**

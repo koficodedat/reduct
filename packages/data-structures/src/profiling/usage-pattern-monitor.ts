@@ -5,8 +5,9 @@
  * and adapting the implementation based on those patterns.
  */
 
-import { OperationType, DataStructureType } from './index';
 import { RepresentationType } from '@reduct/shared-types/data-structures';
+
+import { OperationType, DataStructureType as _DataStructureType } from './index';
 
 /**
  * Operation pattern data

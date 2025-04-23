@@ -1,8 +1,12 @@
 /**
  * Example demonstrating the tiered optimization framework
  */
+
+// Internal shared types
+import { AcceleratorTier } from '@reduct/shared-types/wasm/accelerator';
+
+// Local imports from the same package
 import { TieredSortAccelerator, SortInput } from '../src/accelerators/data-structures/tiered-sort';
-import { AcceleratorTier } from '../src/accelerators/accelerator';
 import { findOptimalThreshold, visualizeThreshold } from '../src/utils/threshold-finder';
 import { isWebAssemblySupported } from '../src/core/feature-detection';
 
@@ -36,18 +40,18 @@ console.log('--------------------------------------------------');
 for (const size of sizes) {
   // Generate a random array
   const array = generateArray(size);
-  
+
   // Create the input
   const input: SortInput<number> = { array };
-  
+
   // Determine the tier
   const tier = sortAccelerator.determineTier(input);
-  
+
   // Sort the array and measure performance
   console.time(`Sort ${size} elements (${tier})`);
   const sorted = sortAccelerator.execute(input);
   console.timeEnd(`Sort ${size} elements (${tier})`);
-  
+
   console.log(`Array size: ${size}, Tier: ${tier}, Result length: ${sorted.length}`);
 }
 
@@ -74,13 +78,13 @@ console.log('-------------------------');
 const jsSortImplementation = (input: SortInput<number>): number[] => {
   const { array, compareFn } = input;
   const result = [...array];
-  
+
   if (compareFn) {
     result.sort(compareFn);
   } else {
     result.sort();
   }
-  
+
   return result;
 };
 
@@ -94,19 +98,19 @@ findOptimalThreshold(
 ).then(result => {
   console.log(`Optimal threshold: ${result.threshold}`);
   console.log(`Crossover point: ${result.crossoverPoint !== null ? result.crossoverPoint.toFixed(2) : 'N/A'}`);
-  
+
   console.log('\nPerformance data:');
   console.log('----------------');
   console.log('Size\tJS Time\tWASM Time\tSpeedup');
   for (const data of result.performanceData) {
     console.log(`${data.size}\t${data.jsTime.toFixed(3)}\t${data.wasmTime.toFixed(3)}\t${data.speedup.toFixed(3)}`);
   }
-  
+
   // Visualize the threshold
   console.log('\nThreshold Visualization:');
   console.log('----------------------');
   console.log(visualizeThreshold(result));
-  
+
   console.log('\nTiered optimization example completed.');
 });
 
@@ -126,16 +130,16 @@ const tiers = [
 
 for (const tier of tiers) {
   console.log(`\nTesting with tier: ${tier}`);
-  
+
   // Create a custom sort accelerator with fixed tier
   class FixedTierSortAccelerator extends TieredSortAccelerator<number> {
     public determineTier(): AcceleratorTier {
       return tier;
     }
   }
-  
+
   const fixedTierAccelerator = new FixedTierSortAccelerator();
-  
+
   // Sort the array and measure performance
   console.time(`Sort with ${tier}`);
   fixedTierAccelerator.execute({ array: largeArray });

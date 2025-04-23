@@ -6,8 +6,8 @@
  * @packageDocumentation
  */
 
-import { BaseBenchmarkPlugin } from '../plugin';
 import { AdapterFactory } from '../adapter-factory';
+import { BaseBenchmarkPlugin } from '../plugin';
 import { BenchmarkOperation, BenchmarkSpecialCase } from '../types';
 
 /**

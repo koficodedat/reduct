@@ -6,8 +6,9 @@
  * @packageDocumentation
  */
 
-import { updateImplementationCapabilities, updateOperationRequiredCapabilities, registerOperation } from './index';
 import { registerBuiltInCapabilities } from '../comparison/capabilities';
+
+import { updateImplementationCapabilities, updateOperationRequiredCapabilities, registerOperation } from './index';
 
 /**
  * Registers capabilities for all implementations

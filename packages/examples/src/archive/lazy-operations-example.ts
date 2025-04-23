@@ -124,7 +124,7 @@ const getMemoryUsage = () => {
   if (global.gc) {
     global.gc(); // Force garbage collection if available
   }
-  
+
   const memoryUsage = process.memoryUsage();
   return {
     rss: Math.round(memoryUsage.rss / 1024 / 1024),
@@ -140,7 +140,7 @@ console.log('Memory usage before operations:', memoryBefore);
 // Perform eager operations
 console.log('\nPerforming eager operations...');
 console.time('Eager operations (memory)');
-const eagerMemoryResult = list
+const _eagerMemoryResult = list
   .map(x => x * 2)
   .filter(x => x % 3 === 0)
   .map(x => x - 1);

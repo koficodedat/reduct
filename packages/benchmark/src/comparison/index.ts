@@ -7,14 +7,13 @@
  * @packageDocumentation
  */
 
-import { BenchmarkOptions, BenchmarkComparison } from '../types';
-import { benchmark } from '../utils';
 import {
   getImplementation,
   findCommonOperations,
   Implementation
 } from '../registry';
-import { generateRandomArray } from '../utils';
+import { BenchmarkOptions, BenchmarkComparison } from '../types';
+import { benchmark , generateRandomArray } from '../utils';
 
 // Export adapter-based comparison
 export * from './adapter-based';

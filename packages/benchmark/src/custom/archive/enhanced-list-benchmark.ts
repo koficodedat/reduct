@@ -9,12 +9,17 @@
  * - Adaptive Implementation Selection
  */
 
-import { List } from '@reduct/data-structures';
+// External libraries
 import * as fs from 'fs';
 import * as path from 'path';
 import { performance } from 'perf_hooks';
-import { formatBenchmarkResults } from '../utils';
-import { exportSuiteToMarkdown, exportSuiteToCSV } from '../visualization/exporters';
+
+// Local imports from other packages
+import { List } from '@reduct/data-structures';
+
+// Local imports from the same package
+import { formatBenchmarkResults as _formatBenchmarkResults } from '../utils';
+import { exportSuiteToMarkdown as _exportSuiteToMarkdown, exportSuiteToCSV } from '../visualization/exporters';
 
 // Size categories to test
 const SIZE_CATEGORIES = {
@@ -25,7 +30,7 @@ const SIZE_CATEGORIES = {
 };
 
 // Operations to benchmark
-const OPERATIONS = [
+const _OPERATIONS = [
   'get',
   'append',
   'prepend',

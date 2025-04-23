@@ -6,9 +6,10 @@
  * Uses WebAssembly for accelerating numeric operations.
  */
 
-import { IList, TransientList } from './types';
-import { HAMTPersistentVector } from './hamt-persistent-vector';
 import { NumericAccelerator, isWebAssemblySupported } from '../utils/mock-wasm';
+
+import { HAMTPersistentVector } from './hamt-persistent-vector';
+import { IList, TransientList } from './types';
 // Create a singleton accelerator instance
 const accelerator = new NumericAccelerator();
 

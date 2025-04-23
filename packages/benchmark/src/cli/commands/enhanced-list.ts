@@ -6,18 +6,19 @@
  * @packageDocumentation
  */
 
+import * as fs from 'fs';
+import * as path from 'path';
+
 import { Command } from 'commander';
+
 import {
   runEnhancedListBenchmarks,
   measureEnhancedListScalability,
   compareStandardVsFusedOperations,
   compareStandardVsSpecializedLists
 } from '../../data-structures/list';
-import { formatBenchmarkSuite } from '../../visualization/formatters';
-import { formatScalabilityResult } from '../../visualization/formatters';
 import { exportToFormat } from '../../visualization/exporters';
-import * as fs from 'fs';
-import * as path from 'path';
+import { formatBenchmarkSuite , formatScalabilityResult } from '../../visualization/formatters';
 
 /**
  * Register the enhanced list command

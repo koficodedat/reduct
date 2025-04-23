@@ -5,10 +5,11 @@
  * This helps determine the optimal size thresholds for transitions between implementations.
  */
 
-import { List } from '@reduct/data-structures';
 import * as fs from 'fs';
 import * as path from 'path';
 import { performance } from 'perf_hooks';
+
+import { List } from '@reduct/data-structures';
 
 // Size ranges to test
 const SMALL_SIZES = [1, 2, 4, 8, 16, 24, 32, 48, 64, 96, 128];

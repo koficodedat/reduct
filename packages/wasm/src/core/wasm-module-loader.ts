@@ -1,9 +1,9 @@
 /**
  * WebAssembly module loader
  */
-import { WasmModule } from './wasm-module';
-import { WasmMemoryPool } from './wasm-memory-pool';
 import { WasmBatchProcessor } from './wasm-batch-processor';
+import { WasmMemoryPool } from './wasm-memory-pool';
+import { WasmModule } from './wasm-module';
 
 /**
  * WebAssembly module loader configuration

@@ -6,8 +6,9 @@
  * for specific data types can significantly improve performance.
  */
 
-import { IList, TransientList } from '../types';
 import { getPooledArray, releasePooledArray } from '../../memory/pool';
+import { IList, TransientList } from '../types';
+
 import { CompactList } from './compact-list';
 
 /**

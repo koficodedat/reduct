@@ -6,10 +6,12 @@
 
 import fs from 'fs';
 import path from 'path';
-import { getProfilingSystem, enableProfiling, disableProfiling, generateProfilingReport, clearProfilingData } from './index';
+
 import { generateChunkPoolReport, clearChunkPoolStats } from './chunk-pool-monitor';
-import { generateNodeCacheReport, clearNodeCacheStats } from './node-cache-monitor';
 import { generateMemoryReport, clearMemoryStats } from './memory-monitor';
+import { generateNodeCacheReport, clearNodeCacheStats } from './node-cache-monitor';
+
+import { getProfilingSystem, enableProfiling, disableProfiling, generateProfilingReport, clearProfilingData } from './index';
 
 /**
  * Generate a report and save it to a file

@@ -6,18 +6,19 @@
  * @packageDocumentation
  */
 
+import * as fs from 'fs';
+
+import { recordBenchmarkRun } from '../../analysis/trends';
 import { compareImplementationsWithAdapters, AdapterComparisonOptions } from '../../comparison/adapter-based';
 // import { getAdapter } from '../../adapters';
-import { formatBenchmarkComparison } from '../../visualization/formatters';
+import { resolveReportPath } from '../../utils/paths';
 import {
   exportComparisonToCSV,
   exportComparisonToMarkdown,
   exportComparisonToHTML,
   exportToJSON
 } from '../../visualization/exporters';
-import * as fs from 'fs';
-import { resolveReportPath } from '../../utils/paths';
-import { recordBenchmarkRun } from '../../analysis/trends';
+import { formatBenchmarkComparison } from '../../visualization/formatters';
 
 /**
  * Command handler for the 'adapter-compare' command

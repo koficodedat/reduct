@@ -5,10 +5,10 @@
  * Uses Hash Array Mapped Trie (HAMT) for efficient structural sharing and memory usage.
  */
 
-import { IList, TransientList } from './types';
 import * as HAMTNode from './hamt-node';
 import { HAMTNode as IHAMTNode } from './hamt-node';
 import { TransientHAMTPersistentVector } from './transient-hamt-persistent-vector';
+import { IList, TransientList } from './types';
 
 // Constants
 const BITS_PER_LEVEL = 5;
@@ -224,7 +224,7 @@ export class HAMTPersistentVector<T> implements IList<T> {
 
     // Slow path: tail is full, incorporate into trie and create new tail
     let newRoot = this.root;
-    let newHeight = this.height;
+    const newHeight = this.height;
 
     // If the trie is empty, create a new root with the tail
     if (newRoot === null) {

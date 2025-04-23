@@ -7,12 +7,16 @@
  * @packageDocumentation
  */
 
-import { Command, Option } from 'commander';
-import { ComparisonBuilder, runComplexComparison, formatComplexComparisonResult } from '../../comparison';
-import { exportToFormat } from '../../visualization/exporters';
 import * as fs from 'fs';
-import * as path from 'path';
+// path is used indirectly via resolveReportPath
+import * as _path from 'path';
+
+import { Command, Option } from 'commander';
+
+import { ComparisonBuilder, runComplexComparison, formatComplexComparisonResult } from '../../comparison';
 import { resolveReportPath } from '../../utils/paths';
+import { exportToFormat } from '../../visualization/exporters';
+
 
 /**
  * Creates the complex-compare command

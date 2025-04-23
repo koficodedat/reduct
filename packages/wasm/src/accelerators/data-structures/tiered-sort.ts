@@ -5,9 +5,12 @@
  * It demonstrates how to use the tiered optimization framework to automatically
  * switch between JavaScript and WebAssembly based on input characteristics.
  */
+// Internal shared types
+import { PerformanceProfile, AcceleratorOptions, AcceleratorTier } from '@reduct/shared-types/wasm/accelerator';
+import { WebAssemblyFeature } from '@reduct/shared-types/wasm/features';
+
+// Local imports from the same package
 import { WasmAccelerator } from '../wasm-accelerator';
-import { PerformanceProfile, AcceleratorOptions, AcceleratorTier } from '../accelerator';
-import { WebAssemblyFeature } from '../../core/feature-detection';
 
 /**
  * Input for the sort operation

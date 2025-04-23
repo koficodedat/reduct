@@ -5,6 +5,7 @@
  */
 
 import { BenchmarkResult, BenchmarkSuite, BenchmarkComparison, ScalabilityResult } from '../types';
+
 import { renderTemplate, defaultHelpers, TemplateOptions } from './templates';
 
 /**

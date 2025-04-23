@@ -4,7 +4,7 @@
  * Provides a pool of WebAssembly memory instances to reduce allocation overhead.
  */
 
-import { createWasmMemory, getTypedArrayView } from './memory';
+import { createWasmMemory, getTypedArrayView as _getTypedArrayView } from './memory';
 
 /**
  * Memory pool entry

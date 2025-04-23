@@ -4,8 +4,10 @@
  * @packageDocumentation
  */
 
-import { SimpleOperationAdapter } from './adapter-factory';
+// Internal shared types
 import { BenchmarkOperation, BenchmarkSpecialCase } from '@reduct/shared-types/benchmark';
+
+// No local imports needed
 
 /**
  * Definition of a benchmark suite

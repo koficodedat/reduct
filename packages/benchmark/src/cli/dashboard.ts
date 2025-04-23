@@ -2,10 +2,13 @@
 /**
  * CLI script to generate a performance dashboard
  */
-import { generateDashboard } from '../utils/dashboard';
+import * as path from 'path';
+
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import * as path from 'path';
+
+import { generateDashboard } from '../utils/dashboard';
+
 
 // Parse command line arguments
 const argv = yargs(hideBin(process.argv))

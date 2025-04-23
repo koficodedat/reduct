@@ -7,8 +7,9 @@
  */
 
 import { Registry } from '../types';
-import { sortingRegistry } from './sorting';
+
 import { searchingRegistry } from './searching';
+import { sortingRegistry } from './sorting';
 
 // Combine all algorithm registries
 export const algorithmRegistry: Registry = {

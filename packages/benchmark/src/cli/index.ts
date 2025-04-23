@@ -7,21 +7,25 @@
  * @packageDocumentation
  */
 
-import { Command } from 'commander';
-import { runCommand } from './commands/run';
-import { compareCommand } from './commands/compare';
-import { scalabilityCommand } from './commands/scalability';
-import { exportCommand } from './commands/export';
-import { registerTemplateExportCommand } from './commands/template-export';
-import { createAnalyzeCommand } from './commands/analyze';
-import { createTrendCommand } from './commands/trend';
-import { createCICommand } from './commands/ci';
-import { registerBenchmarkCommand } from './commands/benchmark';
-import { registerEnhancedListCommand } from './commands/enhanced-list';
-import { ComparisonBuilder, runComplexComparison, formatComplexComparisonResult } from '../comparison';
-import { exportToFormat } from '../visualization/exporters';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { Command } from 'commander';
+
+import { ComparisonBuilder, runComplexComparison, formatComplexComparisonResult } from '../comparison';
+import { exportToFormat } from '../visualization/exporters';
+
+import { createAnalyzeCommand } from './commands/analyze';
+import { registerBenchmarkCommand } from './commands/benchmark';
+import { createCICommand } from './commands/ci';
+import { compareCommand } from './commands/compare';
+import { registerEnhancedListCommand } from './commands/enhanced-list';
+import { exportCommand } from './commands/export';
+import { runCommand } from './commands/run';
+import { scalabilityCommand } from './commands/scalability';
+import { registerTemplateExportCommand } from './commands/template-export';
+import { createTrendCommand } from './commands/trend';
+
 
 /**
  * Creates the CLI program with all commands and options

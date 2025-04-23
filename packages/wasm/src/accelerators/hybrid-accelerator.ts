@@ -4,9 +4,11 @@
  * An accelerator that uses both JavaScript and WebAssembly for different parts of an operation.
  */
 
-import { AcceleratorOptions, AcceleratorTier, PerformanceProfile } from '@reduct/shared-types/wasm';
-import { BaseAccelerator } from './accelerator';
+import { AcceleratorOptions, AcceleratorTier, PerformanceProfile } from '@reduct/shared-types/wasm/accelerator';
+
 import { EnhancedInputCharacteristicsAnalyzer, ProcessingStrategy } from '../utils/enhanced-input-characteristics';
+
+import { BaseAccelerator } from './accelerator';
 
 /**
  * Hybrid operation part

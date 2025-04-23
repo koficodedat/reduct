@@ -2,9 +2,10 @@
 /**
  * CLI script to run tiered optimization benchmarks
  */
-import { BenchmarkRunner, BenchmarkRunnerOptions } from '../suites/tiered-optimization';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
+
+import { BenchmarkRunner, BenchmarkRunnerOptions } from '../suites/tiered-optimization';
 
 // Parse command line arguments
 const argv = yargs(hideBin(process.argv))

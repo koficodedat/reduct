@@ -4,8 +4,8 @@
  * @packageDocumentation
  */
 
-import { BenchmarkResult, BenchmarkSuite, BenchmarkComparison, ScalabilityResult } from '../types';
 import { ComplexComparisonResult } from '../comparison/complex';
+import { BenchmarkResult, BenchmarkSuite, BenchmarkComparison, ScalabilityResult } from '../types';
 
 /**
  * CSV export options

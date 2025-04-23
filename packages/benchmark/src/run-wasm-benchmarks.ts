@@ -3,8 +3,8 @@
  */
 
 import { runInputSizeBenchmarks } from './runners/input-size-benchmark-runner';
-import { generateCharts } from './visualization/chart-generator';
 import { DataTypeCategory, InputSizeCategory } from './suites/wasm-optimization/input-size-benchmark';
+import { generateCharts } from './visualization/chart-generator';
 
 /**
  * Run WebAssembly benchmarks and generate charts

@@ -7,6 +7,7 @@
  */
 
 import { BenchmarkDefinition, BenchmarkOperation, BenchmarkSpecialCase } from './types';
+
 import { BenchmarkRegistry } from './index';
 
 /**

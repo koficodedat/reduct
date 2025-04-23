@@ -9,10 +9,13 @@
  * - Integrated List (with automatic transitions)
  */
 
-import { List, SmallList, ChunkedList, PersistentVector } from '@reduct/data-structures';
+// External libraries
 import * as fs from 'fs';
 import * as path from 'path';
 import { performance } from 'perf_hooks';
+
+// Local imports from other packages
+import { List, SmallList, ChunkedList, PersistentVector } from '@reduct/data-structures';
 
 // Size categories to test
 const SIZE_CATEGORIES = {

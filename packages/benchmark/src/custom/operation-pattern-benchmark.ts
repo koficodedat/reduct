@@ -4,10 +4,15 @@
  * Tests performance of List vs. native arrays with different operation patterns
  */
 
-import { List, IList } from '@reduct/data-structures';
-import { performance } from 'perf_hooks';
+// External libraries
 import * as fs from 'fs';
 import * as path from 'path';
+import { performance } from 'perf_hooks';
+
+// Internal shared types
+
+// Local imports from other packages
+import { List, IList } from '@reduct/data-structures';
 
 // Size for all benchmarks
 const SIZE = 10000;

@@ -6,18 +6,22 @@
  * @packageDocumentation
  */
 
-import { Command } from 'commander';
 import * as fs from 'fs';
-import * as path from 'path';
+// path is used indirectly via resolveReportPath
+import * as _path from 'path';
+
+import { Command } from 'commander';
+
 import {
   BenchmarkRegistry,
   createBenchmarkConfig,
   initializeBenchmarkRegistry,
-  AdapterFactory
+  // AdapterFactory is used indirectly by the benchmark registry
+  // but not directly in this file
 } from '../../benchmark-registry/main';
 import { benchmark } from '../../utils';
-import { formatBenchmarkSuite } from '../../visualization/formatters';
 import { resolveReportPath } from '../../utils/paths';
+import { formatBenchmarkSuite } from '../../visualization/formatters';
 
 /**
  * Registers the benchmark command
@@ -139,7 +143,8 @@ export function registerBenchmarkCommand(program: Command): void {
         }
 
         // Format and output results
-        const outputFormat = options.output || 'console';
+        // Note: outputFormat is currently not used, but kept for future format-specific output
+        const _outputFormat = options.output || 'console';
 
         // Create a benchmark suite from the results
         const suite = {

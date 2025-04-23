@@ -2,9 +2,10 @@
  * Runner for the input size benchmark suite
  */
 
-import { InputSizeBenchmarkSuite, DataTypeCategory, InputSizeCategory } from '../suites/wasm-optimization/input-size-benchmark';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { InputSizeBenchmarkSuite, DataTypeCategory, InputSizeCategory } from '../suites/wasm-optimization/input-size-benchmark';
 
 /**
  * Options for the input size benchmark runner

@@ -5,14 +5,18 @@
  * better performance than pure JavaScript implementations.
  */
 
-import { IList, TransientList } from '../types';
+import { InputDataType, InputSizeCategory as _InputSizeCategory } from '@reduct/shared-types/utils';
+
 import { getPooledArray, releasePooledArray } from '../../memory/pool';
+import { InputCharacteristicsAnalyzer } from '../../utils/input-characteristics';
+import { NumericAccelerator , isWebAssemblySupported } from '../../utils/mock-wasm';
+import { IList, TransientList as _TransientList } from '../types';
+
+// CompactList implementation may be used in the future
 // import { CompactList } from './compact-list';
 import { NumericList } from './numeric-list';
-import { NumericAccelerator } from '../../utils/mock-wasm';
-import { isWebAssemblySupported } from '../../utils/mock-wasm';
-import { InputCharacteristicsAnalyzer } from '../../utils/input-characteristics';
-import { InputDataType, InputSizeCategory } from '@reduct/shared-types/utils';
+
+
 
 // Create a singleton accelerator instance
 const accelerator = new NumericAccelerator();

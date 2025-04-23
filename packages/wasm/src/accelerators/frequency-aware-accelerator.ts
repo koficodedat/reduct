@@ -4,7 +4,8 @@
  * An accelerator that uses frequency detection to optimize operations in tight loops.
  */
 
-import { AcceleratorOptions, AcceleratorTier, PerformanceProfile } from '@reduct/shared-types/wasm';
+import { AcceleratorOptions, AcceleratorTier, PerformanceProfile } from '@reduct/shared-types/wasm/accelerator';
+
 import { BaseAccelerator } from './accelerator';
 
 /**

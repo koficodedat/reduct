@@ -8,21 +8,25 @@
  * @packageDocumentation
  */
 
-import { Command } from 'commander';
-import { runCommand } from './commands/run';
-import { compareCommand } from './commands/compare';
-import { adapterCompareCommand } from './commands/adapter-compare';
-import { scalabilityCommand } from './commands/scalability';
-import { exportCommand } from './commands/export';
-import { registerTemplateExportCommand } from './commands/template-export';
-import { createAnalyzeCommand } from './commands/analyze';
-import { createTrendCommand } from './commands/trend';
-import { registerBenchmarkCommand } from './commands/benchmark';
-import { ComparisonBuilder, runComplexComparison, formatComplexComparisonResult } from '../comparison';
-import { exportToFormat } from '../visualization/exporters';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { Command } from 'commander';
+
+import { ComparisonBuilder, runComplexComparison, formatComplexComparisonResult } from '../comparison';
 import { resolveReportPath } from '../utils/paths';
+import { exportToFormat } from '../visualization/exporters';
+
+import { adapterCompareCommand } from './commands/adapter-compare';
+import { createAnalyzeCommand } from './commands/analyze';
+import { registerBenchmarkCommand } from './commands/benchmark';
+import { compareCommand } from './commands/compare';
+import { exportCommand } from './commands/export';
+import { runCommand } from './commands/run';
+import { scalabilityCommand } from './commands/scalability';
+import { registerTemplateExportCommand } from './commands/template-export';
+import { createTrendCommand } from './commands/trend';
+
 
 const program = new Command();
 

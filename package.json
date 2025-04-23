@@ -13,6 +13,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "lint": "yarn workspaces run lint",
+    "lint:imports": "eslint --ext .ts,.tsx --fix 'packages/*/src/**/*.ts'  --rule 'import/order: error'",
+    "lint:imports:check": "eslint --ext .ts,.tsx 'packages/*/src/**/*.ts' --rule 'import/order: error' --quiet",
     "clean": "yarn workspaces run clean",
     "typecheck": "tsc --noEmit"
   },
@@ -22,6 +24,8 @@
     "@vitest/coverage-v8": "^1.0.0",
     "eslint": "^8.0.0",
     "eslint-config-prettier": "^10.1.1",
+    "eslint-import-resolver-typescript": "^4.3.4",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.5",
     "fast-check": "^3.13.2",
     "prettier": "^3.5.3",

@@ -25,8 +25,8 @@ import {
   bottomUpMergeSort,
   functionalHeapSort,
 } from '../../algorithms/sorting';
-import { Registry, Implementation } from '../types';
 import { generateRandomArray } from '../../utils';
+import { Registry, Implementation } from '../types';
 
 // Helper type for sorting algorithms
 type SortingAlgorithm<T> = (arr: T[]) => T[];

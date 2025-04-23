@@ -1,6 +1,8 @@
 /**
  * Example demonstrating WebAssembly acceleration for sorting algorithms
  */
+
+// Local imports from the same package
 import { isWebAssemblySupported } from '../src/core/feature-detection';
 import { SortingAccelerator } from '../src/accelerators/algorithms/sorting';
 

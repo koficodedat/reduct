@@ -6,7 +6,8 @@
  * @packageDocumentation
  */
 
-import { Implementation } from '../registry';
+import { Implementation , getImplementation } from '../registry';
+
 import {
   OperationAdapter,
   OperationAdapterFactory,
@@ -14,7 +15,6 @@ import {
   OperationCategory,
   AdapterOperationMetadata,
 } from './types';
-import { getImplementation } from '../registry';
 
 /**
  * Creates an operation adapter for a registry implementation

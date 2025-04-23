@@ -6,7 +6,9 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+
 import { BenchmarkResult, BenchmarkComparison, ScalabilityResult } from '../types';
+
 import { calculateMean, calculateStatistics, StatisticalMetrics } from './statistics';
 
 /**

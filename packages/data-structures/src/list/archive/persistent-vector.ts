@@ -764,7 +764,7 @@ export class PersistentVector<T> implements IList<T> {
     // Navigate to the element
     let node = this.root;
     let level = this.height;
-    let idx = index;
+    const idx = index;
 
     while (level > 0) {
       const childIndex = (idx >> (level * SHIFT)) & MASK;
@@ -914,7 +914,7 @@ export class PersistentVector<T> implements IList<T> {
 
     const path: Node<T>[] = [this.root];
     let node = this.root;
-    let idx = index;
+    const idx = index;
 
     for (let level = this.height; level > 0; level--) {
       const childIndex = (idx >> (level * SHIFT)) & MASK;

@@ -2,11 +2,14 @@
 /**
  * CLI script to perform automatic bisection
  */
-import { performBisection, formatBisectionResultMarkdown } from '../utils/bisection';
+import * as fs from 'fs';
+import * as path from 'path';
+
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import * as path from 'path';
-import * as fs from 'fs';
+
+import { performBisection, formatBisectionResultMarkdown } from '../utils/bisection';
+
 
 // Parse command line arguments
 const argv = yargs(hideBin(process.argv))

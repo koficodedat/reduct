@@ -6,10 +6,16 @@
  * @packageDocumentation
  */
 
-import { IComplex, ISignalProcessor } from './types';
+// External libraries
+import { performance } from 'perf_hooks';
+
+// Local imports from the same package
+import { isWebAssemblySupported } from '../utils/mock-wasm';
+
 import { Complex } from './complex';
 import { SignalProcessor } from './signal-processor';
-import { isWebAssemblySupported } from '../utils/mock-wasm';
+import { IComplex, ISignalProcessor } from './types';
+
 // Import types for testing
 interface FFTInput {
   signal: number[];
@@ -28,7 +34,7 @@ enum AcceleratorTier {
 
 // Mock SignalAccelerator for testing
 class SignalAccelerator {
-  constructor(options?: any) {}
+  constructor(_options?: any) {}
 
   fft(input: FFTInput): number[] {
     // Mock implementation that performs FFT in JavaScript
@@ -256,7 +262,7 @@ export class WasmSignalProcessor implements ISignalProcessor {
     // For a moving average filter with equal coefficients,
     // we can optimize the calculation for better accuracy
     if (filter.length > 1 && filter.every(val => val === filter[0])) {
-      const filterSum = filter.reduce((sum, val) => sum + val, 0);
+      const _filterSum = filter.reduce((sum, val) => sum + val, 0); // Filter sum not used in this implementation
       const n1 = signal.length;
       const n2 = filter.length;
       const n = n1 + n2 - 1;

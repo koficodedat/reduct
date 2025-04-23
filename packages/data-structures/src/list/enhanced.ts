@@ -5,12 +5,13 @@
  * It automatically selects the most efficient implementation based on the data type and size.
  */
 
-import { IList, TransientList } from './types';
+// Local imports from the same package
+import { LazyList, lazy } from './lazy-list';
 import { createOptimizedList, createNumericList, createPersistentVector } from './optimized/factory';
-import { isNumericArray, isStringArray } from './type-detection';
 import { NumericList } from './optimized/numeric-list';
 import { StringList } from './optimized/string-list';
-import { LazyList, lazy } from './lazy-list';
+import { isNumericArray, isStringArray } from './type-detection';
+import { IList, TransientList } from './types';
 
 /**
  * Enhanced List class that automatically selects the most efficient implementation

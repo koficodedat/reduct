@@ -4,8 +4,8 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HybridAccelerator, HybridOperationImplementation } from '../../../src/accelerators/hybrid-accelerator';
-import { AcceleratorTier } from '@reduct/shared-types/wasm';
-import { ProcessingStrategy } from '../../../src/utils/enhanced-input-characteristics';
+import { AcceleratorTier } from '@reduct/shared-types/wasm/accelerator';
+import { ProcessingStrategy } from '@reduct/shared-types/utils/enhanced-input-characteristics';
 
 // Mock the EnhancedInputCharacteristicsAnalyzer
 vi.mock('../../../src/utils/enhanced-input-characteristics', () => {

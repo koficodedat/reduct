@@ -6,14 +6,15 @@
  * @packageDocumentation
  */
 
+import { getImplementation } from '../registry';
 import {
   ComplexComparisonConfig,
   ComplexImplementationAdapter,
   ComplexOperationAdapter,
   TestCase
 } from '../registry/types';
+
 import { findImplementationsWithCapabilities } from './capabilities';
-import { getImplementation } from '../registry';
 
 /**
  * Builder for creating complex comparisons

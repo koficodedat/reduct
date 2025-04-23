@@ -6,9 +6,18 @@
  * @packageDocumentation
  */
 
-// Export List implementation
-export * from './list';
-export { default as List } from './list';
+// Import and re-export List implementation
+import { default as List } from './list';
+export { List };
+
+// Export list interfaces and types
+export { IList, IListFactory, TransientList } from './list/types';
+
+// Export type detection utilities
+export { detectDataType, isNumericArray, isStringArray, isObjectArray } from './list/type-detection';
+
+// Export data type from shared types
+export { DataType, RepresentationType } from '@reduct/shared-types/data-structures';
 
 // Export specialized list implementations
 export {
@@ -23,7 +32,7 @@ export { CompactList } from './list/optimized/compact-list';
 export { NumericList } from './list/optimized/numeric-list';
 export { WasmNumericList } from './list/optimized/wasm-numeric-list';
 export { StringList } from './list/optimized/string-list';
-export { NumericOperations, StringOperations } from './list/enhanced';
+// Export operations (already exported from './list')
 
 // Export persistent vector implementations
 export { HAMTPersistentVector } from './list/hamt-persistent-vector';

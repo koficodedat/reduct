@@ -1,6 +1,6 @@
 /**
  * Example demonstrating WebAssembly acceleration in the Reduct library
- * 
+ *
  * Note: This is a conceptual example of how the WebAssembly acceleration
  * might work once the @reduct/wasm package is implemented. The actual
  * implementation may differ.
@@ -13,7 +13,7 @@ import { List } from '@reduct/data-structures';
 // Mock implementation of the WebAssembly package for demonstration purposes
 const mockWasm = {
   isWebAssemblySupported: () => true,
-  getAccelerator: <T, R>(domain: string, type: string, operation: string) => ({
+  getAccelerator: <_T, _R>(domain: string, type: string, operation: string) => ({
     execute: (input: any) => {
       console.log(`Executing ${domain}/${type}/${operation} with WebAssembly`);
       // This would be the actual WebAssembly implementation
@@ -36,12 +36,12 @@ const mockWasm = {
     const jsResult = jsImpl(input);
     const jsEnd = performance.now();
     const jsTime = jsEnd - jsStart;
-    
+
     const wasmStart = performance.now();
     const wasmResult = wasmImpl.execute(input);
     const wasmEnd = performance.now();
     const wasmTime = wasmEnd - wasmStart;
-    
+
     return {
       jsTime,
       wasmTime,
@@ -181,8 +181,8 @@ const jsImplementation = (input: number[]) => {
 const combinedBenchmark = benchmark(
   jsImplementation,
   combinedAccelerator,
-  { 
-    data: list.toArray(), 
+  {
+    data: list.toArray(),
     mapFn: (x: number) => x * 2,
     filterFn: (x: number) => x % 3 === 0,
     reduceFn: (acc: number, x: number) => acc + x,

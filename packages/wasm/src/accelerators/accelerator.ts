@@ -1,16 +1,18 @@
 /**
  * WebAssembly accelerator interfaces and types
  */
+import { InputSizeCategory, InputDataType } from '@reduct/shared-types/utils';
+import { AcceleratorTier, PerformanceProfile, AcceleratorOptions, Accelerator } from '@reduct/shared-types/wasm/accelerator';
+import { WebAssemblyFeature } from '@reduct/shared-types/wasm/features';
+
 import { WasmAcceleratorNotAvailableError } from '../core/error-handling';
 import { isWebAssemblySupported } from '../core/feature-detection';
-import { WebAssemblyFeature } from '@reduct/shared-types/wasm';
 import { adaptiveThresholdManager, ThresholdConfig } from '../utils/adaptive-threshold-manager';
-import { performanceCounter } from '../utils/performance-counter';
 import { InputCharacteristicsAnalyzer } from '../utils/input-characteristics';
-import { InputSizeCategory, InputDataType } from '@reduct/shared-types/utils';
+import { performanceCounter } from '../utils/performance-counter';
+
 import { FrequencyDetector, FrequencyDetectorConfig } from './frequency-detector';
 
-import { AcceleratorTier, PerformanceProfile, AcceleratorOptions, Accelerator } from '@reduct/shared-types/wasm';
 
 /**
  * Tiering strategy for determining when to use WebAssembly

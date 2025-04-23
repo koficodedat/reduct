@@ -6,8 +6,9 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { resolveReportPath } from '../../utils/paths';
+
 import { Command } from 'commander';
+
 import {
   loadBenchmarkHistory,
   detectRegressions,
@@ -16,7 +17,9 @@ import {
   generateTrendHtml,
   recordBenchmarkRun
 } from '../../analysis/trends';
-import { BenchmarkResult, BenchmarkComparison, ScalabilityResult } from '../../types';
+// These types are used indirectly in the trend analysis functions
+import { _BenchmarkResult, _BenchmarkComparison, _ScalabilityResult } from '../../types';
+import { resolveReportPath } from '../../utils/paths';
 
 /**
  * Create the trend command

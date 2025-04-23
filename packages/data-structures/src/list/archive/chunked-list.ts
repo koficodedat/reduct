@@ -7,6 +7,9 @@
  * @packageDocumentation
  */
 
+// Local imports from the same package
+import { recordChunkAcquire, recordChunkRelease } from '../profiling/chunk-pool-monitor';
+
 import { IList, TransientList } from './types';
 
 /**
@@ -132,8 +135,6 @@ function adjustBranchingFactor(): void {
 function getBranchingFactor(): number {
   return ADAPTIVE_BRANCHING_FACTOR;
 }
-
-import { recordChunkAcquire, recordChunkRelease } from '../profiling/chunk-pool-monitor';
 
 /**
  * Maximum size of the chunk pool
@@ -272,7 +273,7 @@ function emptyNode<T>(): Node<T> {
 function getPath<T>(node: Node<T>, index: number, level: number): (Node<T> | T)[] {
   const path: (Node<T> | T)[] = [node];
   let currentNode = node;
-  let idx = index;
+  const idx = index;
 
   for (let i = level; i > 0; i--) {
     if (!currentNode.children) {
@@ -833,7 +834,7 @@ export class ChunkedList<T> implements IList<T> {
     // Navigate to the element
     let node = this.root;
     let level = this.height;
-    let idx = index;
+    const idx = index;
 
     while (level > 0) {
       const childIndex = (idx >> (level * SHIFT)) & MASK;
@@ -1032,7 +1033,7 @@ export class ChunkedList<T> implements IList<T> {
 
     const path: Node<T>[] = [this.root];
     let node = this.root;
-    let idx = index;
+    const idx = index;
 
     for (let level = this.height; level > 0; level--) {
       const childIndex = (idx >> (level * SHIFT)) & MASK;

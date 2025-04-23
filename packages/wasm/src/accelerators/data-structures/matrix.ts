@@ -1,12 +1,12 @@
 /**
  * WebAssembly accelerator for matrix operations
- * 
+ *
  * Provides WebAssembly-accelerated implementations of common matrix operations.
  */
 
-import { Accelerator, AcceleratorOptions, AcceleratorTier } from '../accelerator';
 import { safeWasmOperation } from '../../core/error-handling';
-import { getWasmModule } from '../../core/wasm-module';
+import { getWasmModule as _getWasmModule } from '../../core/wasm-module';
+import { Accelerator, AcceleratorOptions, AcceleratorTier } from '../accelerator';
 
 /**
  * Input for matrix multiplication
@@ -28,7 +28,7 @@ export interface MatrixMultiplyInput {
 
 /**
  * Matrix accelerator
- * 
+ *
  * Provides WebAssembly-accelerated implementations of common matrix operations.
  */
 export class MatrixAccelerator extends Accelerator<any, any> {
@@ -38,7 +38,7 @@ export class MatrixAccelerator extends Accelerator<any, any> {
 
   /**
    * Multiply two matrices
-   * 
+   *
    * @param input The input matrices and dimensions
    * @returns The result matrix as a flat array (row-major order)
    */
@@ -56,7 +56,7 @@ export class MatrixAccelerator extends Accelerator<any, any> {
 
   /**
    * Multiply two matrices using WebAssembly
-   * 
+   *
    * @param input The input matrices and dimensions
    * @returns The result matrix as a flat array (row-major order)
    */
@@ -77,17 +77,17 @@ export class MatrixAccelerator extends Accelerator<any, any> {
         // Convert to Float64Array for better performance
         const aTypedArray = new Float64Array(input.a);
         const bTypedArray = new Float64Array(input.b);
-        
+
         // Call the WebAssembly implementation
         const result = module.matrix_multiply_f64(
-          aTypedArray, 
-          bTypedArray, 
-          input.aRows, 
-          input.aCols, 
-          input.bRows, 
+          aTypedArray,
+          bTypedArray,
+          input.aRows,
+          input.aCols,
+          input.bRows,
           input.bCols
         );
-        
+
         // Convert the result back to a regular array
         return Array.from(new Float64Array(result));
       } catch (error) {
@@ -100,7 +100,7 @@ export class MatrixAccelerator extends Accelerator<any, any> {
 
   /**
    * Multiply two matrices using JavaScript
-   * 
+   *
    * @param input The input matrices and dimensions
    * @returns The result matrix as a flat array (row-major order)
    */
@@ -131,7 +131,7 @@ export class MatrixAccelerator extends Accelerator<any, any> {
 
   /**
    * Determine the appropriate tier for the input
-   * 
+   *
    * @param input The input matrices and dimensions
    * @returns The appropriate tier
    */

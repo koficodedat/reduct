@@ -5,10 +5,10 @@
  * This script runs comprehensive benchmarks comparing List vs. native arrays.
  */
 
-import { runSizeVariationBenchmarkAndSave } from '../custom/size-variation-benchmark';
 import { runDataTypeBenchmarkAndSave } from '../custom/data-type-benchmark';
-import { runOperationPatternBenchmarkAndSave } from '../custom/operation-pattern-benchmark';
 import { runImmutabilityBenchmarkAndSave } from '../custom/immutability-benchmark';
+import { runOperationPatternBenchmarkAndSave } from '../custom/operation-pattern-benchmark';
+import { runSizeVariationBenchmarkAndSave } from '../custom/size-variation-benchmark';
 
 async function main(): Promise<void> {
   console.log('Running Comprehensive Benchmarks...');

@@ -11,8 +11,8 @@
 
 // Use the temporary ImmutableMap implementation from the benchmark package
 import { ImmutableMap } from '../../data-structures/map';
-import { Registry, Implementation } from '../types';
 import { generateRandomEntries } from '../../utils';
+import { Registry, Implementation } from '../types';
 
 /**
  * Reduct Map implementation

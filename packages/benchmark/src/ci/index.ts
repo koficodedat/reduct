@@ -4,11 +4,12 @@
  * @packageDocumentation
  */
 
+import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import { execSync } from 'child_process';
-import { resolveReportPath } from '../utils/paths';
+
 import { detectRegressions, TrendAnalysisOptions } from '../analysis/trends';
+import { resolveReportPath } from '../utils/paths';
 import { exportComparisonToMarkdown } from '../visualization/exporters';
 
 /**

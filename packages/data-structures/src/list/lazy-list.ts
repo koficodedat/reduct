@@ -7,8 +7,8 @@
  * @packageDocumentation
  */
 
-import { IList } from './types';
 import * as specializedOps from './specialized-operations';
+import { IList } from './types';
 
 /**
  * Type of lazy operation

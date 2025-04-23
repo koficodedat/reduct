@@ -5,9 +5,12 @@
  */
 
 import fs from 'fs';
-import path from 'path';
-import { resolveReportPath } from '../../utils/paths';
+// path is used indirectly via resolveReportPath
+import _path from 'path';
+
 import { Command } from 'commander';
+
+import { resolveReportPath } from '../../utils/paths';
 import { exportToHTMLTemplate, exportToMarkdownTemplate, exportToCSVTemplate } from '../../visualization/template-exporters';
 import { getTemplate, getAllTemplates } from '../../visualization/templates';
 

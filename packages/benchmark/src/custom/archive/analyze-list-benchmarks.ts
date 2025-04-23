@@ -5,8 +5,10 @@
  * between different List implementations.
  */
 
+// External libraries
 import * as fs from 'fs';
 import * as path from 'path';
+
 import * as glob from 'glob';
 
 /**

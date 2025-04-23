@@ -2,8 +2,9 @@
  * Script to run the benchmark server
  */
 
-import { startBenchmarkServer } from './server/benchmark-server';
 import path from 'path';
+
+import { startBenchmarkServer } from './server/benchmark-server';
 
 /**
  * Run the benchmark server

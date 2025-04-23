@@ -7,10 +7,13 @@
  * @packageDocumentation
  */
 
-import { Registry, Implementation, OperationsRegistry, OperationMetadata } from './types';
-import { dataStructureRegistry } from './data-structures';
-import { algorithmRegistry } from './algorithms';
+// Local imports from the same package
 import { hasCapability } from '../comparison/capabilities';
+
+import { algorithmRegistry } from './algorithms';
+import { setupCapabilities } from './capabilities-setup';
+import { dataStructureRegistry } from './data-structures';
+import { Registry, Implementation, OperationsRegistry, OperationMetadata } from './types';
 
 // Global registry
 const registry: Registry = {
@@ -251,13 +254,10 @@ export function updateOperationRequiredCapabilities(name: string, requiredCapabi
   metadata.requiredCapabilities = [...new Set(metadata.requiredCapabilities)];
 }
 
-// Export types
+// Export types and registries
 export * from './types';
-export { dataStructureRegistry } from './data-structures';
 export { algorithmRegistry } from './algorithms';
-
-// Import and run capabilities setup
-import { setupCapabilities } from './capabilities-setup';
+export { dataStructureRegistry } from './data-structures';
 
 // Setup capabilities for implementations
 setupCapabilities();

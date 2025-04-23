@@ -85,9 +85,10 @@ const numbers = List.from(Array.from({ length: 10000 }, (_, i) => i));
 
 // Sum operation
 console.time('Manual sum');
-let manualSum = 0;
+// Variable intentionally unused for demonstration purposes
+let _manualSum = 0;
 for (let i = 0; i < numbers.size; i++) {
-  manualSum += numbers.get(i) || 0;
+  _manualSum += numbers.get(i) || 0;
 }
 console.timeEnd('Manual sum');
 

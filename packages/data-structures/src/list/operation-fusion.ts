@@ -5,9 +5,11 @@
  * by fusing multiple operations into a single pass.
  */
 
-import { IList } from './types';
-import List from './index';
 import { getPooledArray, releasePooledArray } from '../memory/pool';
+
+import { IList } from './types';
+
+import List from './index';
 
 /**
  * Fused map and filter operations
@@ -476,13 +478,13 @@ export function filterConcat<T>(
   }
 
   const result: T[] = [];
-  let resultIndex = 0;
+  let _resultIndex = 0;
 
   for (let i = 0; i < list1.size; i++) {
     const value = list1.get(i);
     if (value !== undefined && filterFn(value, i)) {
       result.push(value);
-      resultIndex++;
+      _resultIndex++;
     }
   }
 
@@ -490,7 +492,6 @@ export function filterConcat<T>(
     const value = list2.get(i);
     if (value !== undefined) {
       result.push(value);
-      resultIndex++;
     }
   }
 

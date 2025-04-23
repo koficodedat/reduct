@@ -1,11 +1,13 @@
 /**
  * Utilities for sending notifications about performance regressions
  */
-import { RegressionDetectionResult, hasRegressions } from './regression-detection';
-import { templates, TemplateContext } from './notification-templates';
+import axios from 'axios';
+
 import { applyFilters, NotificationFilter } from './notification-filters';
 import { addToHistory } from './notification-history';
-import axios from 'axios';
+import { templates, TemplateContext } from './notification-templates';
+import { RegressionDetectionResult, hasRegressions } from './regression-detection';
+
 
 /**
  * Notification options

@@ -7,14 +7,14 @@
  * @packageDocumentation
  */
 
-import { BenchmarkOptions, BenchmarkComparison } from '../types';
-import { benchmark } from '../utils';
-import { ProgressIndicator, ProgressIndicatorType } from '../visualization/progress';
 import {
   getAdapter,
   findCommonAdapterOperations,
 } from '../adapters';
 import { getImplementation } from '../registry';
+import { BenchmarkOptions, BenchmarkComparison } from '../types';
+import { benchmark } from '../utils';
+import { ProgressIndicator, ProgressIndicatorType } from '../visualization/progress';
 
 /**
  * Options for comparing implementations using adapters

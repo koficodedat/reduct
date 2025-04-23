@@ -7,6 +7,7 @@
  */
 
 import { Registry } from '../types';
+
 import { listRegistry } from './list';
 import { mapRegistry } from './map';
 import { stackRegistry } from './stack';

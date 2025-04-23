@@ -6,16 +6,15 @@
  * Includes optimized path finding and node manipulation operations.
  */
 
-import { IList, TransientList } from './types';
-import * as HAMTNode from './hamt-node';
-import { HAMTNode as IHAMTNode } from './hamt-node';
+import * as _HAMTNode from './hamt-node'; // Used for type information
+import { HAMTNode as _IHAMTNode } from './hamt-node'; // Used for type information
 import { HAMTPersistentVector } from './hamt-persistent-vector';
-import { TransientHAMTPersistentVector } from './transient-hamt-persistent-vector';
+import { TransientList, IList } from './types';
 
 // Constants
 const BITS_PER_LEVEL = 5;
 const BRANCH_SIZE = 1 << BITS_PER_LEVEL; // 32
-const MASK = BRANCH_SIZE - 1; // 0x1F
+const _MASK = BRANCH_SIZE - 1; // 0x1F - Kept for reference
 
 /**
  * Enhanced HAMTPersistentVector implementation

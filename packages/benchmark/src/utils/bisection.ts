@@ -1,9 +1,10 @@
 /**
  * Utilities for automatic bisection to identify the commit that introduced a regression
  */
+import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
-import { spawn } from 'child_process';
+
 import { RegressionDetectionResult, hasRegressions } from './regression-detection';
 
 /**

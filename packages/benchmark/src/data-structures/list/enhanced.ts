@@ -7,6 +7,7 @@
  */
 
 import { List } from '@reduct/data-structures';
+
 import { BenchmarkOptions, BenchmarkResult, BenchmarkSuite, ScalabilityResult } from '../../types';
 import { benchmark, generateRandomArray } from '../../utils';
 

@@ -4,19 +4,30 @@
  * @packageDocumentation
  */
 
-// Export all components
-export * from './types';
-export * from './index';
-export * from './plugin';
-export * from './config';
-export * from './adapter-factory';
-
-// Import and re-export from the benchmark runner
+// Import from other packages
 import { benchmark } from '../utils';
-export { benchmark as runBenchmark };
 
-// Import plugins
+// Import local modules
+import { PluginRegistry } from './plugin';
 import { registerAllPlugins } from './plugins';
+// Types are imported via export type statements
+
+// Export all components
+export * from './adapter-factory';
+export * from './config';
+export * from './plugin';
+
+// Re-export specific types to avoid duplication
+export type {
+  OperationAdapter,
+  OperationAdapterFactory,
+  OperationCompatibility,
+  OperationInterface,
+  OperationMatcher
+} from './types';
+
+// Re-export benchmark function with a different name
+export { benchmark as runBenchmark };
 
 /**
  * Initializes the benchmark registry system
@@ -27,7 +38,6 @@ export function initializeBenchmarkRegistry(): void {
   registerAllPlugins();
 
   // Initialize all plugins
-  const { PluginRegistry } = require('./plugin');
   PluginRegistry.initializeAll();
 
   // Register benchmarks from all plugins

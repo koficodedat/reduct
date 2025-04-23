@@ -2,6 +2,7 @@
  * Example demonstrating specialized batch operations in the Reduct library
  */
 
+// Local imports from other packages
 import { List } from '@reduct/data-structures';
 
 console.log('Specialized Batch Operations Example');
@@ -10,7 +11,7 @@ console.log('===================================');
 // Create a list with 1 million elements
 console.log('\nCreating a list with 1 million elements...');
 const size = 1000000;
-const list = List.of(size, i => i);
+const list = List.range(0, size);
 console.log(`List size: ${list.size}`);
 
 // Example 1: mapFilter vs map+filter
@@ -110,7 +111,7 @@ console.log('\nExample 5: concatMap vs concat+map');
 console.log('--------------------------------');
 
 // Create another list
-const list2 = List.of(1000, i => i + size);
+const list2 = List.range(size, size + 1000);
 
 // Measure time for separate operations
 console.time('concat+map');
@@ -125,7 +126,7 @@ const combinedConcatResult = list.concatMap(list2, mapFn);
 console.timeEnd('concatMap');
 
 // Verify results are the same
-console.log('Results match:', separateConcatResult.size === combinedConcatResult.size && 
+console.log('Results match:', separateConcatResult.size === combinedConcatResult.size &&
   JSON.stringify(separateConcatResult.slice(0, 5).toArray()) === JSON.stringify(combinedConcatResult.slice(0, 5).toArray()) &&
   JSON.stringify(separateConcatResult.slice(size, size + 5).toArray()) === JSON.stringify(combinedConcatResult.slice(size, size + 5).toArray()));
 
@@ -138,7 +139,7 @@ const getMemoryUsage = () => {
   if (global.gc) {
     global.gc(); // Force garbage collection if available
   }
-  
+
   const memoryUsage = process.memoryUsage();
   return {
     rss: Math.round(memoryUsage.rss / 1024 / 1024),

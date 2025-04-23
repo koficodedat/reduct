@@ -6,7 +6,7 @@
  * @packageDocumentation
  */
 
-import { RepresentationType } from '@reduct/shared-types/data-structures';
+import { RepresentationType as _RepresentationType } from '@reduct/shared-types/data-structures';
 
 /**
  * Interface for a transient (temporarily mutable) list

@@ -6,8 +6,8 @@
  * @packageDocumentation
  */
 
-import { IComplex, ISignalProcessor } from './types';
 import { Complex } from './complex';
+import { IComplex, ISignalProcessor } from './types';
 
 /**
  * Signal processor implementation

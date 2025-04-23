@@ -5,6 +5,7 @@
  */
 
 import { Command } from 'commander';
+
 import { ciCommand, createWorkflowCommand } from '../../ci';
 
 /**

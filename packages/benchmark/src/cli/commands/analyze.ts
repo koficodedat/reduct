@@ -5,17 +5,20 @@
  */
 
 import * as fs from 'fs';
-import * as path from 'path';
-import { resolveReportPath } from '../../utils/paths';
+// path is used indirectly via resolveReportPath
+import * as _path from 'path';
+
 import { Command } from 'commander';
+
 import {
-  calculateStatistics,
+  // calculateStatistics is used indirectly by the analysis functions
   analyzeBenchmarkResults,
   analyzeBenchmarkComparison,
   analyzeScalabilityResult,
   formatStatisticalAnalysis
 } from '../../analysis/statistics';
 import { BenchmarkResult, BenchmarkComparison, ScalabilityResult } from '../../types';
+import { resolveReportPath } from '../../utils/paths';
 
 /**
  * Create the analyze command

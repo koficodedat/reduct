@@ -2,7 +2,7 @@
  * WebAssembly feature detection utilities
  */
 
-import { WebAssemblyFeature } from '@reduct/shared-types/wasm';
+import { WebAssemblyFeature } from '@reduct/shared-types/wasm/features';
 
 /**
  * Check if WebAssembly is supported in the current environment

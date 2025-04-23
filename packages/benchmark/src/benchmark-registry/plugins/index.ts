@@ -7,11 +7,12 @@
  */
 
 import { PluginRegistry } from '../plugin';
+
 import { ListBenchmarkPlugin } from './list-plugin';
 import { MapBenchmarkPlugin } from './map-plugin';
-import { StackBenchmarkPlugin } from './stack-plugin';
-import { SortingBenchmarkPlugin } from './sorting-plugin';
 import { SearchingBenchmarkPlugin } from './searching-plugin';
+import { SortingBenchmarkPlugin } from './sorting-plugin';
+import { StackBenchmarkPlugin } from './stack-plugin';
 
 /**
  * Registers all benchmark plugins

@@ -6,21 +6,24 @@
  * @packageDocumentation
  */
 
-import { BenchmarkOptions } from '../../types';
+import * as fs from 'fs';
+
+import { runSearchingBenchmarks } from '../../algorithms/searching';
+import { runSortingBenchmarks } from '../../algorithms/sorting';
 import { runListBenchmarks } from '../../data-structures/list';
 import { runMapBenchmarks } from '../../data-structures/map';
 import { runStackBenchmarks } from '../../data-structures/stack';
-import { runSortingBenchmarks } from '../../algorithms/sorting';
-import { runSearchingBenchmarks } from '../../algorithms/searching';
-import { formatBenchmarkSuite } from '../../visualization/formatters';
+import { BenchmarkOptions } from '../../types';
+import { resolveReportPath } from '../../utils/paths';
 import {
   exportSuiteToCSV,
   exportSuiteToMarkdown,
   exportSuiteToHTML,
   exportToJSON
 } from '../../visualization/exporters';
-import * as fs from 'fs';
-import { resolveReportPath } from '../../utils/paths';
+import { formatBenchmarkSuite } from '../../visualization/formatters';
+
+
 
 /**
  * Command handler for the 'run' command

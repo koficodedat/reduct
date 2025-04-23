@@ -4,8 +4,9 @@
  * This module provides tools to monitor the memory usage of the Reduct library's data structures.
  */
 
-import { InternalDataStructureType } from './index';
 import { MemoryStats } from '@reduct/shared-types/data-structures';
+
+import { InternalDataStructureType } from './index';
 
 // Using MemoryStats from shared-types
 

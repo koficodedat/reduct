@@ -1,8 +1,8 @@
 /**
  * Benchmark runner for tiered optimization
  */
-import { NumericArrayBenchmark, NumericArrayOperation } from './numeric-array-benchmark';
 import { ListBenchmark, ListOperation } from './list-benchmark';
+import { NumericArrayBenchmark, NumericArrayOperation } from './numeric-array-benchmark';
 
 /**
  * Benchmark runner options

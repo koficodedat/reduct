@@ -2,10 +2,13 @@
 /**
  * CLI script to generate a notification dashboard
  */
-import { generateNotificationDashboard } from '../utils/notification-dashboard';
+import * as path from 'path';
+
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import * as path from 'path';
+
+import { generateNotificationDashboard } from '../utils/notification-dashboard';
+
 
 // Parse command line arguments
 const argv = yargs(hideBin(process.argv))

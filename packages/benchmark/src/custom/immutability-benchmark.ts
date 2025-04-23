@@ -4,10 +4,11 @@
  * Tests scenarios where immutability provides advantages
  */
 
-import { List } from '@reduct/data-structures';
-import { performance } from 'perf_hooks';
 import * as fs from 'fs';
 import * as path from 'path';
+import { performance } from 'perf_hooks';
+
+import { List } from '@reduct/data-structures';
 
 // Size for all benchmarks
 const SIZE = 10000;

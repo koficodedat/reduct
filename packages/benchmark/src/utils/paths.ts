@@ -4,8 +4,8 @@
  * @packageDocumentation
  */
 
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
 
 /**
  * Gets the benchmark package root directory

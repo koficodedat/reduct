@@ -7,8 +7,7 @@
  * @packageDocumentation
  */
 
-
-import { List } from '@reduct/data-structures';
+// Local imports from other packages
 import {
   quickSort,
   mergeSort,
@@ -16,6 +15,7 @@ import {
   functionalQuickSort
 } from '@reduct/algorithms';
 import { runSortingBenchmarks, formatBenchmarkSuite } from '@reduct/benchmark';
+import { List } from '@reduct/data-structures';
 
 // Example 1: Basic sorting with arrays
 console.log('Example 1: Basic Array Sorting');

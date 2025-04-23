@@ -8,6 +8,15 @@
  */
 
 import {
+  registryImplementationAdapterFactory,
+} from './factory';
+import {
+  exactMatcher,
+  categoryMatcher,
+  tagMatcher,
+  accessModificationMatcher,
+} from './matchers';
+import {
   registerAdapter,
   registerAdapterFactory,
   registerOperationMatcher,
@@ -19,16 +28,7 @@ import {
   findCommonAdapterOperations,
 } from './registry';
 
-import {
-  exactMatcher,
-  categoryMatcher,
-  tagMatcher,
-  accessModificationMatcher,
-} from './matchers';
 
-import {
-  registryImplementationAdapterFactory,
-} from './factory';
 
 // Register default matchers
 registerOperationMatcher(exactMatcher);

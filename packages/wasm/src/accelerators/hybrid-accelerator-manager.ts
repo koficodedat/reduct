@@ -4,9 +4,9 @@
  * Provides methods for managing and using hybrid accelerators.
  */
 
-import { HybridAcceleratorFactory } from './hybrid-accelerator-factory';
-import { HybridOperationImplementation, HybridAcceleratorOptions } from './hybrid-accelerator';
 import { AcceleratorTier } from './accelerator';
+import { HybridOperationImplementation, HybridAcceleratorOptions } from './hybrid-accelerator';
+import { HybridAcceleratorFactory } from './hybrid-accelerator-factory';
 
 /**
  * Manager for hybrid accelerators

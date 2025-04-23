@@ -4,6 +4,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+
 import { InputSizeBenchmarkResult } from '../suites/wasm-optimization/input-size-benchmark';
 
 /**
@@ -37,7 +38,7 @@ export class ChartGenerator {
 
   /**
    * Create a new chart generator
-   * 
+   *
    * @param options The chart generator options
    */
   constructor(options: ChartGeneratorOptions = {}) {
@@ -66,7 +67,7 @@ export class ChartGenerator {
 
   /**
    * Generate a chart for a benchmark report
-   * 
+   *
    * @param reportFile The benchmark report file
    */
   private generateChartForReport(reportFile: string): void {
@@ -89,16 +90,16 @@ export class ChartGenerator {
 
   /**
    * Parse benchmark results from a report
-   * 
+   *
    * @param reportContent The report content
    * @returns The parsed benchmark results
    */
   private parseReportResults(reportContent: string): InputSizeBenchmarkResult[] {
     const results: InputSizeBenchmarkResult[] = [];
-    
+
     // Extract benchmark results from the report
     const sections = reportContent.split(/^## /m).slice(1);
-    
+
     for (const section of sections) {
       // Skip summary and crossover points sections
       if (section.startsWith('Summary') || section.startsWith('Performance Crossover Points')) {
@@ -108,13 +109,13 @@ export class ChartGenerator {
       // Parse the section header to get size category, data type, and input size
       const headerMatch = section.match(/^([a-z_]+) ([a-z_]+) \(size: (\d+)\)/i);
       if (!headerMatch) continue;
-      
+
       const [, sizeCategory, dataTypeCategory, inputSizeStr] = headerMatch;
       const inputSize = parseInt(inputSizeStr, 10);
 
       // Extract results for each tier
       const tierSections = section.split(/^### /m).slice(1);
-      
+
       for (const tierSection of tierSections) {
         // Skip speedup section
         if (tierSection.startsWith('Speedup')) {
@@ -123,11 +124,11 @@ export class ChartGenerator {
 
         // Parse the tier
         const tier = tierSection.split('\n')[0].trim();
-        
+
         // Extract execution time
         const executionTimeMatch = tierSection.match(/Execution time: ([\d.]+)ms/);
         if (!executionTimeMatch) continue;
-        
+
         const executionTime = parseFloat(executionTimeMatch[1]);
 
         // Add the result
@@ -148,7 +149,7 @@ export class ChartGenerator {
 
   /**
    * Generate HTML with charts
-   * 
+   *
    * @param results The benchmark results
    * @param title The chart title
    * @returns The generated HTML
@@ -156,7 +157,7 @@ export class ChartGenerator {
   private generateHtml(results: InputSizeBenchmarkResult[], title: string): string {
     // Group results by data type
     const groupedByDataType = new Map<string, InputSizeBenchmarkResult[]>();
-    
+
     for (const result of results) {
       const key = result.dataTypeCategory;
       if (!groupedByDataType.has(key)) {
@@ -167,11 +168,11 @@ export class ChartGenerator {
 
     // Generate chart data for each data type
     const chartData: Record<string, any> = {};
-    
+
     for (const [dataType, dataTypeResults] of groupedByDataType.entries()) {
       // Group by input size
       const groupedBySize = new Map<number, InputSizeBenchmarkResult[]>();
-      
+
       for (const result of dataTypeResults) {
         if (!groupedBySize.has(result.inputSize)) {
           groupedBySize.set(result.inputSize, []);
@@ -186,22 +187,22 @@ export class ChartGenerator {
 
       // Sort input sizes
       const sizes = Array.from(groupedBySize.keys()).sort((a, b) => a - b);
-      
+
       for (const size of sizes) {
         const sizeResults = groupedBySize.get(size)!;
-        
+
         const jsResult = sizeResults.find(r => r.tier === 'JS_PREFERRED');
         const conditionalResult = sizeResults.find(r => r.tier === 'CONDITIONAL');
         const highValueResult = sizeResults.find(r => r.tier === 'HIGH_VALUE');
-        
+
         if (jsResult) {
           jsSeries.push([size, jsResult.executionTime]);
         }
-        
+
         if (conditionalResult) {
           conditionalSeries.push([size, conditionalResult.executionTime]);
         }
-        
+
         if (highValueResult) {
           highValueSeries.push([size, highValueResult.executionTime]);
         }
@@ -241,8 +242,8 @@ export class ChartGenerator {
 </head>
 <body>
   <h1>${title} - Benchmark Charts</h1>
-  
-  ${Object.entries(chartData).map(([dataType, data]) => `
+
+  ${Object.entries(chartData).map(([dataType, _data]) => `
     <h2>${dataType} Data</h2>
     <div class="chart-container">
       <canvas id="chart-${dataType}"></canvas>
@@ -255,7 +256,7 @@ export class ChartGenerator {
   <script>
     // Chart data
     const chartData = ${JSON.stringify(chartData)};
-    
+
     // Create charts
     document.addEventListener('DOMContentLoaded', function() {
       ${Object.keys(chartData).map(dataType => `
@@ -313,7 +314,7 @@ export class ChartGenerator {
             }
           }
         });
-        
+
         // Logarithmic scale chart for ${dataType}
         new Chart(document.getElementById('chart-${dataType}-log'), {
           type: 'line',
@@ -380,7 +381,7 @@ export class ChartGenerator {
 
 /**
  * Generate charts for benchmark results
- * 
+ *
  * @param options The chart generator options
  */
 export function generateCharts(options: ChartGeneratorOptions = {}): void {

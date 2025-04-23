@@ -5,6 +5,7 @@
  */
 
 import { IList } from './types';
+
 import List from './index';
 
 /**

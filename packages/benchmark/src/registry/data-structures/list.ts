@@ -7,8 +7,9 @@
  */
 
 import { List } from '@reduct/data-structures';
-import { Registry, Implementation } from '../types';
+
 import { generateRandomArray } from '../../utils';
+import { Registry, Implementation } from '../types';
 
 /**
  * Reduct List implementation

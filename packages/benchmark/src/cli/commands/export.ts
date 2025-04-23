@@ -7,9 +7,11 @@
  */
 
 import * as fs from 'fs';
-import * as path from 'path';
-import { resolveReportPath } from '../../utils/paths';
+// path is used indirectly via resolveReportPath
+import * as _path from 'path';
+
 import { BenchmarkResult, BenchmarkSuite, BenchmarkComparison, ScalabilityResult } from '../../types';
+import { resolveReportPath } from '../../utils/paths';
 import {
   exportResultsToCSV,
   exportSuiteToCSV,
